@@ -7,7 +7,7 @@
 // e stessa firma delle funzioni.
 
 import { applicaMovimento, type Movimento, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
-import type { ProdottoForm } from '../../types/quickActions';
+import type { ProdottoForm } from '../../types/prodotto';
 import { parseNum } from '../format';
 import { collection, delay, nextIdOf } from './db';
 import { costoMedioPonderato } from '../../types/acquisto';

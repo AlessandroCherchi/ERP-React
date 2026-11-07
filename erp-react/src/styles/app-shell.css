@@ -1518,3 +1518,123 @@
     opacity: .4;
     cursor: not-allowed;
 }
+
+/* ========================= POPOVER (notifiche, ricerca globale) ========================= */
+
+.popover-anchor {
+    position: relative;
+}
+
+.popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 1200;
+    width: 340px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 12px;
+    list-style: none;
+    margin: 0;
+    border-radius: var(--erp-radius-lg);
+    background: var(--erp-bg);
+    box-shadow: -8px -8px 16px rgba(var(--erp-light-rgb), .8), 8px 8px 20px rgba(var(--erp-shadow-cool-rgb), .55);
+}
+
+.popover--search {
+    left: 0;
+    right: auto;
+    width: max(100%, 380px);
+}
+
+.popover-title {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 8px 10px;
+}
+
+.popover-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.popover-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--erp-radius);
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--erp-text);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.popover-item:hover,
+.popover-item.active,
+.popover-item:focus-visible {
+    background: rgba(var(--erp-accent-rgb), .06);
+    outline: none;
+}
+
+.popover-item > i:first-child {
+    width: 18px;
+    text-align: center;
+    color: var(--erp-text-soft);
+}
+
+.popover-item--danger > i:first-child { color: var(--erp-error); }
+.popover-item--warning > i:first-child { color: var(--erp-warning); }
+.popover-item--info > i:first-child { color: var(--erp-info); }
+
+.popover-item > span {
+    flex: 1;
+}
+
+.popover-go {
+    font-size: 11px;
+    color: var(--erp-text-muted);
+}
+
+.popover-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.popover-text small {
+    font-size: 11.5px;
+    color: var(--erp-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popover-tag {
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--erp-accent);
+    background: rgba(var(--erp-accent-rgb), .08);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.popover-empty {
+    padding: 14px 8px;
+    font-size: 13px;
+    color: var(--erp-text-soft);
+}
+
+.popover-empty i {
+    color: var(--erp-success);
+    margin-right: 6px;
+}

@@ -1,7 +1,5 @@
 // Dominio Prodotto / Magazzino.
-// Estende i campi del modale "Aggiungi Prodotto" della Dashboard
-// (types/quickActions.ts → ProdottoForm) con i dati anagrafici
-// persistiti: id, ubicazione e storico movimenti.
+// Anagrafica articolo, stato di scorta derivato, movimenti di magazzino.
 //
 // TODO(step Backend, spec §2/§9): sostituire con lo schema
 // Postgres/RLS reale; oggi è "server state" simulato
@@ -117,6 +115,35 @@ export function applicaMovimento(giacenza: number, tipo: MovimentoTipo, quantita
 }
 
 // ------------------------- FORM -------------------------
+
+/**
+ * Campi del prodotto, condivisi fra la quick action "Aggiungi Prodotto"
+ * della Dashboard e il CRUD della pagina Inventario (stesso modale in
+ * entrambi i posti — vedi components/inventario/ProdottoFormFields).
+ */
+export interface ProdottoForm {
+    nome: string;
+    sku: string;
+    categoria: string;
+    /** Id del fornitore come stringa ('' = nessuno): valore della <select>. */
+    fornitoreId: string;
+    costo: string;
+    prezzo: string;
+    giacenza: string;
+    scorta: string;
+    unita: string;
+    iva: string;
+    /** Posizione a magazzino, es. "A-12-3". */
+    ubicazione: string;
+    descrizione: string;
+}
+
+export const EMPTY_PRODOTTO: ProdottoForm = {
+    nome: '', sku: '', categoria: '', fornitoreId: '',
+    costo: '', prezzo: '', giacenza: '', scorta: '', unita: 'pz', iva: '22',
+    ubicazione: '', descrizione: '',
+};
+
 
 // Categorie, unità e aliquote sono tabelle del tenant: config → tables.
 

@@ -6,13 +6,14 @@
 import type { Cliente, ClienteFormValues, ClienteRef } from '../types/cliente';
 import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../types/fornitore';
 import type { Movimento, Prodotto } from '../types/prodotto';
-import type { ProdottoForm } from '../types/quickActions';
+import type { ProdottoForm } from '../types/prodotto';
 import type { Ordine, OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { Utente, UtenteFormValues } from '../types/utente';
 import type { AcquistoFormValues, OrdineAcquisto } from '../types/acquisto';
 import type { RicevimentoInput } from '../lib/mockApi/acquisti';
 import type { Fattura, FatturaFormValues, Incasso } from '../types/fattura';
 import type { IncassoInput } from '../lib/mockApi/fatture';
+import type { AuditEntry } from '../types/audit';
 import type { RettificaInput } from '../lib/mockApi/inventario';
 
 export type { ClienteRef, RettificaInput, RicevimentoInput, IncassoInput };
@@ -79,6 +80,10 @@ export interface FattureApi {
     eliminaIncasso(id: number): Promise<void>;
 }
 
+export interface AuditApi {
+    list(): Promise<AuditEntry[]>;
+}
+
 export interface DataApi {
     clienti: ClientiApi;
     fornitori: FornitoriApi;
@@ -87,4 +92,5 @@ export interface DataApi {
     utenti: UtentiApi;
     acquisti: AcquistiApi;
     fatture: FattureApi;
+    audit: AuditApi;
 }

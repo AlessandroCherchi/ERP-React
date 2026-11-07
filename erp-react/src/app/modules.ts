@@ -41,7 +41,8 @@ export const MODULES: ModuleDef[] = [
       page: page(() => import('../pages/Fatture'), 'Fatture') },
     { id: 'contabilita', path: '/contabilita', icon: 'fa-calculator', labelKey: 'nav.contabilita', resource: 'fatture', placement: 'main',
       page: page(() => import('../pages/Contabilita'), 'Contabilita') },
-    { id: 'report', path: '/report', icon: 'fa-chart-pie', labelKey: 'nav.report', resource: 'ordini', placement: 'main' },
+    { id: 'report', path: '/report', icon: 'fa-chart-pie', labelKey: 'nav.report', resource: 'ordini', placement: 'main',
+      page: page(() => import('../pages/Report'), 'Report') },
     { id: 'impostazioni', path: '/impostazioni', icon: 'fa-gear', labelKey: 'nav.impostazioni', resource: 'impostazioni', placement: 'footer',
       page: page(() => import('../pages/Impostazioni'), 'Impostazioni') },
 ];

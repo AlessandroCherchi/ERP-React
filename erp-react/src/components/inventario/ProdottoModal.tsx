@@ -4,8 +4,8 @@ import { Modal } from '../ui/Modal';
 import { ActionButton } from '../ui/Button';
 import { ProdottoFormFields } from './ProdottoFormFields';
 import { useValidatedForm } from '../../lib/validation';
-import { prodottoSchema } from '../../lib/schemas/quickActions';
-import { EMPTY_PRODOTTO, type ProdottoForm } from '../../types/quickActions';
+import { prodottoSchema } from '../../lib/schemas/prodotto';
+import { EMPTY_PRODOTTO, type ProdottoForm } from '../../types/prodotto';
 import type { Prodotto } from '../../types/prodotto';
 import type { FornitoreRef } from '../../types/fornitore';
 

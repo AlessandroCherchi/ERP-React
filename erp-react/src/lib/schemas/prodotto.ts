@@ -1,10 +1,10 @@
-// Domain validation magazzino — Implementation Contract v3.1 §3.
-// Lo schema del prodotto è già condiviso con la quick action della
-// Dashboard (schemas/quickActions.ts → prodottoSchema): qui vive solo
-// ciò che è specifico dei movimenti di magazzino.
+// Domain validation magazzino — Implementation Contract v3.1 §3:
+// anagrafica articolo (condivisa da Inventario e azione rapida della
+// Dashboard) e movimenti di magazzino.
 
 import * as v from 'valibot';
 
+const optional = v.string();
 const required = v.pipe(v.string(), v.trim(), v.minLength(1, 'Campo obbligatorio'));
 
 /**
@@ -28,4 +28,20 @@ export const movimentoSchema = v.object({
     causale: required,
     data: required,
     note: v.string(),
+});
+
+/** Anagrafica articolo: obbligatori nome, SKU e prezzo; i numerici restano string fino al submit. */
+export const prodottoSchema = v.object({
+    nome: required,
+    sku: required,
+    categoria: optional,
+    fornitoreId: optional,
+    costo: optional,
+    prezzo: required,
+    giacenza: optional,
+    scorta: optional,
+    unita: optional,
+    iva: optional,
+    ubicazione: optional,
+    descrizione: optional,
 });

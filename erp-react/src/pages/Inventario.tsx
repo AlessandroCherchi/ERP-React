@@ -26,7 +26,7 @@ import {
     statoProdotto, STATO_LABEL, valoreGiacenza,
     type MovimentoFormValues, type Prodotto, type ProdottoStato,
 } from '../types/prodotto';
-import type { ProdottoForm } from '../types/quickActions';
+import type { ProdottoForm } from '../types/prodotto';
 import '../styles/app-shell.css';
 import '../styles/inventario.css';
 

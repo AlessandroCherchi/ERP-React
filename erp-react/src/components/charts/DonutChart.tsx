@@ -4,6 +4,8 @@ import { readToken } from '../../config/theme';
 interface Segment {
     value: number;
     color: string;
+    /** Etichetta per la descrizione accessibile. */
+    label?: string;
 }
 
 interface DonutChartProps {
@@ -40,7 +42,8 @@ export function DonutChart({ segments }: DonutChartProps) {
             const total = segments.reduce((s, seg) => s + seg.value, 0);
             let startAngle = -Math.PI / 2;
 
-            segments.forEach((seg) => {
+            // Nessun dato: niente spicchi (evita NaN), resta il totale 0 al centro.
+            (total > 0 ? segments : []).forEach((seg) => {
                 const sliceAngle = (seg.value / total) * Math.PI * 2;
                 ctx.beginPath();
                 ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
@@ -59,11 +62,11 @@ export function DonutChart({ segments }: DonutChartProps) {
             });
 
             ctx.fillStyle = readToken('--erp-text', '#4a4a4a');
-            ctx.font = '800 28px Poppins';
+            ctx.font = `800 28px ${readToken('--erp-font', 'sans-serif')}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(String(total), cx, cy - 6);
-            ctx.font = '500 10px Poppins';
+            ctx.font = `500 10px ${readToken('--erp-font', 'sans-serif')}`;
             ctx.fillStyle = readToken('--erp-text-muted', '#9a9a9a');
             ctx.fillText('Totale', cx, cy + 14);
         }
@@ -77,5 +80,5 @@ export function DonutChart({ segments }: DonutChartProps) {
         return () => observer?.disconnect();
     }, [segments]);
 
-    return <canvas ref={canvasRef} />;
+    return <canvas ref={canvasRef} role="img" aria-label={segments.map((x) => `${x.label ?? ''} ${x.value}`.trim()).join(', ')} />;
 }

@@ -32,4 +32,7 @@ export const qk = {
     incassi: {
         all: ['incassi'] as const,
     },
+    audit: {
+        all: ['audit'] as const,
+    },
 };

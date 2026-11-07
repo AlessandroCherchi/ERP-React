@@ -1,6 +1,6 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 + Fasi A, B, C, E completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+Stato: **Step 6 + Fasi A, B, C, E, F completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
 piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
@@ -380,13 +380,35 @@ esadecimali nei componenti.
 Fatturato, numero ordini e credito non sono più campi dell'anagrafica:
 `types/statistiche.ts` li calcola da ordini, fatture e incassi (schema mock v3).
 
+## Fase F — Dashboard reale, Report, registro attività, notifiche, ricerca — DONE
+
+- **Dashboard** interamente su dati reali: fatturato del mese, ordini in
+  corso, valore di magazzino, crediti scaduti; andamento fatturato 6/12 mesi;
+  ordini per stato; articoli più venduti; attività recenti; avvisi; azioni
+  rapide reali (la "Nuova fattura" crea una bozza vera). Eliminati i dati
+  demo fissi (`lib/demoData`), il modale fattura finto e il backup finto.
+- **Report** (`/report`): vendite (12 mesi, top clienti, top articoli),
+  magazzino (valorizzazione per categoria, articoli critici), acquisti per
+  fornitore, registro attività filtrabile; ogni tabella esportabile in CSV.
+  Aggregazioni pure e testate in `lib/analytics.ts`.
+- **Registro attività**: ogni mutation dichiara in `data/hooks.ts` cosa
+  scrivere a registro (`meta.audit`); il `MutationCache` registra utente e
+  orario. In produzione lo scrive il backend nella transazione (§14).
+- **Centro notifiche** (campanella): avvisi derivati dai dati — esauriti,
+  sotto scorta, ritardi clienti/fornitori, fatture scartate/da inviare,
+  scadute — filtrati per moduli visibili, con link all'elenco già filtrato.
+- **Ricerca globale** (combobox ARIA con tastiera) su clienti, fornitori,
+  articoli, ordini, acquisti, fatture.
+- Grafici canvas accessibili (`role="img"` + descrizione), font dal tema,
+  scala robusta a serie vuote.
+
 ## Roadmap frontend (backend in secondo piano)
 - ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
 - ~~C — Acquisti~~ — fatto.
 - **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,
   lotti/seriali/scadenze, inventario fisico, valorizzazione.
 - ~~E — Ciclo attivo~~ — fatto (DDT: vedi D).
-- **F — Report, Dashboard su dati reali, audit, notifiche, ricerca globale.**
+- ~~F — Report, Dashboard reale, audit, notifiche, ricerca~~ — fatto.
 
 ## Step 7 — RxDB + Sync Coordinator
 - Schema RxDB per cache/outbox (customer/order/invoice/product draft)

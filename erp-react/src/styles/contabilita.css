@@ -85,3 +85,46 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* ========================= REPORT ========================= */
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 24px;
+}
+
+.report-block {
+    margin-bottom: 24px;
+    min-width: 0;
+}
+
+.report-block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.report-block-head h2 {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.report-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.report-chart {
+    margin-bottom: 24px;
+}
+
+@media (max-width: 560px) {
+    .report-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

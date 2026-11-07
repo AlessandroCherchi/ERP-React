@@ -50,6 +50,8 @@ export const it = {
     topbar: {
         searchPlaceholder: 'Cerca nell’ERP…',
         notifications: 'Notifiche',
+        allClear: 'Nessun avviso: tutto in ordine.',
+        noResults: 'Nessun risultato.',
         userMenu: 'Utente',
     },
     roles: {

@@ -89,3 +89,19 @@ export function downloadCsv(filename: string, headers: string[], rows: Array<Arr
 export function downloadJson(filename: string, data: unknown): void {
     downloadFile(filename, JSON.stringify(data, null, 2), 'application/json;charset=utf-8;');
 }
+
+/** "3 minuti fa", "ieri"… nel locale del tenant. */
+export function tempoFa(iso: string, now: Date = new Date()): string {
+    const diff = (new Date(iso).getTime() - now.getTime()) / 1000;
+    const rtf = new Intl.RelativeTimeFormat(settings.intl, { numeric: 'auto' });
+    const abs = Math.abs(diff);
+    if (abs < 60) return rtf.format(Math.round(diff), 'second');
+    if (abs < 3600) return rtf.format(Math.round(diff / 60), 'minute');
+    if (abs < 86_400) return rtf.format(Math.round(diff / 3600), 'hour');
+    return rtf.format(Math.round(diff / 86_400), 'day');
+}
+
+/** Etichetta breve di un mese yyyy-mm ("ago 26"). */
+export function etichettaMese(mese: string): string {
+    return new Date(`${mese}-01T00:00:00`).toLocaleDateString(settings.intl, { month: 'short', year: '2-digit' });
+}

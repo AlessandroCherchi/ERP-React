@@ -1,6 +1,6 @@
 import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
 import { formatEuro, parseNum } from '../../lib/format';
-import type { ProdottoForm } from '../../types/quickActions';
+import type { ProdottoForm } from '../../types/prodotto';
 import type { FornitoreRef } from '../../types/fornitore';
 import type { FieldErrors } from '../../lib/validation';
 import { useConfig } from '../../config/configStore';

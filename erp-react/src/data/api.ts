@@ -11,6 +11,7 @@ import * as ordini from '../lib/mockApi/ordini';
 import * as utenti from '../lib/mockApi/utenti';
 import * as acquisti from '../lib/mockApi/acquisti';
 import * as fatture from '../lib/mockApi/fatture';
+import * as audit from '../lib/mockApi/audit';
 
 const mockApi: DataApi = {
     clienti: {
@@ -66,6 +67,9 @@ const mockApi: DataApi = {
         inviaSdi: fatture.inviaSdi,
         registraIncasso: fatture.registraIncasso,
         eliminaIncasso: fatture.eliminaIncasso,
+    },
+    audit: {
+        list: audit.fetchAudit,
     },
 };
 

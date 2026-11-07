@@ -6,7 +6,7 @@
 // config e permission matrix.
 
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 import { App } from '../App';
 import { router } from './router';
@@ -130,6 +130,28 @@ describe('impostazioni', () => {
         act(() => useConfigStore.getState().updateConfig({ tables: { ...useConfigStore.getState().config.tables, categorie: [{ value: 'Vernici', label: 'Vernici' }] } }));
         await renderAt('/inventario');
         expect(await screen.findAllByRole('option', { name: 'Vernici', hidden: true })).not.toHaveLength(0);
+    });
+});
+
+describe('shell: ricerca globale e notifiche', () => {
+    it('la ricerca trova un cliente e porta all’elenco filtrato', async () => {
+        await loginAs('owner');
+        await renderAt('/dashboard');
+        const input = await screen.findByRole('combobox');
+        await act(async () => { fireEvent.change(input, { target: { value: 'Rossi' } }); });
+        // il primo gruppo di risultati è Clienti (seguono ordini e fatture dello stesso cliente)
+        const [hit] = await within(await screen.findByRole('listbox')).findAllByRole('option', { name: /Rossi S\.r\.l\./ });
+        await act(async () => hit!.querySelector('button')!.click());
+        expect(router.state.location.pathname).toBe('/clienti');
+        expect(router.state.location.search).toContain('q=Rossi');
+    });
+
+    it('la campanella segnala gli articoli esauriti del dataset demo', async () => {
+        await loginAs('warehouse');
+        await renderAt('/inventario');
+        const bell = await screen.findByRole('button', { name: /Notifiche \(\d+\)/ });
+        await act(async () => bell.click());
+        expect(await screen.findByRole('link', { name: /esauriti/ })).toBeTruthy();
     });
 });
 

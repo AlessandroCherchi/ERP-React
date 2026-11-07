@@ -47,6 +47,8 @@ export const en: Dictionary = {
     topbar: {
         searchPlaceholder: 'Search the ERP…',
         notifications: 'Notifications',
+        allClear: 'No alerts: all clear.',
+        noResults: 'No results.',
         userMenu: 'User',
     },
     roles: {
