@@ -32,7 +32,8 @@ export interface ProdottoForm {
     nome: string;
     sku: string;
     categoria: string;
-    fornitore: string;
+    /** Id del fornitore come stringa ('' = nessuno): valore della <select>. */
+    fornitoreId: string;
     costo: string;
     prezzo: string;
     giacenza: string;
@@ -45,7 +46,7 @@ export interface ProdottoForm {
 }
 
 export const EMPTY_PRODOTTO: ProdottoForm = {
-    nome: '', sku: '', categoria: 'Elettronica', fornitore: '',
+    nome: '', sku: '', categoria: '', fornitoreId: '',
     costo: '', prezzo: '', giacenza: '', scorta: '', unita: 'pz', iva: '22',
     ubicazione: '', descrizione: '',
 };

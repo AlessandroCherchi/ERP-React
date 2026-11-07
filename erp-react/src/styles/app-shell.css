@@ -1478,3 +1478,43 @@
 .system-actions a.neu-action-btn {
     text-decoration: none;
 }
+
+/* ========================= DATA TABLE (componenti generici) =========================
+   L'ordinamento è un <button> dentro il <th> (accessibile da tastiera),
+   la cella nome è un <button>: entrambi ereditano l'aspetto originale. */
+
+.th-sort-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.entity-cell {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+.entity-cell:focus-visible,
+.th-sort-btn:focus-visible {
+    outline: 2px solid var(--erp-accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.cell-strong {
+    font-weight: 600;
+}
+
+.neu-icon-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}

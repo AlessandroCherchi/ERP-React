@@ -1,124 +1,59 @@
-import type { Cliente } from '../../types/cliente';
+import {
+    DetailField, DetailHeader, DetailPanelShell, DetailSection, DetailStat, PanelActions, type PanelAction,
+} from '../ui/DetailPanelShell';
+import { formatEuro } from '../../lib/format';
+import { STATO_CLIENTE_LABEL, type Cliente } from '../../types/cliente';
 
 interface ClientDetailPanelProps {
     cliente: Cliente | null;
     open: boolean;
     onClose: () => void;
-    onEdit?: () => void;
-    onDelete?: () => void;
+    actions: PanelAction[];
 }
 
-function capitalise(str: string): string {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-}
-
-/** Pannello dettaglio a scomparsa — porting 1:1 di #detailPanel in clienti.html. */
-export function ClientDetailPanel({ cliente, open, onClose, onEdit, onDelete }: ClientDetailPanelProps) {
+/** Pannello dettaglio cliente: anagrafica, dati fiscali, panoramica economica. */
+export function ClientDetailPanel({ cliente, open, onClose, actions }: ClientDetailPanelProps) {
     return (
-        <>
-            <div className={`detail-overlay${open ? ' open' : ''}`} onClick={onClose} />
-            <aside className={`detail-panel${open ? ' open' : ''}`}>
-                <div className="detail-panel-header">
-                    <h2>Dettaglio Cliente</h2>
-                    <button className="neu-icon-btn neu-icon-btn--sm" onClick={onClose} aria-label="Chiudi dettaglio">
-                        <i className="fa-solid fa-xmark" />
-                    </button>
+        <DetailPanelShell open={open} title="Dettaglio Cliente" onClose={onClose} footer={<PanelActions actions={actions} />}>
+            {cliente && (
+                <div className="detail-panel-body">
+                    <DetailHeader
+                        icon="fa-user"
+                        name={cliente.nome}
+                        status={{ className: cliente.stato, label: STATO_CLIENTE_LABEL[cliente.stato] }}
+                    />
+
+                    <DetailSection title="Informazioni di Contatto">
+                        <div className="detail-grid">
+                            <DetailField label="Email" value={cliente.email} />
+                            <DetailField label="Telefono" value={cliente.telefono} />
+                            <DetailField label="Indirizzo" value={cliente.indirizzo} />
+                            <DetailField label="Città" value={cliente.citta ? `${cliente.citta}${cliente.provincia ? ` (${cliente.provincia})` : ''}` : ''} />
+                        </div>
+                    </DetailSection>
+
+                    <DetailSection title="Dati Aziendali">
+                        <div className="detail-grid">
+                            <DetailField label="P.IVA" value={cliente.piva} />
+                            <DetailField label="Cod. Fiscale" value={cliente.cf} />
+                            <DetailField label="PEC" value={cliente.pec} />
+                            <DetailField label="SDI" value={cliente.sdi} />
+                        </div>
+                    </DetailSection>
+
+                    <DetailSection title="Panoramica Economica">
+                        <div className="detail-stats-row">
+                            <DetailStat label="Fatturato" value={formatEuro(cliente.fatturato, 0)} />
+                            <DetailStat label="Ordini" value={cliente.ordini} />
+                            <DetailStat label="Credito" value={formatEuro(cliente.credito, 0)} />
+                        </div>
+                    </DetailSection>
+
+                    <DetailSection title="Note">
+                        <p className="detail-notes">{cliente.note || 'Nessuna nota disponibile.'}</p>
+                    </DetailSection>
                 </div>
-
-                {cliente && (
-                    <div className="detail-panel-body">
-                        <div className="detail-avatar">
-                            <i className="fa-solid fa-user" />
-                        </div>
-                        <h3 className="detail-name">{cliente.nome}</h3>
-                        <span className={`detail-status status-badge status-badge--${cliente.stato}`}>
-                            {capitalise(cliente.stato)}
-                        </span>
-
-                        <div className="detail-section">
-                            <h4>Informazioni di Contatto</h4>
-                            <div className="detail-grid">
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Email</span>
-                                    <span className="detail-field-value">{cliente.email || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Telefono</span>
-                                    <span className="detail-field-value">{cliente.telefono || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Indirizzo</span>
-                                    <span className="detail-field-value">{cliente.indirizzo || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Città</span>
-                                    <span className="detail-field-value">
-                                        {cliente.citta}{cliente.provincia ? ` (${cliente.provincia})` : ''}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>Dati Aziendali</h4>
-                            <div className="detail-grid">
-                                <div className="detail-field">
-                                    <span className="detail-field-label">P.IVA</span>
-                                    <span className="detail-field-value">{cliente.piva || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Cod. Fiscale</span>
-                                    <span className="detail-field-value">{cliente.cf || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">PEC</span>
-                                    <span className="detail-field-value">{cliente.pec || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">SDI</span>
-                                    <span className="detail-field-value">{cliente.sdi || '—'}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>Panoramica Economica</h4>
-                            <div className="detail-stats-row">
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">€ {cliente.fatturato.toLocaleString('it-IT')}</span>
-                                    <span className="detail-stat-label">Fatturato</span>
-                                </div>
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">{cliente.ordini}</span>
-                                    <span className="detail-stat-label">Ordini</span>
-                                </div>
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">€ {cliente.credito.toLocaleString('it-IT')}</span>
-                                    <span className="detail-stat-label">Credito</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>Note</h4>
-                            <p className="detail-notes">{cliente.note || 'Nessuna nota disponibile.'}</p>
-                        </div>
-                    </div>
-                )}
-
-                <div className="detail-panel-footer">
-                    {onEdit && (
-                        <button className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                        </button>
-                    )}
-                </div>
-            </aside>
-        </>
+            )}
+        </DetailPanelShell>
     );
 }

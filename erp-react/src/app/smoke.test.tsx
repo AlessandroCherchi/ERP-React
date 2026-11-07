@@ -98,6 +98,22 @@ describe('permessi nella UI', () => {
     });
 });
 
+describe('elenchi', () => {
+    it('i filtri arrivano dall’URL', async () => {
+        await loginAs('owner');
+        await renderAt('/clienti?stato=prospect');
+        expect(await screen.findByText('Arancio Design')).toBeTruthy();
+        expect(screen.queryByText('Rossi S.r.l.')).toBeNull();
+    });
+
+    it('inventario mostra il fornitore risolto per id', async () => {
+        await loginAs('owner');
+        await renderAt('/inventario?q=SKU-4501');
+        expect(await screen.findByText('Widget Pro X200')).toBeTruthy();
+        expect(await screen.findByRole('cell', { name: 'Tecnoforniture S.p.A.' })).toBeTruthy();
+    });
+});
+
 describe('tenant', () => {
     it('brand e moduli seguono il config del tenant', async () => {
         act(() => useConfigStore.getState().setTenant('acme'));

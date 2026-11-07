@@ -28,6 +28,13 @@ export interface Fornitore extends AnagraficaBase {
     debito: number;
 }
 
+/** Riferimento minimo per select e lookup (include gli inattivi: servono a risolvere i nomi). */
+export interface FornitoreRef {
+    id: number;
+    nome: string;
+    attivo: boolean;
+}
+
 /** Campi compilabili dal form (Fornitore meno id e derivati server-side). */
 export type FornitoreFormValues = Omit<Fornitore, 'id' | 'acquistato' | 'ordini' | 'debito'>;
 

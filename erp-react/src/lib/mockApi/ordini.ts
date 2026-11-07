@@ -13,7 +13,7 @@ import {
 } from './inventario';
 import { nomeCliente } from './clienti';
 import {
-    impegnaMagazzino, transizioneValida,
+    impegnaMagazzino, ordineEliminabile, ordineModificabile, transizioneValida,
     type Ordine, type OrdineFormValues, type OrdineStato,
 } from '../../types/ordine';
 import { collection, nextIdOf } from './db';
@@ -184,7 +184,7 @@ export async function updateOrdine(id: number, data: OrdineFormValues): Promise<
     if (idx === -1) throw new Error('Ordine non trovato');
 
     const corrente = store[idx]!;
-    if (corrente.stato !== 'bozza') {
+    if (!ordineModificabile(corrente.stato)) {
         throw new Error('Solo gli ordini in bozza possono essere modificati');
     }
 
@@ -208,7 +208,7 @@ export async function deleteOrdine(id: number): Promise<void> {
     if (idx === -1) return;
 
     const stato = store[idx]!.stato;
-    if (stato !== 'bozza' && stato !== 'annullato') {
+    if (!ordineEliminabile(stato)) {
         throw new Error('Un ordine già confermato non può essere eliminato');
     }
     store.splice(idx, 1);

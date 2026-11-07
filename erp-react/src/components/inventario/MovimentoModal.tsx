@@ -4,7 +4,7 @@ import { ActionButton } from '../ui/Button';
 import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
 import { useValidatedForm } from '../../lib/validation';
 import { movimentoSchema } from '../../lib/schemas/prodotto';
-import { parseNum, today } from '../../lib/format';
+import { formatNumber, parseNum, today } from '../../lib/format';
 import { applicaMovimento, type MovimentoFormValues, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
 
 interface MovimentoModalProps {
@@ -83,7 +83,7 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
                     <p className="form-hint form-group--full">
                         <strong>{prodotto.nome}</strong> — {prodotto.sku}
                         <br />
-                        Giacenza attuale: {giacenzaAttuale.toLocaleString('it-IT')} {unita}
+                        Giacenza attuale: {formatNumber(giacenzaAttuale)} {unita}
                     </p>
                 </FormRow>
             )}
@@ -145,7 +145,7 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
             <FormRow>
                 <FormTotal
                     label="Giacenza risultante"
-                    value={`${giacenzaFinale.toLocaleString('it-IT')} ${unita}`}
+                    value={`${formatNumber(giacenzaFinale)} ${unita}`}
                 />
             </FormRow>
 
@@ -153,7 +153,7 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
                 <FormRow>
                     <p className="form-hint form-hint--warning form-group--full">
                         <i className="fa-solid fa-triangle-exclamation" /> Lo scarico supera la giacenza
-                        disponibile: verranno scaricate solo {giacenzaAttuale.toLocaleString('it-IT')} {unita}.
+                        disponibile: verranno scaricate solo {formatNumber(giacenzaAttuale)} {unita}.
                     </p>
                 </FormRow>
             )}

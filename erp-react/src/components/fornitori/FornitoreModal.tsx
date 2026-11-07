@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useConfig } from '../../config/configStore';
 import { Modal } from '../ui/Modal';
 import { ActionButton } from '../ui/Button';
 import { FornitoreFormFields } from './FornitoreFormFields';
@@ -23,6 +24,7 @@ function toFormValues(f: Fornitore): FornitoreFormValues {
 
 /** Modale Nuovo/Modifica Fornitore — stessa struttura di ClientModal. */
 export function FornitoreModal({ open, onClose, editing, onSubmit, saving }: FornitoreModalProps) {
+    const { tables } = useConfig();
     const { values, errors, setField, validate, reset } = useValidatedForm<FornitoreFormValues>(
         fornitoreSchema,
         EMPTY_FORNITORE_FORM
@@ -30,7 +32,11 @@ export function FornitoreModal({ open, onClose, editing, onSubmit, saving }: For
 
     useEffect(() => {
         if (!open) return;
-        reset(editing ? toFormValues(editing) : EMPTY_FORNITORE_FORM);
+        reset(editing ? toFormValues(editing) : {
+            ...EMPTY_FORNITORE_FORM,
+            categoria: tables.categorie[0]?.value ?? '',
+            pagamento: tables.terminiPagamento[0]?.value ?? '0',
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, editing]);
 

@@ -1,182 +1,74 @@
 import { StockBar } from './StockBar';
-import { formatDate, formatEuro } from '../../lib/format';
+import { MovementList } from './MovementList';
 import {
-    margineUnitario, MOVIMENTO_LABEL, statoProdotto, STATO_LABEL, valoreGiacenza,
-    type Movimento, type Prodotto,
+    DetailField, DetailHeader, DetailPanelShell, DetailSection, DetailStat, PanelActions, type PanelAction,
+} from '../ui/DetailPanelShell';
+import { formatEuro, formatNumber } from '../../lib/format';
+import {
+    margineUnitario, statoProdotto, STATO_LABEL, valoreGiacenza, type Movimento, type Prodotto,
 } from '../../types/prodotto';
 
 interface ProductDetailPanelProps {
     prodotto: Prodotto | null;
+    /** Ragione sociale del fornitore abituale, risolta dalla pagina. */
+    fornitore: string;
     /** Movimenti del solo prodotto aperto, già ordinati dal più recente. */
     movimenti: Movimento[];
     open: boolean;
     onClose: () => void;
-    onMove?: () => void;
-    onEdit?: () => void;
-    onDelete?: () => void;
+    actions: PanelAction[];
 }
 
-/** Segno con cui il movimento ha inciso sulla giacenza. */
-function segno(m: Movimento): string {
-    if (m.tipo === 'rettifica') return '=';
-    return m.tipo === 'carico' ? '+' : '−';
-}
-
-/** Pannello dettaglio articolo — stessa struttura di ClientDetailPanel, con storico movimenti. */
-export function ProductDetailPanel({
-    prodotto, movimenti, open, onClose, onMove, onEdit, onDelete,
-}: ProductDetailPanelProps) {
-    const stato = prodotto ? statoProdotto(prodotto) : 'disponibile';
-
+/** Pannello dettaglio articolo: scorta, anagrafica, valorizzazione, storico movimenti. */
+export function ProductDetailPanel({ prodotto, fornitore, movimenti, open, onClose, actions }: ProductDetailPanelProps) {
     return (
-        <>
-            <div className={`detail-overlay${open ? ' open' : ''}`} onClick={onClose} />
-            <aside className={`detail-panel${open ? ' open' : ''}`} aria-hidden={!open}>
-                <div className="detail-panel-header">
-                    <h2>Dettaglio Articolo</h2>
-                    <button
-                        type="button"
-                        className="neu-icon-btn neu-icon-btn--sm"
-                        onClick={onClose}
-                        aria-label="Chiudi dettaglio"
-                    >
-                        <i className="fa-solid fa-xmark" />
-                    </button>
-                </div>
-
-                {prodotto && (
+        <DetailPanelShell open={open} title="Dettaglio Articolo" onClose={onClose} footer={<PanelActions actions={actions} />}>
+            {prodotto && (() => {
+                const stato = statoProdotto(prodotto);
+                return (
                     <div className="detail-panel-body">
-                        <div className="detail-avatar">
-                            <i className="fa-solid fa-box" />
-                        </div>
-                        <h3 className="detail-name">{prodotto.nome}</h3>
-                        <span className={`detail-status status-badge status-badge--${stato}`}>
-                            {STATO_LABEL[stato]}
-                        </span>
+                        <DetailHeader icon="fa-box" name={prodotto.nome} status={{ className: stato, label: STATO_LABEL[stato] }} />
 
-                        <div className="detail-section">
-                            <h4>Livello di Scorta</h4>
-                            <StockBar
-                                giacenza={prodotto.giacenza}
-                                scorta={prodotto.scorta}
-                                unita={prodotto.unita}
-                            />
+                        <DetailSection title="Livello di Scorta">
+                            <StockBar giacenza={prodotto.giacenza} scorta={prodotto.scorta} unita={prodotto.unita} />
                             <p className="detail-notes detail-notes--compact">
-                                Soglia di riordino: {prodotto.scorta.toLocaleString('it-IT')} {prodotto.unita}
+                                Soglia di riordino: {formatNumber(prodotto.scorta)} {prodotto.unita}
                             </p>
-                        </div>
+                        </DetailSection>
 
-                        <div className="detail-section">
-                            <h4>Dati Articolo</h4>
+                        <DetailSection title="Dati Articolo">
                             <div className="detail-grid">
-                                <div className="detail-field">
-                                    <span className="detail-field-label">SKU</span>
-                                    <span className="detail-field-value">{prodotto.sku}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Categoria</span>
-                                    <span className="detail-field-value">{prodotto.categoria}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Fornitore</span>
-                                    <span className="detail-field-value">{prodotto.fornitore || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Ubicazione</span>
-                                    <span className="detail-field-value">{prodotto.ubicazione || '—'}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Unità di misura</span>
-                                    <span className="detail-field-value">{prodotto.unita}</span>
-                                </div>
-                                <div className="detail-field">
-                                    <span className="detail-field-label">Aliquota IVA</span>
-                                    <span className="detail-field-value">{prodotto.iva}%</span>
-                                </div>
+                                <DetailField label="SKU" value={prodotto.sku} />
+                                <DetailField label="Categoria" value={prodotto.categoria} />
+                                <DetailField label="Fornitore" value={fornitore} />
+                                <DetailField label="Ubicazione" value={prodotto.ubicazione} />
+                                <DetailField label="Unità di misura" value={prodotto.unita} />
+                                <DetailField label="Aliquota IVA" value={`${prodotto.iva}%`} />
                             </div>
-                        </div>
+                        </DetailSection>
 
-                        <div className="detail-section">
-                            <h4>Valorizzazione</h4>
+                        <DetailSection title="Valorizzazione">
                             <div className="detail-stats-row">
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">{formatEuro(prodotto.costo)}</span>
-                                    <span className="detail-stat-label">Costo</span>
-                                </div>
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">{formatEuro(prodotto.prezzo)}</span>
-                                    <span className="detail-stat-label">Prezzo</span>
-                                </div>
-                                <div className="detail-stat">
-                                    <span className="detail-stat-value">{formatEuro(margineUnitario(prodotto))}</span>
-                                    <span className="detail-stat-label">Margine</span>
-                                </div>
+                                <DetailStat label="Costo" value={formatEuro(prodotto.costo)} />
+                                <DetailStat label="Prezzo" value={formatEuro(prodotto.prezzo)} />
+                                <DetailStat label="Margine" value={formatEuro(margineUnitario(prodotto))} />
                             </div>
                             <p className="detail-notes detail-notes--compact">
-                                Valore a magazzino: <strong>{formatEuro(valoreGiacenza(prodotto), 2)}</strong>
-                                {' '}({prodotto.giacenza.toLocaleString('it-IT')} × {formatEuro(prodotto.costo)})
+                                Valore a magazzino: <strong>{formatEuro(valoreGiacenza(prodotto))}</strong>
+                                {' '}({formatNumber(prodotto.giacenza)} × {formatEuro(prodotto.costo)})
                             </p>
-                        </div>
+                        </DetailSection>
 
-                        <div className="detail-section">
-                            <h4>Ultimi Movimenti</h4>
-                            {movimenti.length === 0 ? (
-                                <p className="detail-notes">Nessun movimento registrato per questo articolo.</p>
-                            ) : (
-                                <ul className="movement-list">
-                                    {movimenti.map((m) => (
-                                        <li className="movement-item" key={m.id}>
-                                            <div className={`movement-icon movement-icon--${m.tipo}`}>
-                                                <i
-                                                    className={`fa-solid ${m.tipo === 'carico'
-                                                        ? 'fa-arrow-down'
-                                                        : m.tipo === 'scarico'
-                                                            ? 'fa-arrow-up'
-                                                            : 'fa-scale-balanced'
-                                                        }`}
-                                                />
-                                            </div>
-                                            <div className="movement-text">
-                                                <strong>{MOVIMENTO_LABEL[m.tipo]} · {m.causale}</strong>
-                                                <span>
-                                                    {formatDate(m.data)} — giacenza dopo:{' '}
-                                                    {m.giacenzaFinale.toLocaleString('it-IT')} {prodotto.unita}
-                                                </span>
-                                            </div>
-                                            <div className={`movement-qty movement-qty--${m.tipo}`}>
-                                                {segno(m)}{m.quantita.toLocaleString('it-IT')}
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
+                        <DetailSection title="Ultimi Movimenti">
+                            <MovementList movimenti={movimenti} unita={prodotto.unita} empty="Nessun movimento registrato per questo articolo." />
+                        </DetailSection>
 
-                        <div className="detail-section">
-                            <h4>Descrizione</h4>
+                        <DetailSection title="Descrizione">
                             <p className="detail-notes">{prodotto.descrizione || 'Nessuna descrizione disponibile.'}</p>
-                        </div>
+                        </DetailSection>
                     </div>
-                )}
-
-                <div className="detail-panel-footer">
-                    {onMove && (
-                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onMove}>
-                            <i className="fa-solid fa-right-left" /> <span>Movimento</span>
-                        </button>
-                    )}
-                    {onEdit && (
-                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                        </button>
-                    )}
-                </div>
-            </aside>
-        </>
+                );
+            })()}
+        </DetailPanelShell>
     );
 }

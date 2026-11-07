@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useConfig } from '../../config/configStore';
 import { Modal } from '../ui/Modal';
 import { ActionButton } from '../ui/Button';
 import { ProdottoFormFields } from './ProdottoFormFields';
@@ -6,6 +7,7 @@ import { useValidatedForm } from '../../lib/validation';
 import { prodottoSchema } from '../../lib/schemas/quickActions';
 import { EMPTY_PRODOTTO, type ProdottoForm } from '../../types/quickActions';
 import type { Prodotto } from '../../types/prodotto';
+import type { FornitoreRef } from '../../types/fornitore';
 
 interface ProdottoModalProps {
     open: boolean;
@@ -16,8 +18,8 @@ interface ProdottoModalProps {
     /** Valori precompilati per la creazione (es. SKU progressivo). */
     defaults?: Partial<ProdottoForm>;
     saving?: boolean;
-    /** Ragioni sociali dall'anagrafica fornitori, per la select Fornitore. */
-    fornitori?: string[];
+    /** Anagrafica fornitori, per la select Fornitore. */
+    fornitori?: FornitoreRef[];
 }
 
 /** Prodotto (numerico, dal server) → valori del form (string). */
@@ -26,7 +28,7 @@ function toFormValues(p: Prodotto): ProdottoForm {
         nome: p.nome,
         sku: p.sku,
         categoria: p.categoria,
-        fornitore: p.fornitore,
+        fornitoreId: p.fornitoreId == null ? '' : String(p.fornitoreId),
         costo: String(p.costo),
         prezzo: String(p.prezzo),
         giacenza: String(p.giacenza),
@@ -47,6 +49,7 @@ function toFormValues(p: Prodotto): ProdottoForm {
 export function ProdottoModal({
     open, onClose, editing = null, onSubmit, defaults, saving = false, fornitori,
 }: ProdottoModalProps) {
+    const { tables } = useConfig();
     const { values, errors, setField, validate, reset } = useValidatedForm<ProdottoForm>(
         prodottoSchema,
         EMPTY_PRODOTTO
@@ -54,7 +57,14 @@ export function ProdottoModal({
 
     useEffect(() => {
         if (!open) return;
-        reset(editing ? toFormValues(editing) : { ...EMPTY_PRODOTTO, ...defaults });
+        // Nuovo articolo: i default delle select vengono dalle tabelle del tenant.
+        reset(editing ? toFormValues(editing) : {
+            ...EMPTY_PRODOTTO,
+            categoria: tables.categorie[0]?.value ?? '',
+            unita: tables.unita[0]?.value ?? 'pz',
+            iva: String(tables.aliquoteIva[0]?.value ?? 22),
+            ...defaults,
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, editing]);
 

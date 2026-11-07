@@ -9,7 +9,7 @@ export const qk = {
     },
     fornitori: {
         all: ['fornitori'] as const,
-        nomi: ['fornitori', 'nomi'] as const,
+        ref: ['fornitori', 'ref'] as const,
     },
     prodotti: {
         all: ['prodotti'] as const,

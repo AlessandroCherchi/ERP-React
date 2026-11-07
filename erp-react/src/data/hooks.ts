@@ -54,7 +54,7 @@ export const useDeleteCliente = (o?: MutationHookOptions<void, number>) =>
 // ------------------------- FORNITORI -------------------------
 
 export const useFornitori = () => useQuery({ queryKey: qk.fornitori.all, queryFn: api.fornitori.list });
-export const useFornitoriNomi = () => useQuery({ queryKey: qk.fornitori.nomi, queryFn: api.fornitori.listNomiAttivi });
+export const useFornitoriRef = () => useQuery({ queryKey: qk.fornitori.ref, queryFn: api.fornitori.listRef });
 
 export const useCreateFornitore = (o?: MutationHookOptions<Awaited<ReturnType<typeof api.fornitori.create>>, FornitoreFormValues>) =>
     useEntityMutation(api.fornitori.create, [qk.fornitori.all], o);

@@ -28,11 +28,11 @@ export const DEFAULT_CONFIG: TenantConfig = {
     },
     tables: {
         categorie: [
-            { value: 'Elettronica', label: 'Elettronica' },
-            { value: 'Componenti', label: 'Componenti' },
-            { value: 'Illuminazione', label: 'Illuminazione' },
-            { value: 'Networking', label: 'Networking' },
-            { value: 'Accessori', label: 'Accessori' },
+            { value: 'Elettronica', label: 'Elettronica', icon: 'fa-microchip' },
+            { value: 'Componenti', label: 'Componenti', icon: 'fa-gears' },
+            { value: 'Illuminazione', label: 'Illuminazione', icon: 'fa-lightbulb' },
+            { value: 'Networking', label: 'Networking', icon: 'fa-network-wired' },
+            { value: 'Accessori', label: 'Accessori', icon: 'fa-screwdriver-wrench' },
         ],
         unita: [
             { value: 'pz', label: 'pz — pezzi' },

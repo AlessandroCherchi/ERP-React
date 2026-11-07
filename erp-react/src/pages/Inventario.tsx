@@ -1,152 +1,106 @@
 import { useMemo, useState } from 'react';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
-import { KpiValue } from '../components/ui/KpiValue';
-import { ProductToolbar, type CategoriaFilter, type Filter } from '../components/inventario/ProductToolbar';
-import { ProductTable, type SortDir, type SortKey } from '../components/inventario/ProductTable';
+import { DataTable, EntityCell, KpiGrid, ListToolbar, ToolbarSelect, type Column, type RowAction } from '../components/data';
 import { ProductDetailPanel } from '../components/inventario/ProductDetailPanel';
 import { ProdottoModal } from '../components/inventario/ProdottoModal';
 import { MovimentoModal } from '../components/inventario/MovimentoModal';
+import { StockBar } from '../components/inventario/StockBar';
+import type { PanelAction } from '../components/ui/DetailPanelShell';
 import { useToast } from '../components/ui/Toast';
-import { useConfirm } from '../components/ui/Confirm';
 import { useStagger } from '../hooks/useStagger';
-import { downloadCsv, formatEuro, parseNum } from '../lib/format';
+import { useListState } from '../hooks/useListState';
+import { useCrudDialogs } from '../hooks/useCrudDialogs';
+import { useDeleteConfirm } from '../hooks/useDeleteConfirm';
 import {
-    useCreateProdotto, useDeleteProdotto, useFornitoriNomi, useMovimenti, useProdotti,
+    useCreateProdotto, useDeleteProdotto, useFornitoriRef, useMovimenti, useProdotti,
     useRegistraMovimento, useUpdateProdotto,
 } from '../data';
 import { usePermissions } from '../auth/hooks';
 import { useConfig } from '../config/configStore';
 import { nextNumber } from '../config/numbering';
+import { formatEuro, formatNumber, parseNum } from '../lib/format';
+import { exportCsv } from '../lib/csv';
+import { queryRows } from '../lib/listQuery';
 import {
     statoProdotto, STATO_LABEL, valoreGiacenza,
-    type MovimentoFormValues, type Prodotto,
+    type MovimentoFormValues, type Prodotto, type ProdottoStato,
 } from '../types/prodotto';
 import type { ProdottoForm } from '../types/quickActions';
 import '../styles/app-shell.css';
 import '../styles/inventario.css';
 
-/** Chiavi di ordinamento che non sono campi diretti di Prodotto. */
+type SortKey = 'sku' | 'nome' | 'categoria' | 'giacenza' | 'prezzo' | 'valore';
+type StatoFilter = 'all' | ProdottoStato;
+
+const STATO_CHIPS: { value: StatoFilter; label: string }[] = [
+    { value: 'all', label: 'Tutti' },
+    { value: 'disponibile', label: 'Disponibili' },
+    { value: 'sotto-scorta', label: 'Sotto scorta' },
+    { value: 'esaurito', label: 'Esauriti' },
+];
+
+/** Valore ordinabile: "valore" è derivato (giacenza × costo), il resto è un campo. */
 function sortValue(p: Prodotto, key: SortKey): string | number {
-    if (key === 'valore') return valoreGiacenza(p);
-    return p[key];
+    return key === 'valore' ? valoreGiacenza(p) : p[key];
 }
 
 export function Inventario() {
     const { toast } = useToast();
-    const { confirm } = useConfirm();
-    const staggerStyle = useStagger();
+    const stagger = useStagger();
+    const confirmDelete = useDeleteConfirm();
     const perm = usePermissions('magazzino');
     const config = useConfig();
-    const PER_PAGE = config.pageSize;
+    const { pageSize, tables } = config;
 
     const { data: prodotti = [] } = useProdotti();
     const { data: movimenti = [] } = useMovimenti();
-    const { data: fornitoriNomi = [] } = useFornitoriNomi();
+    const { data: fornitori = [] } = useFornitoriRef();
 
-    // ---- stato UI effimero (filtri/ricerca/ordinamento/paginazione) ----
-    const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState<Filter>('all');
-    const [categoria, setCategoria] = useState<CategoriaFilter>('all');
-    const [sortKey, setSortKey] = useState<SortKey>('sku');
-    const [sortDir, setSortDir] = useState<SortDir>('asc');
-    const [currentPage, setCurrentPage] = useState(1);
-
-    const [detailId, setDetailId] = useState<number | null>(null);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const list = useListState<SortKey, { stato: StatoFilter; categoria: string }>({
+        sort: { key: 'sku', dir: 'asc' },
+        filters: { stato: 'all', categoria: 'all' },
+    });
+    const dlg = useCrudDialogs(prodotti);
     const [movimentoId, setMovimentoId] = useState<number | null>(null);
 
+    const nomeFornitore = useMemo(() => {
+        const map = new Map(fornitori.map((f) => [f.id, f.nome]));
+        return (p: Prodotto) => (p.fornitoreId != null ? map.get(p.fornitoreId) ?? '' : '');
+    }, [fornitori]);
+    const iconaCategoria = useMemo(() => {
+        const map = new Map(tables.categorie.map((c) => [c.value, c.icon]));
+        return (categoria: string) => map.get(categoria) ?? 'fa-box';
+    }, [tables.categorie]);
+
     // Le mutation di magazzino invalidano da sé giacenze e movimenti (data/hooks.ts).
-    const createMut = useCreateProdotto({
-        onSuccess: (p) => toast(`Prodotto "${p.nome}" creato con successo.`, 'success'),
-    });
-    const updateMut = useUpdateProdotto({
-        onSuccess: (p) => toast(`Prodotto "${p.nome}" aggiornato con successo.`, 'success'),
-    });
-    const deleteMut = useDeleteProdotto({
-        onSuccess: (_v, id) => {
-            const nome = prodotti.find((p) => p.id === id)?.nome;
-            toast(`Prodotto "${nome}" eliminato.`, 'info');
-        },
-    });
+    const createMut = useCreateProdotto({ onSuccess: (p) => toast(`Prodotto "${p.nome}" creato con successo.`, 'success') });
+    const updateMut = useUpdateProdotto({ onSuccess: (p) => toast(`Prodotto "${p.nome}" aggiornato con successo.`, 'success') });
+    const deleteMut = useDeleteProdotto({ onSuccess: () => toast('Prodotto eliminato.', 'info') });
     const movimentoMut = useRegistraMovimento({
-        onSuccess: (p) => {
-            toast(`Giacenza di "${p.nome}" aggiornata: ${p.giacenza.toLocaleString('it-IT')} ${p.unita}.`, 'success');
-        },
+        onSuccess: (p) => toast(`Giacenza di "${p.nome}" aggiornata: ${formatNumber(p.giacenza)} ${p.unita}.`, 'success'),
     });
 
-    // ---- filtro + ricerca + ordinamento ----
-    const filtered = useMemo(() => {
-        let list = prodotti.slice();
+    const { stato, categoria } = list.filters;
+    const result = useMemo(() => queryRows(prodotti, {
+        filters: [
+            ...(stato === 'all' ? [] : [(p: Prodotto) => statoProdotto(p) === stato]),
+            ...(categoria === 'all' ? [] : [(p: Prodotto) => p.categoria === categoria]),
+        ],
+        search: list.search,
+        searchFields: (p) => [p.nome, p.sku, nomeFornitore(p), p.categoria, p.ubicazione],
+        sort: { key: list.sortKey, dir: list.sortDir, value: sortValue },
+        page: { current: list.page, size: pageSize },
+    }), [prodotti, stato, categoria, list.search, list.sortKey, list.sortDir, list.page, pageSize, nomeFornitore]);
 
-        if (filter !== 'all') list = list.filter((p) => statoProdotto(p) === filter);
-        if (categoria !== 'all') list = list.filter((p) => p.categoria === categoria);
-
-        if (search) {
-            const q = search.toLowerCase();
-            list = list.filter(
-                (p) =>
-                    p.nome.toLowerCase().includes(q) ||
-                    p.sku.toLowerCase().includes(q) ||
-                    p.fornitore.toLowerCase().includes(q) ||
-                    p.categoria.toLowerCase().includes(q) ||
-                    p.ubicazione.toLowerCase().includes(q)
-            );
-        }
-
-        list.sort((a, b) => {
-            const valA = sortValue(a, sortKey);
-            const valB = sortValue(b, sortKey);
-            const na = typeof valA === 'string' ? valA.toLowerCase() : valA;
-            const nb = typeof valB === 'string' ? valB.toLowerCase() : valB;
-            if (na < nb) return sortDir === 'asc' ? -1 : 1;
-            if (na > nb) return sortDir === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        return list;
-    }, [prodotti, filter, categoria, search, sortKey, sortDir]);
-
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-    const page = Math.min(currentPage, totalPages);
-    const pageRows = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-
-    function handleSort(key: SortKey) {
-        if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-        else { setSortKey(key); setSortDir('asc'); }
-    }
-
-    function handleFilterChange(f: Filter) { setFilter(f); setCurrentPage(1); }
-    function handleCategoriaChange(c: CategoriaFilter) { setCategoria(c); setCurrentPage(1); }
-    function handleSearchChange(v: string) { setSearch(v); setCurrentPage(1); }
-
-    function handleExport() {
-        const headers = ['SKU', 'Prodotto', 'Categoria', 'Fornitore', 'Giacenza', 'Unità', 'Scorta minima', 'Costo', 'Prezzo', 'Valore magazzino', 'IVA %', 'Ubicazione', 'Stato'];
-        const rows = filtered.map((p) => [
-            p.sku, p.nome, p.categoria, p.fornitore, p.giacenza, p.unita, p.scorta,
-            p.costo, p.prezzo, valoreGiacenza(p), p.iva, p.ubicazione, STATO_LABEL[statoProdotto(p)],
-        ]);
-        downloadCsv(`inventario_export_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
-        toast('Export CSV completato.', 'success');
-    }
-
-    function handleDelete(id: number) {
-        const p = prodotti.find((x) => x.id === id);
-        if (!p) return;
-        confirm({
-            title: 'Conferma Eliminazione',
-            text: `Sei sicuro di voler eliminare "${p.nome}" (${p.sku})? L'azione è irreversibile e rimuove anche lo storico movimenti.`,
-            confirmLabel: 'Elimina',
-            icon: 'fa-trash-can',
-            onConfirm: () => deleteMut.mutate(id),
-        });
+    function handleDelete(p: Prodotto) {
+        confirmDelete(`"${p.nome}" (${p.sku})`, () => deleteMut.mutate(p.id), 'Viene rimosso anche lo storico movimenti.');
     }
 
     function handleSubmit(values: ProdottoForm) {
-        if (editingId) updateMut.mutate({ id: editingId, data: values });
+        if (dlg.editingId != null) updateMut.mutate({ id: dlg.editingId, data: values });
         else createMut.mutate(values);
-        setModalOpen(false);
+        dlg.closeModal();
     }
 
     function handleMovimento(values: MovimentoFormValues) {
@@ -162,23 +116,70 @@ export function Inventario() {
         setMovimentoId(null);
     }
 
-    const detailProdotto = detailId != null ? prodotti.find((p) => p.id === detailId) ?? null : null;
-    const editingProdotto = editingId != null ? prodotti.find((p) => p.id === editingId) ?? null : null;
-    const movimentoProdotto = movimentoId != null ? prodotti.find((p) => p.id === movimentoId) ?? null : null;
+    function handleExport() {
+        exportCsv('inventario', result.filtered, [
+            { header: 'SKU', value: (p) => p.sku },
+            { header: 'Prodotto', value: (p) => p.nome },
+            { header: 'Categoria', value: (p) => p.categoria },
+            { header: 'Fornitore', value: nomeFornitore },
+            { header: 'Giacenza', value: (p) => p.giacenza },
+            { header: 'Unità', value: (p) => p.unita },
+            { header: 'Scorta minima', value: (p) => p.scorta },
+            { header: 'Costo', value: (p) => p.costo },
+            { header: 'Prezzo', value: (p) => p.prezzo },
+            { header: 'Valore magazzino', value: valoreGiacenza },
+            { header: 'IVA %', value: (p) => p.iva },
+            { header: 'Ubicazione', value: (p) => p.ubicazione },
+            { header: 'Stato', value: (p) => STATO_LABEL[statoProdotto(p)] },
+        ]);
+        toast('Export CSV completato.', 'success');
+    }
+
+    const columns: Column<Prodotto, SortKey>[] = [
+        { id: 'sku', header: 'SKU', sortKey: 'sku', className: 'cell-sku', cell: (p) => p.sku },
+        {
+            id: 'nome', header: 'Prodotto', sortKey: 'nome',
+            cell: (p) => <EntityCell icon={<i className={`fa-solid ${iconaCategoria(p.categoria)}`} />} label={p.nome} onOpen={() => dlg.openDetail(p.id)} />,
+        },
+        { id: 'categoria', header: 'Categoria', sortKey: 'categoria', cell: (p) => p.categoria },
+        { id: 'fornitore', header: 'Fornitore', cell: (p) => nomeFornitore(p) || '—' },
+        { id: 'giacenza', header: 'Giacenza', sortKey: 'giacenza', cell: (p) => <StockBar giacenza={p.giacenza} scorta={p.scorta} unita={p.unita} /> },
+        { id: 'prezzo', header: 'Prezzo', sortKey: 'prezzo', className: 'cell-strong', cell: (p) => formatEuro(p.prezzo) },
+        { id: 'valore', header: 'Valore', sortKey: 'valore', className: 'cell-strong', cell: (p) => formatEuro(valoreGiacenza(p), 0) },
+        {
+            id: 'stato', header: 'Stato',
+            cell: (p) => { const s = statoProdotto(p); return <span className={`status-badge status-badge--${s}`}>{STATO_LABEL[s]}</span>; },
+        },
+    ];
+
+    const rowActions: RowAction<Prodotto>[] = [
+        { id: 'view', icon: 'fa-eye', label: 'Dettaglio', onClick: (p) => dlg.openDetail(p.id) },
+        ...(perm.update ? [
+            { id: 'move', icon: 'fa-right-left', label: 'Movimento di magazzino', onClick: (p: Prodotto) => setMovimentoId(p.id) },
+            { id: 'edit', icon: 'fa-pen', label: 'Modifica', onClick: (p: Prodotto) => dlg.openEdit(p.id) },
+        ] : []),
+        ...(perm.delete ? [{ id: 'delete', icon: 'fa-trash-can', label: 'Elimina', onClick: handleDelete }] : []),
+    ];
+
+    const detail = dlg.detail;
+    const panelActions: PanelAction[] = detail ? [
+        ...(perm.update ? [
+            { id: 'move', label: 'Movimento', icon: 'fa-right-left', variant: 'outline' as const, onClick: () => { dlg.closeDetail(); setMovimentoId(detail.id); } },
+            { id: 'edit', label: 'Modifica', icon: 'fa-pen', variant: 'outline' as const, onClick: () => dlg.openEdit(detail.id) },
+        ] : []),
+        ...(perm.delete ? [{ id: 'delete', label: 'Elimina', icon: 'fa-trash-can', variant: 'danger' as const, onClick: () => { dlg.closeDetail(); handleDelete(detail); } }] : []),
+    ] : [];
 
     const detailMovimenti = useMemo(
-        () => (detailId == null ? [] : movimenti.filter((m) => m.prodottoId === detailId).slice(0, 6)),
-        [movimenti, detailId]
+        () => (detail ? movimenti.filter((m) => m.prodottoId === detail.id).slice(0, 6) : []),
+        [movimenti, detail]
     );
+    const nextSku = useMemo(() => nextNumber(config.numbering.sku, prodotti.map((p) => p.sku)), [config.numbering.sku, prodotti]);
 
-    // ---- KPI derivati dal catalogo corrente ----
-    const totaleArticoli = prodotti.length;
+    // KPI derivati dal catalogo corrente
     const valoreMagazzino = prodotti.reduce((s, p) => s + valoreGiacenza(p), 0);
     const sottoScorta = prodotti.filter((p) => statoProdotto(p) === 'sotto-scorta').length;
     const esauriti = prodotti.filter((p) => statoProdotto(p) === 'esaurito').length;
-
-    // Prossimo SKU suggerito, derivato dal catalogo (config/numbering.ts).
-    const nextSku = useMemo(() => nextNumber(config.numbering.sku, prodotti.map((p) => p.sku)), [config.numbering.sku, prodotti]);
 
     return (
         <AppLayout pageClass="inventario-page">
@@ -187,96 +188,70 @@ export function Inventario() {
                 <p>Catalogo articoli, giacenze e movimenti di magazzino</p>
             </Topbar>
 
-            <section className="kpi-grid">
-                <div className="kpi-card" style={staggerStyle(0)}>
-                    <div className="kpi-icon kpi-icon--stock"><i className="fa-solid fa-boxes-stacked" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Articoli a Catalogo</span>
-                        <KpiValue value={String(totaleArticoli)} />
-                        <span className="kpi-trend kpi-trend--up"><i className="fa-solid fa-arrow-trend-up" /> +3.4%</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(1)}>
-                    <div className="kpi-icon kpi-icon--revenue"><i className="fa-solid fa-coins" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Valore Magazzino</span>
-                        <KpiValue value={formatEuro(valoreMagazzino, 0)} />
-                        <span className="kpi-trend kpi-trend--up"><i className="fa-solid fa-arrow-trend-up" /> +6.2%</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(2)}>
-                    <div className="kpi-icon kpi-icon--warning"><i className="fa-solid fa-triangle-exclamation" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Sotto Scorta</span>
-                        <KpiValue value={String(sottoScorta)} />
-                        <span className="kpi-trend kpi-trend--down"><i className="fa-solid fa-arrow-trend-down" /> da riordinare</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(3)}>
-                    <div className="kpi-icon kpi-icon--danger"><i className="fa-solid fa-circle-xmark" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Esauriti</span>
-                        <KpiValue value={String(esauriti)} />
-                        <span className="kpi-trend kpi-trend--down"><i className="fa-solid fa-arrow-trend-down" /> giacenza zero</span>
-                    </div>
-                </div>
-            </section>
+            <KpiGrid stagger={stagger} items={[
+                { icon: 'fa-boxes-stacked', variant: 'stock', label: 'Articoli a Catalogo', value: formatNumber(prodotti.length) },
+                { icon: 'fa-coins', variant: 'revenue', label: 'Valore Magazzino', value: formatEuro(valoreMagazzino, 0), trend: { dir: 'up', text: 'a costo d’acquisto' } },
+                { icon: 'fa-triangle-exclamation', variant: 'warning', label: 'Sotto Scorta', value: formatNumber(sottoScorta), trend: { dir: 'down', text: 'da riordinare' } },
+                { icon: 'fa-circle-xmark', variant: 'danger', label: 'Esauriti', value: formatNumber(esauriti), trend: { dir: 'down', text: 'giacenza zero' } },
+            ]} />
 
-            <div style={staggerStyle(4)}>
-                <ProductToolbar
-                    search={search}
-                    onSearchChange={handleSearchChange}
-                    filter={filter}
-                    onFilterChange={handleFilterChange}
-                    categoria={categoria}
-                    onCategoriaChange={handleCategoriaChange}
-                    onExport={handleExport}
-                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
-                />
+            <div style={stagger(4)}>
+                <ListToolbar
+                    search={list.search}
+                    onSearchChange={list.setSearch}
+                    searchPlaceholder="Cerca per nome, SKU, fornitore o ubicazione..."
+                    chips={{ label: 'Filtra per stato di scorta', value: stato, options: STATO_CHIPS, onChange: (v) => list.setFilter('stato', v) }}
+                    onExport={perm.export ? handleExport : undefined}
+                    onAdd={perm.create ? dlg.openCreate : undefined}
+                    addLabel="Nuovo Prodotto"
+                >
+                    <ToolbarSelect
+                        label="Filtra per categoria"
+                        value={categoria}
+                        onChange={(v) => list.setFilter('categoria', v)}
+                        options={[{ value: 'all', label: 'Tutte le categorie' }, ...tables.categorie]}
+                    />
+                </ListToolbar>
             </div>
 
-            <div style={staggerStyle(5)}>
-                <ProductTable
-                    rows={pageRows}
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={handleSort}
-                    onView={setDetailId}
-                    onMove={perm.update ? setMovimentoId : undefined}
-                    onEdit={perm.update ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
-                    onDelete={perm.delete ? handleDelete : undefined}
-                    total={filtered.length}
-                    currentPage={page}
-                    totalPages={totalPages}
-                    perPage={PER_PAGE}
-                    onPageChange={setCurrentPage}
+            <div style={stagger(5)}>
+                <DataTable
+                    rows={result.rows}
+                    columns={columns}
+                    sortKey={list.sortKey}
+                    sortDir={list.sortDir}
+                    onSort={list.toggleSort}
+                    actions={rowActions}
+                    rowLabel={(p) => p.nome}
+                    rowClassName={(p) => (statoProdotto(p) !== 'disponibile' ? 'row--alert' : undefined)}
+                    empty={{ icon: 'fa-boxes-packing', text: 'Nessun articolo trovato.' }}
+                    pagination={{ total: result.filtered.length, page: result.page, totalPages: result.totalPages, pageSize, onPageChange: list.setPage }}
                 />
             </div>
 
             <ProductDetailPanel
-                prodotto={detailProdotto}
+                prodotto={detail}
+                fornitore={detail ? nomeFornitore(detail) : ''}
                 movimenti={detailMovimenti}
-                open={detailId != null}
-                onClose={() => setDetailId(null)}
-                onMove={perm.update ? () => { const id = detailId; setDetailId(null); setMovimentoId(id); } : undefined}
-                onEdit={perm.update ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
-                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
+                open={dlg.detailOpen}
+                onClose={dlg.closeDetail}
+                actions={panelActions}
             />
 
             <ProdottoModal
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                editing={editingProdotto}
+                open={dlg.modalOpen}
+                onClose={dlg.closeModal}
+                editing={dlg.editing}
                 onSubmit={handleSubmit}
                 defaults={{ sku: nextSku }}
-                fornitori={fornitoriNomi}
+                fornitori={fornitori}
                 saving={createMut.isPending || updateMut.isPending}
             />
 
             <MovimentoModal
                 open={movimentoId != null}
                 onClose={() => setMovimentoId(null)}
-                prodotto={movimentoProdotto}
+                prodotto={prodotti.find((p) => p.id === movimentoId) ?? null}
                 onSubmit={handleMovimento}
                 saving={movimentoMut.isPending}
             />

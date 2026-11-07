@@ -89,6 +89,19 @@ export const STATI_FILTRO: Record<Exclude<StatoFilter, 'all'>, OrdineStato[]> = 
     annullato: ['annullato'],
 };
 
+/**
+ * Il contenuto (righe, cliente) si modifica solo in bozza: cambiarlo dopo la
+ * conferma scollegherebbe il documento dai movimenti che ha generato.
+ */
+export function ordineModificabile(stato: OrdineStato): boolean {
+    return stato === 'bozza';
+}
+
+/** Si eliminano solo bozze e annullati: un ordine che ha movimentato resta agli atti. */
+export function ordineEliminabile(stato: OrdineStato): boolean {
+    return stato === 'bozza' || stato === 'annullato';
+}
+
 /** Un ordine è "aperto" finché non è chiuso (consegnato o annullato). */
 export function ordineAperto(stato: OrdineStato): boolean {
     return stato !== 'consegnato' && stato !== 'annullato';

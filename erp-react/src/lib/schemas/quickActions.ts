@@ -23,7 +23,7 @@ export const prodottoSchema = v.object({
     nome: required,
     sku: required,
     categoria: optional,
-    fornitore: optional,
+    fornitoreId: optional,
     costo: optional,
     prezzo: required,
     giacenza: optional,

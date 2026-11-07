@@ -21,6 +21,12 @@ export const CLIENTE_STATI: StatoOption[] = [
     { value: 'prospect', label: 'Prospect' },
 ];
 
+export const STATO_CLIENTE_LABEL: Record<ClienteStato, string> = {
+    attivo: 'Attivo',
+    inattivo: 'Inattivo',
+    prospect: 'Prospect',
+};
+
 /** Campi compilabili dal form (Cliente meno i derivati/generati server-side). */
 export type ClienteFormValues = Omit<Cliente, 'id' | 'fatturato' | 'ordini' | 'credito'>;
 

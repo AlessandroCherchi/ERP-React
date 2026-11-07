@@ -26,10 +26,10 @@ export const acme: TenantOverride = {
     modules: { contabilita: false },
     tables: {
         categorie: [
-            { value: 'Ferramenta', label: 'Ferramenta' },
-            { value: 'Elettrico', label: 'Elettrico' },
-            { value: 'Idraulica', label: 'Idraulica' },
-            { value: 'Utensileria', label: 'Utensileria' },
+            { value: 'Ferramenta', label: 'Ferramenta', icon: 'fa-screwdriver-wrench' },
+            { value: 'Elettrico', label: 'Elettrico', icon: 'fa-plug' },
+            { value: 'Idraulica', label: 'Idraulica', icon: 'fa-faucet' },
+            { value: 'Utensileria', label: 'Utensileria', icon: 'fa-toolbox' },
         ],
     },
     numbering: {

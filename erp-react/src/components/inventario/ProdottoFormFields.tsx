@@ -1,6 +1,7 @@
 import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
 import { formatEuro, parseNum } from '../../lib/format';
 import type { ProdottoForm } from '../../types/quickActions';
+import type { FornitoreRef } from '../../types/fornitore';
 import type { FieldErrors } from '../../lib/validation';
 import { useConfig } from '../../config/configStore';
 import { optionsWithCurrent } from '../../config';
@@ -9,12 +10,8 @@ interface ProdottoFormFieldsProps {
     values: ProdottoForm;
     errors: FieldErrors<ProdottoForm>;
     setField: <K extends keyof ProdottoForm>(key: K, value: ProdottoForm[K]) => void;
-    /**
-     * Ragioni sociali dall'anagrafica fornitori. Se l'elenco è vuoto
-     * (query non ancora risolta) il campo resta un input libero, così il
-     * form non blocca l'inserimento mentre i dati arrivano.
-     */
-    fornitori?: string[];
+    /** Anagrafica fornitori (anche inattivi, per risolvere il valore corrente). */
+    fornitori?: FornitoreRef[];
     /**
      * 'create' → la giacenza è quella iniziale, modificabile.
      * 'edit'   → la giacenza è in sola lettura: si cambia solo con un
@@ -38,9 +35,7 @@ export function ProdottoFormFields({ values, errors, setField, mode, fornitori =
     // Un articolo esistente può puntare a un fornitore non più attivo (o
     // eliminato): va comunque mostrato, altrimenti la select lo azzererebbe
     // silenziosamente al primo salvataggio.
-    const opzioniFornitori = values.fornitore && !fornitori.includes(values.fornitore)
-        ? [values.fornitore, ...fornitori]
-        : fornitori;
+    const opzioniFornitori = fornitori.filter((f) => f.attivo || String(f.id) === values.fornitoreId);
 
     return (
         <>
@@ -72,24 +67,12 @@ export function ProdottoFormFields({ values, errors, setField, mode, fornitori =
                     </SelectBox>
                 </FormGroup>
                 <FormGroup label="Fornitore">
-                    {opzioniFornitori.length > 0 ? (
-                        <SelectBox
-                            value={values.fornitore}
-                            onChange={(e) => setField('fornitore', e.target.value)}
-                        >
-                            <option value="">Nessun fornitore</option>
-                            {opzioniFornitori.map((f) => (
-                                <option value={f} key={f}>{f}</option>
-                            ))}
-                        </SelectBox>
-                    ) : (
-                        <InputBox
-                            icon="fa-truck-field"
-                            placeholder="Es. Tecnoforniture S.p.A."
-                            value={values.fornitore}
-                            onChange={(e) => setField('fornitore', e.target.value)}
-                        />
-                    )}
+                    <SelectBox value={values.fornitoreId} onChange={(e) => setField('fornitoreId', e.target.value)}>
+                        <option value="">Nessun fornitore</option>
+                        {opzioniFornitori.map((f) => (
+                            <option value={String(f.id)} key={f.id}>{f.nome}{f.attivo ? '' : ' (non attivo)'}</option>
+                        ))}
+                    </SelectBox>
                 </FormGroup>
             </FormRow>
 

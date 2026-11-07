@@ -1,99 +1,76 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
-import { KpiValue } from '../components/ui/KpiValue';
-import { FornitoreToolbar, type CategoriaFilter, type Filter } from '../components/fornitori/FornitoreToolbar';
-import { FornitoreTable, type SortKey } from '../components/fornitori/FornitoreTable';
+import { DataTable, EntityCell, KpiGrid, ListToolbar, ToolbarSelect, type Column, type RowAction } from '../components/data';
 import { FornitoreDetailPanel } from '../components/fornitori/FornitoreDetailPanel';
 import { FornitoreModal } from '../components/fornitori/FornitoreModal';
+import type { PanelAction } from '../components/ui/DetailPanelShell';
 import { useToast } from '../components/ui/Toast';
 import { useConfirm } from '../components/ui/Confirm';
 import { useStagger } from '../hooks/useStagger';
-import { downloadCsv, formatEuro } from '../lib/format';
-import { matchesQuery, paginate, sortRows, type SortDir } from '../lib/tableUtils';
+import { useListState } from '../hooks/useListState';
+import { useCrudDialogs } from '../hooks/useCrudDialogs';
 import { useCreateFornitore, useDeleteFornitore, useFornitori, useProdotti, useUpdateFornitore } from '../data';
 import { usePermissions } from '../auth/hooks';
 import { useConfig } from '../config/configStore';
-import { labelPagamento, STATO_FORNITORE_LABEL, type Fornitore, type FornitoreFormValues } from '../types/fornitore';
+import { formatEuro, formatNumber } from '../lib/format';
+import { exportCsv } from '../lib/csv';
+import { byKey, queryRows } from '../lib/listQuery';
+import { initials } from '../lib/text';
+import {
+    labelPagamento, STATO_FORNITORE_LABEL, type Fornitore, type FornitoreFormValues, type FornitoreStato,
+} from '../types/fornitore';
 import '../styles/app-shell.css';
 import '../styles/fornitori.css';
 
-/** Valore confrontabile per ciascuna colonna ordinabile. */
-function sortValue(f: Fornitore, key: SortKey): string | number {
-    return f[key];
-}
+type SortKey = 'id' | 'nome' | 'categoria' | 'citta' | 'leadTime' | 'acquistato' | 'debito';
+type StatoFilter = 'all' | FornitoreStato;
+
+const STATO_CHIPS: { value: StatoFilter; label: string }[] = [
+    { value: 'all', label: 'Tutti' },
+    { value: 'attivo', label: 'Attivi' },
+    { value: 'sospeso', label: 'Sospesi' },
+    { value: 'inattivo', label: 'Inattivi' },
+];
 
 export function Fornitori() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const staggerStyle = useStagger();
+    const stagger = useStagger();
     const perm = usePermissions('anagrafiche');
-    const PER_PAGE = useConfig().pageSize;
+    const { pageSize, tables } = useConfig();
 
     const { data: fornitori = [] } = useFornitori();
-    // Serve solo per mostrare gli articoli collegati nel pannello dettaglio.
+    // Serve per gli articoli collegati (dettaglio) e l'avviso in eliminazione.
     const { data: prodotti = [] } = useProdotti();
 
-    const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState<Filter>('all');
-    const [categoria, setCategoria] = useState<CategoriaFilter>('all');
-    const [sortKey, setSortKey] = useState<SortKey>('id');
-    const [sortDir, setSortDir] = useState<SortDir>('asc');
-    const [currentPage, setCurrentPage] = useState(1);
-
-    const [detailId, setDetailId] = useState<number | null>(null);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
-
-    const createMut = useCreateFornitore({
-        onSuccess: (f) => toast(`Fornitore "${f.nome}" creato con successo.`, 'success'),
+    const list = useListState<SortKey, { stato: StatoFilter; categoria: string }>({
+        sort: { key: 'id', dir: 'asc' },
+        filters: { stato: 'all', categoria: 'all' },
     });
-    const updateMut = useUpdateFornitore({
-        onSuccess: (f) => toast(`Fornitore "${f.nome}" aggiornato con successo.`, 'success'),
-    });
-    const deleteMut = useDeleteFornitore({
-        onSuccess: (_v, id) => {
-            const nome = fornitori.find((f) => f.id === id)?.nome;
-            toast(`Fornitore "${nome}" eliminato.`, 'info');
-        },
-    });
+    const dlg = useCrudDialogs(fornitori);
 
-    const filtered = useMemo(() => {
-        let list = fornitori;
-        if (filter !== 'all') list = list.filter((f) => f.stato === filter);
-        if (categoria !== 'all') list = list.filter((f) => f.categoria === categoria);
-        list = list.filter((f) =>
-            matchesQuery(f, search, (x) => [x.nome, x.email, x.citta, x.telefono, x.piva, x.categoria])
-        );
-        return sortRows(list, sortKey, sortDir, sortValue);
-    }, [fornitori, filter, categoria, search, sortKey, sortDir]);
+    const createMut = useCreateFornitore({ onSuccess: (f) => toast(`Fornitore "${f.nome}" creato con successo.`, 'success') });
+    const updateMut = useUpdateFornitore({ onSuccess: (f) => toast(`Fornitore "${f.nome}" aggiornato con successo.`, 'success') });
+    const deleteMut = useDeleteFornitore({ onSuccess: () => toast('Fornitore eliminato.', 'info') });
 
-    const { page, totalPages, rows: pageRows } = paginate(filtered, currentPage, PER_PAGE);
+    const { stato, categoria } = list.filters;
+    const result = useMemo(() => queryRows(fornitori, {
+        filters: [
+            ...(stato === 'all' ? [] : [(f: Fornitore) => f.stato === stato]),
+            ...(categoria === 'all' ? [] : [(f: Fornitore) => f.categoria === categoria]),
+        ],
+        search: list.search,
+        searchFields: (f) => [f.nome, f.email, f.citta, f.telefono, f.piva, f.categoria],
+        sort: { key: list.sortKey, dir: list.sortDir, value: byKey },
+        page: { current: list.page, size: pageSize },
+    }), [fornitori, stato, categoria, list.search, list.sortKey, list.sortDir, list.page, pageSize]);
 
-    function handleSort(key: SortKey) {
-        if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-        else { setSortKey(key); setSortDir('asc'); }
-    }
+    /** Articoli che hanno questo fornitore come abituale (relazione per id). */
+    const articoliDi = (id: number) => prodotti.filter((p) => p.fornitoreId === id);
 
-    function handleFilterChange(f: Filter) { setFilter(f); setCurrentPage(1); }
-    function handleCategoriaChange(c: CategoriaFilter) { setCategoria(c); setCurrentPage(1); }
-    function handleSearchChange(v: string) { setSearch(v); setCurrentPage(1); }
-
-    function handleExport() {
-        const headers = ['ID', 'Ragione Sociale', 'Email', 'Telefono', 'Città', 'Provincia', 'P.IVA', 'Cod.Fiscale', 'PEC', 'SDI', 'Categoria', 'Pagamento', 'Lead time (gg)', 'IBAN', 'Stato', 'Acquistato', 'Ordini', 'Debito'];
-        const rows = filtered.map((f) => [
-            f.id, f.nome, f.email, f.telefono, f.citta, f.provincia, f.piva, f.cf, f.pec, f.sdi,
-            f.categoria, labelPagamento(f.pagamento), f.leadTime, f.iban,
-            STATO_FORNITORE_LABEL[f.stato], f.acquistato, f.ordini, f.debito,
-        ]);
-        downloadCsv(`fornitori_export_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
-        toast('Export CSV completato.', 'success');
-    }
-
-    function handleDelete(id: number) {
-        const f = fornitori.find((x) => x.id === id);
-        if (!f) return;
-        const collegati = prodotti.filter((p) => p.fornitore === f.nome).length;
+    function handleDelete(f: Fornitore) {
+        const collegati = articoliDi(f.id).length;
         confirm({
             title: 'Conferma Eliminazione',
             text: collegati > 0
@@ -101,31 +78,67 @@ export function Fornitori() {
                 : `Sei sicuro di voler eliminare "${f.nome}"? L'azione è irreversibile.`,
             confirmLabel: 'Elimina',
             icon: 'fa-trash-can',
-            onConfirm: () => deleteMut.mutate(id),
+            onConfirm: () => deleteMut.mutate(f.id),
         });
     }
 
     function handleSubmit(values: FornitoreFormValues) {
-        if (editingId) updateMut.mutate({ id: editingId, data: values });
+        if (dlg.editingId != null) updateMut.mutate({ id: dlg.editingId, data: values });
         else createMut.mutate(values);
-        setModalOpen(false);
+        dlg.closeModal();
     }
 
-    const detailFornitore = detailId != null ? fornitori.find((f) => f.id === detailId) ?? null : null;
-    const editingFornitore = editingId != null ? fornitori.find((f) => f.id === editingId) ?? null : null;
+    function handleExport() {
+        exportCsv('fornitori', result.filtered, [
+            { header: 'ID', value: (f) => f.id },
+            { header: 'Ragione Sociale', value: (f) => f.nome },
+            { header: 'Email', value: (f) => f.email },
+            { header: 'Telefono', value: (f) => f.telefono },
+            { header: 'Città', value: (f) => f.citta },
+            { header: 'Provincia', value: (f) => f.provincia },
+            { header: 'P.IVA', value: (f) => f.piva },
+            { header: 'Cod.Fiscale', value: (f) => f.cf },
+            { header: 'PEC', value: (f) => f.pec },
+            { header: 'SDI', value: (f) => f.sdi },
+            { header: 'Categoria', value: (f) => f.categoria },
+            { header: 'Pagamento', value: (f) => labelPagamento(f.pagamento) },
+            { header: 'Lead time (gg)', value: (f) => f.leadTime },
+            { header: 'IBAN', value: (f) => f.iban },
+            { header: 'Stato', value: (f) => STATO_FORNITORE_LABEL[f.stato] },
+            { header: 'Acquistato', value: (f) => f.acquistato },
+            { header: 'Ordini', value: (f) => f.ordini },
+            { header: 'Debito', value: (f) => f.debito },
+        ]);
+        toast('Export CSV completato.', 'success');
+    }
 
-    const articoliCollegati = useMemo(
-        () => (detailFornitore ? prodotti.filter((p) => p.fornitore === detailFornitore.nome) : []),
-        [prodotti, detailFornitore]
-    );
+    const columns: Column<Fornitore, SortKey>[] = [
+        { id: 'id', header: '#', sortKey: 'id', cell: (f) => f.id },
+        { id: 'nome', header: 'Fornitore', sortKey: 'nome', cell: (f) => <EntityCell icon={initials(f.nome)} label={f.nome} onOpen={() => dlg.openDetail(f.id)} /> },
+        { id: 'categoria', header: 'Categoria', sortKey: 'categoria', cell: (f) => f.categoria },
+        { id: 'citta', header: 'Città', sortKey: 'citta', cell: (f) => f.citta || '—' },
+        { id: 'lead', header: 'Lead time', sortKey: 'leadTime', cell: (f) => `${f.leadTime} gg` },
+        { id: 'pagamento', header: 'Pagamento', cell: (f) => labelPagamento(f.pagamento) },
+        { id: 'acquistato', header: 'Acquistato', sortKey: 'acquistato', className: 'cell-strong', cell: (f) => formatEuro(f.acquistato, 0) },
+        { id: 'debito', header: 'Debito', sortKey: 'debito', className: 'cell-strong', cell: (f) => formatEuro(f.debito, 0) },
+        { id: 'stato', header: 'Stato', cell: (f) => <span className={`status-badge status-badge--${f.stato}`}>{STATO_FORNITORE_LABEL[f.stato]}</span> },
+    ];
 
-    // ---- KPI derivati ----
-    const totale = fornitori.length;
+    const rowActions: RowAction<Fornitore>[] = [
+        { id: 'view', icon: 'fa-eye', label: 'Dettaglio', onClick: (f) => dlg.openDetail(f.id) },
+        ...(perm.update ? [{ id: 'edit', icon: 'fa-pen', label: 'Modifica', onClick: (f: Fornitore) => dlg.openEdit(f.id) }] : []),
+        ...(perm.delete ? [{ id: 'delete', icon: 'fa-trash-can', label: 'Elimina', onClick: handleDelete }] : []),
+    ];
+
+    const detail = dlg.detail;
+    const panelActions: PanelAction[] = detail ? [
+        ...(perm.update ? [{ id: 'edit', label: 'Modifica', icon: 'fa-pen', variant: 'outline' as const, onClick: () => dlg.openEdit(detail.id) }] : []),
+        ...(perm.delete ? [{ id: 'delete', label: 'Elimina', icon: 'fa-trash-can', variant: 'danger' as const, onClick: () => { dlg.closeDetail(); handleDelete(detail); } }] : []),
+    ] : [];
+
     const attivi = fornitori.filter((f) => f.stato === 'attivo').length;
     const debitoTot = fornitori.reduce((s, f) => s + f.debito, 0);
-    const leadMedio = totale
-        ? Math.round(fornitori.reduce((s, f) => s + f.leadTime, 0) / totale)
-        : 0;
+    const leadMedio = fornitori.length ? Math.round(fornitori.reduce((s, f) => s + f.leadTime, 0) / fornitori.length) : 0;
 
     return (
         <AppLayout pageClass="fornitori-page">
@@ -134,84 +147,59 @@ export function Fornitori() {
                 <p>Anagrafica fornitori, condizioni di acquisto ed esposizione</p>
             </Topbar>
 
-            <section className="kpi-grid">
-                <div className="kpi-card" style={staggerStyle(0)}>
-                    <div className="kpi-icon kpi-icon--clients"><i className="fa-solid fa-truck-field" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Totale Fornitori</span>
-                        <KpiValue value={String(totale)} />
-                        <span className="kpi-trend kpi-trend--up"><i className="fa-solid fa-arrow-trend-up" /> +2.1%</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(1)}>
-                    <div className="kpi-icon kpi-icon--active"><i className="fa-solid fa-circle-check" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Fornitori Attivi</span>
-                        <KpiValue value={String(attivi)} />
-                        <span className="kpi-trend kpi-trend--up"><i className="fa-solid fa-arrow-trend-up" /> +1.4%</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(2)}>
-                    <div className="kpi-icon kpi-icon--warning"><i className="fa-solid fa-truck-fast" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Lead Time Medio</span>
-                        <KpiValue value={`${leadMedio} gg`} />
-                        <span className="kpi-trend kpi-trend--down"><i className="fa-solid fa-arrow-trend-down" /> consegna media</span>
-                    </div>
-                </div>
-                <div className="kpi-card" style={staggerStyle(3)}>
-                    <div className="kpi-icon kpi-icon--revenue"><i className="fa-solid fa-file-invoice-dollar" /></div>
-                    <div className="kpi-info">
-                        <span className="kpi-label">Debito Totale</span>
-                        <KpiValue value={formatEuro(debitoTot, 0)} />
-                        <span className="kpi-trend kpi-trend--down"><i className="fa-solid fa-arrow-trend-down" /> -2.7%</span>
-                    </div>
-                </div>
-            </section>
+            <KpiGrid stagger={stagger} items={[
+                { icon: 'fa-truck-field', variant: 'clients', label: 'Totale Fornitori', value: formatNumber(fornitori.length) },
+                { icon: 'fa-circle-check', variant: 'active', label: 'Fornitori Attivi', value: formatNumber(attivi) },
+                { icon: 'fa-truck-fast', variant: 'warning', label: 'Lead Time Medio', value: `${leadMedio} gg`, trend: { dir: 'down', text: 'consegna media' } },
+                { icon: 'fa-file-invoice-dollar', variant: 'revenue', label: 'Debito Totale', value: formatEuro(debitoTot, 0), trend: { dir: 'down', text: 'da pagare' } },
+            ]} />
 
-            <div style={staggerStyle(4)}>
-                <FornitoreToolbar
-                    search={search}
-                    onSearchChange={handleSearchChange}
-                    filter={filter}
-                    onFilterChange={handleFilterChange}
-                    categoria={categoria}
-                    onCategoriaChange={handleCategoriaChange}
-                    onExport={handleExport}
-                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
-                />
+            <div style={stagger(4)}>
+                <ListToolbar
+                    search={list.search}
+                    onSearchChange={list.setSearch}
+                    searchPlaceholder="Cerca fornitore per nome, città o P.IVA..."
+                    chips={{ label: 'Filtra per stato', value: stato, options: STATO_CHIPS, onChange: (v) => list.setFilter('stato', v) }}
+                    onExport={perm.export ? handleExport : undefined}
+                    onAdd={perm.create ? dlg.openCreate : undefined}
+                    addLabel="Nuovo Fornitore"
+                >
+                    <ToolbarSelect
+                        label="Filtra per categoria fornita"
+                        value={categoria}
+                        onChange={(v) => list.setFilter('categoria', v)}
+                        options={[{ value: 'all', label: 'Tutte le categorie' }, ...tables.categorie]}
+                    />
+                </ListToolbar>
             </div>
 
-            <div style={staggerStyle(5)}>
-                <FornitoreTable
-                    rows={pageRows}
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={handleSort}
-                    onView={setDetailId}
-                    onEdit={perm.update ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
-                    onDelete={perm.delete ? handleDelete : undefined}
-                    total={filtered.length}
-                    currentPage={page}
-                    totalPages={totalPages}
-                    perPage={PER_PAGE}
-                    onPageChange={setCurrentPage}
+            <div style={stagger(5)}>
+                <DataTable
+                    rows={result.rows}
+                    columns={columns}
+                    sortKey={list.sortKey}
+                    sortDir={list.sortDir}
+                    onSort={list.toggleSort}
+                    actions={rowActions}
+                    rowLabel={(f) => f.nome}
+                    rowClassName={(f) => (f.stato === 'sospeso' ? 'row--alert' : undefined)}
+                    empty={{ icon: 'fa-truck-field', text: 'Nessun fornitore trovato.' }}
+                    pagination={{ total: result.filtered.length, page: result.page, totalPages: result.totalPages, pageSize, onPageChange: list.setPage }}
                 />
             </div>
 
             <FornitoreDetailPanel
-                fornitore={detailFornitore}
-                articoli={articoliCollegati}
-                open={detailId != null}
-                onClose={() => setDetailId(null)}
-                onEdit={perm.update ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
-                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
+                fornitore={detail}
+                articoli={detail ? articoliDi(detail.id) : []}
+                open={dlg.detailOpen}
+                onClose={dlg.closeDetail}
+                actions={panelActions}
             />
 
             <FornitoreModal
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                editing={editingFornitore}
+                open={dlg.modalOpen}
+                onClose={dlg.closeModal}
+                editing={dlg.editing}
                 onSubmit={handleSubmit}
                 saving={createMut.isPending || updateMut.isPending}
             />

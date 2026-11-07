@@ -274,12 +274,23 @@ senza toccare il codice dei moduli. Guida operativa: `CUSTOMIZZAZIONE.md`.
   ruolo e verifica guard, permessi e tenant. `npm test`.
 - `.nvmrc` (Node 22), script `typecheck`, `test`, `test:watch`.
 
-### A.2 — residui della fase (prima della Fase B)
-- Tabella/pagina CRUD generica (`DataTable`) e migrazione di Clienti e
-  Inventario a `tableUtils`/`DetailPanelShell`.
-- Testi delle pagine modulo nei dizionari i18n.
-- Filtri e paginazione nell'URL (link condivisibili).
-- Prodotto→fornitore per id invece che per nome.
+### A.2 — Componenti elenco riutilizzabili — DONE
+- `components/data/`: `DataTable` (colonne dichiarative, ordinamento
+  accessibile da tastiera, azioni di riga con motivazione se disabilitate),
+  `ListToolbar` + `ToolbarSelect`, `KpiGrid`/`KpiCard`, `EntityCell`.
+- `lib/listQuery.ts`: pipeline pura filtri → ricerca → sort → pagina,
+  usata da tabelle ed export. `lib/csv.ts`: export tipizzato per colonne.
+- `hooks/useListState`: ricerca/filtri/ordinamento/pagina **nell'URL**
+  (link condivisibili, back del browser). `useCrudDialogs`, `useDeleteConfirm`.
+- Pannelli dettaglio tutti su `DetailPanelShell` + `PanelActions`
+  (azioni per permesso, disabilitate con motivo).
+- Le 4 pagine elenco riscritte sui componenti generici: eliminati 8
+  componenti Table/Toolbar duplicati (~1.100 righe).
+- **Prodotto → fornitore per id** (`fornitoreId`), non più per nome: rinominare
+  un fornitore non rompe il collegamento. Schema mock v2.
+- Icone categoria dal config del tenant; numeri formattati col locale.
+- Residuo: testi delle pagine modulo nei dizionari i18n (le pagine nuove
+  nascono già tradotte).
 
 ## Roadmap frontend (backend in secondo piano)
 - **B — Impostazioni e tabelle base**: azienda, utenti/ruoli, numerazioni,

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatEuro } from '../../lib/format';
+import { formatEuro, formatNumber } from '../../lib/format';
 import { imponibileRiga, totaliOrdine, type RigaOrdine } from '../../types/ordine';
 import type { Prodotto } from '../../types/prodotto';
 
@@ -81,7 +81,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                         <option value="">+ Aggiungi articolo dal catalogo…</option>
                         {prodotti.map((p) => (
                             <option value={p.id} key={p.id}>
-                                {p.nome} — {p.sku} ({p.giacenza.toLocaleString('it-IT')} {p.unita})
+                                {p.nome} — {p.sku} ({formatNumber(p.giacenza)} {p.unita})
                             </option>
                         ))}
                     </select>
@@ -122,7 +122,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                                     <span className="riga-sku">
                                         {r.sku}
                                         {disponibile !== null
-                                            ? ` · disp. ${disponibile.toLocaleString('it-IT')} ${r.unita}`
+                                            ? ` · disp. ${formatNumber(disponibile)} ${r.unita}`
                                             : ' · non più a catalogo'}
                                     </span>
                                 </div>
@@ -176,7 +176,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                                 {scoperto !== null && (
                                     <p className="riga-warn">
                                         <i className="fa-solid fa-triangle-exclamation" />
-                                        Giacenza insufficiente: disponibili {scoperto.toLocaleString('it-IT')} {r.unita}.
+                                        Giacenza insufficiente: disponibili {formatNumber(scoperto)} {r.unita}.
                                         L&apos;ordine si salva comunque, ma la conferma verrà rifiutata.
                                     </p>
                                 )}

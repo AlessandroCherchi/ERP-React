@@ -16,7 +16,8 @@
 import { safeStorage } from '../storage';
 import { getConfig } from '../../config/configStore';
 
-const SCHEMA_VERSION = 1;
+// v2: Prodotto.fornitore (nome) → Prodotto.fornitoreId (relazione per id)
+const SCHEMA_VERSION = 2;
 const registry = new Map<string, unknown[]>();
 
 function prefix(): string {

@@ -1,5 +1,5 @@
-import { DetailField, DetailPanelShell, DetailStat } from '../ui/DetailPanelShell';
-import { formatDate, formatEuro } from '../../lib/format';
+import { DetailField, DetailPanelShell, DetailStat, PanelActions, type PanelAction } from '../ui/DetailPanelShell';
+import { formatDate, formatEuro, formatNumber } from '../../lib/format';
 import {
     PRIORITA_LABEL, STATO_ORDINE_LABEL, imponibileRiga, impegnaMagazzino, inRitardo,
     prossimiStati, totaliOrdine, type Ordine, type OrdineStato,
@@ -11,8 +11,8 @@ interface OrdineDetailPanelProps {
     /** Data ISO di riferimento per il calcolo del ritardo. */
     oggi: string;
     onClose: () => void;
-    onEdit?: () => void;
-    onDelete?: () => void;
+    /** Modifica/elimina: assenti se il ruolo non le consente. */
+    actions: PanelAction[];
     onCambiaStato: (nuovo: OrdineStato) => void;
     /** Transizioni consentite al ruolo corrente (permission §5). Assente = tutte. */
     canTransition?: (nuovo: OrdineStato) => boolean;
@@ -32,42 +32,14 @@ const AZIONE: Record<OrdineStato, { label: string; icon: string; danger?: boolea
 
 /** Pannello dettaglio ordine — guscio condiviso, corpo specifico. */
 export function OrdineDetailPanel({
-    ordine, open, oggi, onClose, onEdit, onDelete, onCambiaStato, canTransition, busy,
+    ordine, open, oggi, onClose, actions, onCambiaStato, canTransition, busy,
 }: OrdineDetailPanelProps) {
-    const modificabile = ordine?.stato === 'bozza';
-    const eliminabile = ordine?.stato === 'bozza' || ordine?.stato === 'annullato';
-
     return (
         <DetailPanelShell
             open={open}
             title="Dettaglio Ordine"
             onClose={onClose}
-            footer={
-                <>
-                    {onEdit && (
-                        <button
-                            type="button"
-                            className="neu-action-btn neu-action-btn--outline"
-                            disabled={!modificabile}
-                            title={modificabile ? undefined : 'Solo le bozze sono modificabili'}
-                            onClick={onEdit}
-                        >
-                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button
-                            type="button"
-                            className="neu-action-btn neu-action-btn--danger"
-                            disabled={!eliminabile}
-                            title={eliminabile ? undefined : 'Un ordine confermato resta agli atti'}
-                            onClick={onDelete}
-                        >
-                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                        </button>
-                    )}
-                </>
-            }
+            footer={<PanelActions actions={actions} />}
         >
             {ordine && (() => {
                 const totali = totaliOrdine(ordine.righe);
@@ -115,7 +87,7 @@ export function OrdineDetailPanel({
                                         <div className="movement-text">
                                             <strong>{r.nome}</strong>
                                             <span>
-                                                {r.sku} — {r.quantita.toLocaleString('it-IT')} {r.unita} ×{' '}
+                                                {r.sku} — {formatNumber(r.quantita)} {r.unita} ×{' '}
                                                 {formatEuro(r.prezzo)}
                                                 {r.sconto > 0 ? ` − ${r.sconto}%` : ''}
                                             </span>

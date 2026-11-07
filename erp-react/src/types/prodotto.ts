@@ -19,7 +19,8 @@ export interface Prodotto {
     sku: string;
     nome: string;
     categoria: string;
-    fornitore: string;
+    /** Fornitore abituale (id anagrafica fornitori); null = nessuno. */
+    fornitoreId: number | null;
     /** Costo d'acquisto unitario (€). Base per la valorizzazione di magazzino. */
     costo: number;
     /** Prezzo di vendita unitario (€). */

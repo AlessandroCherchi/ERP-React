@@ -17,6 +17,11 @@ export interface AliquotaIva extends Option<number> {
     natura?: string;
 }
 
+/** Categoria merceologica: icona Font Awesome opzionale per tabelle e dettagli. */
+export interface CategoriaOption extends Option {
+    icon?: string;
+}
+
 /** Regola di numerazione documento/codice. Generazione definitiva: backend (spec §2). */
 export interface NumberingRule {
     prefix: string;
@@ -60,7 +65,7 @@ export interface TenantConfig {
     };
     /** Tabelle di dominio configurabili (future: modificabili da Impostazioni). */
     tables: {
-        categorie: Option[];
+        categorie: CategoriaOption[];
         unita: Option[];
         aliquoteIva: AliquotaIva[];
         terminiPagamento: Option[];

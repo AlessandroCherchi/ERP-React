@@ -15,7 +15,7 @@ import { ProdottoModal } from '../components/inventario/ProdottoModal';
 import { ReportModal } from '../components/dashboard/modals/ReportModal';
 import {
     useClienti, useClientiSelezionabili, useCreateCliente, useCreateOrdine, useCreateProdotto,
-    useFornitoriNomi, useOrdini, useProdotti,
+    useFornitoriRef, useOrdini, useProdotti,
 } from '../data';
 import { useCan } from '../auth/hooks';
 import { useSession } from '../auth/session';
@@ -77,7 +77,7 @@ export function Dashboard() {
     // Catalogo condiviso con la pagina Inventario: serve per suggerire
     // uno SKU che non collida con quelli già assegnati.
     const { data: prodotti = [] } = useProdotti();
-    const { data: fornitoriNomi = [] } = useFornitoriNomi();
+    const { data: fornitori = [] } = useFornitoriRef();
     const nextSku = useMemo(() => nextNumber(config.numbering.sku, prodotti.map((p) => p.sku)), [config.numbering.sku, prodotti]);
 
     // Registro ordini condiviso con la pagina Vendite: la quick action crea
@@ -401,7 +401,7 @@ export function Dashboard() {
                 onClose={() => setProdottoOpen(false)}
                 onSubmit={handleSaveProdotto}
                 defaults={{ sku: nextSku }}
-                fornitori={fornitoriNomi}
+                fornitori={fornitori}
             />
             <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} onSubmit={handleSaveReport} />
         </AppLayout>

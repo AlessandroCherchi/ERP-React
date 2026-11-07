@@ -1,5 +1,5 @@
-import { DetailField, DetailPanelShell, DetailStat } from '../ui/DetailPanelShell';
-import { formatEuro } from '../../lib/format';
+import { DetailField, DetailPanelShell, DetailStat, PanelActions, type PanelAction } from '../ui/DetailPanelShell';
+import { formatEuro, formatNumber } from '../../lib/format';
 import { labelPagamento, STATO_FORNITORE_LABEL, type Fornitore } from '../../types/fornitore';
 import type { Prodotto } from '../../types/prodotto';
 
@@ -9,33 +9,19 @@ interface FornitoreDetailPanelProps {
     articoli: Prodotto[];
     open: boolean;
     onClose: () => void;
-    onEdit?: () => void;
-    onDelete?: () => void;
+    actions: PanelAction[];
 }
 
 /** Pannello dettaglio fornitore — guscio condiviso, corpo specifico. */
 export function FornitoreDetailPanel({
-    fornitore, articoli, open, onClose, onEdit, onDelete,
+    fornitore, articoli, open, onClose, actions,
 }: FornitoreDetailPanelProps) {
     return (
         <DetailPanelShell
             open={open}
             title="Dettaglio Fornitore"
             onClose={onClose}
-            footer={
-                <>
-                    {onEdit && (
-                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                        </button>
-                    )}
-                </>
-            }
+            footer={<PanelActions actions={actions} />}
         >
             {fornitore && (
                 <div className="detail-panel-body">
@@ -102,7 +88,7 @@ export function FornitoreDetailPanel({
                                         </div>
                                         <div className="movement-text">
                                             <strong>{p.nome}</strong>
-                                            <span>{p.sku} — giacenza {p.giacenza.toLocaleString('it-IT')} {p.unita}</span>
+                                            <span>{p.sku} — giacenza {formatNumber(p.giacenza)} {p.unita}</span>
                                         </div>
                                         <div className="movement-qty">{formatEuro(p.costo)}</div>
                                     </li>

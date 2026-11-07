@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { currentLocale } from '../../lib/format';
 
 interface KpiValueProps {
     /** Testo finale già formattato, es. "€ 124.850" o "38". Porting di animateCounters/countUp. */
@@ -48,7 +49,7 @@ export function KpiValue({ value }: KpiValueProps) {
                     if (timerRef.current) clearInterval(timerRef.current);
                 }
                 currentRef.current = current;
-                const formatted = Math.round(current).toLocaleString('it-IT');
+                const formatted = Math.round(current).toLocaleString(currentLocale());
                 setDisplay(prefix ? `${prefix} ${formatted}` : formatted);
             }, duration / steps);
         }

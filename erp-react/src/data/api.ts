@@ -19,7 +19,7 @@ const mockApi: DataApi = {
     },
     fornitori: {
         list: fornitori.fetchFornitori,
-        listNomiAttivi: fornitori.fetchFornitoriNomi,
+        listRef: fornitori.fetchFornitoriRef,
         create: fornitori.createFornitore,
         update: fornitori.updateFornitore,
         remove: fornitori.deleteFornitore,

@@ -4,7 +4,7 @@
 // hook di data/hooks.ts, mai dall'implementazione.
 
 import type { Cliente, ClienteFormValues } from '../types/cliente';
-import type { Fornitore, FornitoreFormValues } from '../types/fornitore';
+import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../types/fornitore';
 import type { Movimento, Prodotto } from '../types/prodotto';
 import type { ProdottoForm } from '../types/quickActions';
 import type { Ordine, OrdineFormValues, OrdineStato } from '../types/ordine';
@@ -23,7 +23,7 @@ export interface ClientiApi {
 
 export interface FornitoriApi {
     list(): Promise<Fornitore[]>;
-    listNomiAttivi(): Promise<string[]>;
+    listRef(): Promise<FornitoreRef[]>;
     create(data: FornitoreFormValues): Promise<Fornitore>;
     update(id: number, data: FornitoreFormValues): Promise<Fornitore>;
     remove(id: number): Promise<void>;

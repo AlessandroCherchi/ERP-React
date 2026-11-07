@@ -1,4 +1,5 @@
 import { statoProdotto } from '../../types/prodotto';
+import { formatNumber } from '../../lib/format';
 
 interface StockBarProps {
     giacenza: number;
@@ -23,7 +24,7 @@ export function StockBar({ giacenza, scorta, unita }: StockBarProps) {
     return (
         <div className="stock-cell">
             <span className="stock-qty">
-                {giacenza.toLocaleString('it-IT')} <em>{unita}</em>
+                {formatNumber(giacenza)} <em>{unita}</em>
             </span>
             <div
                 className="stock-bar"

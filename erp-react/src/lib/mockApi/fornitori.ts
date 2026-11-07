@@ -8,7 +8,7 @@
 // TODO(step Backend, spec §4/§5): sostituire con client HTTP su
 // /api/v1/fornitori, stesso envelope ApiResponse.
 
-import type { Fornitore, FornitoreFormValues } from '../../types/fornitore';
+import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../../types/fornitore';
 import { collection, nextIdOf } from './db';
 
 
@@ -59,8 +59,8 @@ export async function deleteFornitore(id: number): Promise<void> {
     if (idx !== -1) store.splice(idx, 1);
 }
 
-/** Ragioni sociali per la <select> Fornitore del modale prodotto in Inventario. */
-export async function fetchFornitoriNomi(): Promise<string[]> {
+/** Riferimenti di tutti i fornitori (anche inattivi: servono a risolvere i nomi). */
+export async function fetchFornitoriRef(): Promise<FornitoreRef[]> {
     await delay();
-    return store.filter((f) => f.stato === 'attivo').map((f) => f.nome);
+    return store.map((f) => ({ id: f.id, nome: f.nome, attivo: f.stato === 'attivo' }));
 }
