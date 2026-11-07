@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
 import { KpiValue } from '../components/ui/KpiValue';
@@ -13,20 +12,19 @@ import { useStagger } from '../hooks/useStagger';
 import { downloadCsv, formatEuro, today } from '../lib/format';
 import { matchesQuery, paginate, sortRows, type SortDir } from '../lib/tableUtils';
 import {
-    cambiaStatoOrdine, createOrdine, deleteOrdine, fetchOrdini, updateOrdine,
-} from '../lib/mockApi/ordini';
-import { DisponibilitaInsufficienteError } from '../lib/mockApi/inventario';
-import { fetchClientiSelezionabili } from '../lib/mockApi/clienti';
-import { fetchProdotti } from '../lib/mockApi/inventario';
+    DisponibilitaInsufficienteError, useCambiaStatoOrdine, useClientiSelezionabili, useCreateOrdine,
+    useDeleteOrdine, useOrdini, useProdotti, useUpdateOrdine,
+} from '../data';
+import { usePermissions } from '../auth/hooks';
+import { useConfig } from '../config/configStore';
+import { nextNumber } from '../config/numbering';
 import {
     PRIORITA_LABEL, STATI_FILTRO, STATO_ORDINE_LABEL, inRitardo, ordineAperto,
-    prossimoNumeroOrdine, totaliOrdine,
+    totaliOrdine,
     type Ordine, type OrdineFormValues, type OrdineStato, type StatoFilter,
 } from '../types/ordine';
 import '../styles/app-shell.css';
 import '../styles/vendite.css';
-
-const PER_PAGE = 10;
 
 /**
  * Ordinamento di priorità e stato per rilevanza, non per alfabeto:
@@ -55,14 +53,19 @@ function sortValue(o: Ordine, key: SortKey): string | number {
 export function Vendite() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const queryClient = useQueryClient();
     const staggerStyle = useStagger();
     const oggi = today();
+    const perm = usePermissions('ordini');
+    const config = useConfig();
+    const PER_PAGE = config.pageSize;
+    // "Limitato" (§5): il magazzino avanza lo stato ma non modifica il
+    // contenuto commerciale del documento, che resta a chi può crearlo.
+    const canEdit = perm.create;
 
-    const { data: ordini = [] } = useQuery({ queryKey: ['ordini'], queryFn: fetchOrdini });
-    const { data: clienti = [] } = useQuery({ queryKey: ['clienti', 'ref'], queryFn: fetchClientiSelezionabili });
+    const { data: ordini = [] } = useOrdini();
+    const { data: clienti = [] } = useClientiSelezionabili();
     // Il catalogo serve all'editor righe: prezzi di listino e disponibilità.
-    const { data: prodotti = [] } = useQuery({ queryKey: ['prodotti'], queryFn: fetchProdotti });
+    const { data: prodotti = [] } = useProdotti();
 
     const [search, setSearch] = useState('');
     const [stato, setStato] = useState<StatoFilter>('all');
@@ -76,45 +79,30 @@ export function Vendite() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['ordini'] });
-
-    /** Una transizione può aver mosso il magazzino: giacenze e movimenti sono stale. */
-    const invalidateMagazzino = () => {
-        queryClient.invalidateQueries({ queryKey: ['prodotti'] });
-        queryClient.invalidateQueries({ queryKey: ['movimenti'] });
-    };
-
-    const createMut = useMutation({
-        mutationFn: createOrdine,
+    // Le invalidazioni (ordini; giacenze e movimenti per le transizioni) sono
+    // negli hook di data/hooks.ts: qui resta solo il feedback all'operatore.
+    const createMut = useCreateOrdine({
         onSuccess: (o) => {
-            invalidate();
             toast(`Ordine "${o.numero}" creato in bozza.`, 'success');
         },
     });
 
-    const updateMut = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: OrdineFormValues }) => updateOrdine(id, data),
+    const updateMut = useUpdateOrdine({
         onSuccess: (o) => {
-            invalidate();
             toast(`Ordine "${o.numero}" aggiornato.`, 'success');
         },
         onError: (e: Error) => toast(e.message, 'error'),
     });
 
-    const deleteMut = useMutation({
-        mutationFn: deleteOrdine,
+    const deleteMut = useDeleteOrdine({
         onSuccess: (_v, id) => {
-            invalidate();
             toast(`Ordine "${ordini.find((o) => o.id === id)?.numero}" eliminato.`, 'info');
         },
         onError: (e: Error) => toast(e.message, 'error'),
     });
 
-    const statoMut = useMutation({
-        mutationFn: ({ id, nuovo }: { id: number; nuovo: OrdineStato }) => cambiaStatoOrdine(id, nuovo),
+    const statoMut = useCambiaStatoOrdine({
         onSuccess: (o) => {
-            invalidate();
-            invalidateMagazzino();
             toast(
                 o.stato === 'confermato'
                     ? `Ordine "${o.numero}" confermato: merce scaricata dal magazzino.`
@@ -124,7 +112,7 @@ export function Vendite() {
                 o.stato === 'annullato' ? 'info' : 'success'
             );
         },
-        onError: (e: Error) => {
+        onError: (e) => {
             // L'unico errore che l'operatore può risolvere è la giacenza:
             // dirgli quali articoli mancano e di quanto vale più di
             // "operazione fallita".
@@ -223,7 +211,10 @@ export function Vendite() {
 
     const detailOrdine = detailId != null ? ordini.find((o) => o.id === detailId) ?? null : null;
     const editingOrdine = editingId != null ? ordini.find((o) => o.id === editingId) ?? null : null;
-    const numeroSuggerito = useMemo(() => prossimoNumeroOrdine(ordini), [ordini]);
+    const numeroSuggerito = useMemo(
+        () => nextNumber(config.numbering.ordine, ordini.map((o) => o.numero)),
+        [config.numbering.ordine, ordini]
+    );
 
     // ---- KPI derivati ----
     const aperti = ordini.filter((o) => ordineAperto(o.stato));
@@ -289,7 +280,7 @@ export function Vendite() {
                     soloRitardo={soloRitardo}
                     onSoloRitardoChange={handleRitardoChange}
                     onExport={handleExport}
-                    onAdd={() => { setEditingId(null); setModalOpen(true); }}
+                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
                 />
             </div>
 
@@ -300,8 +291,8 @@ export function Vendite() {
                     sortDir={sortDir}
                     onSort={handleSort}
                     onView={setDetailId}
-                    onEdit={(id) => { setEditingId(id); setModalOpen(true); }}
-                    onDelete={handleDelete}
+                    onEdit={canEdit ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
+                    onDelete={perm.delete ? handleDelete : undefined}
                     oggi={oggi}
                     total={filtered.length}
                     currentPage={page}
@@ -316,8 +307,9 @@ export function Vendite() {
                 open={detailId != null}
                 oggi={oggi}
                 onClose={() => setDetailId(null)}
-                onEdit={() => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); }}
-                onDelete={() => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); }}
+                onEdit={canEdit ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
+                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
+                canTransition={perm.transition}
                 onCambiaStato={(nuovo) => {
                     if (detailId == null) return;
                     // Il pannello resta aperto: dopo una conferma l'operatore

@@ -1,29 +1,81 @@
 /* ============================================================
-   Design tokens — Neumorphic Red/Gold (identici a erp-ui.css)
-   Non introduce nuovi valori: nomina quelli già in uso nel
-   progetto originale, per riuso futuro nei componenti React.
+   Design tokens — tema di default "Neumorphic Red/Gold".
+   UNICA fonte dei colori: nessun altro foglio contiene hex/rgb.
+   Un tenant sovrascrive questi valori a runtime da TenantConfig.theme
+   (vedi src/config/theme.ts): i token *-rgb vengono derivati
+   automaticamente dal relativo hex, non vanno impostati a mano.
 ============================================================ */
 
 :root {
+    /* superfici */
     --erp-bg: #e8e8e8;
+    --erp-bg-light: #f8f8f8;
+    --erp-light: #ffffff;
+
+    /* testo */
     --erp-text: #4a4a4a;
-    --erp-text-muted: #9a9a9a;
+    --erp-text-strong: #5a5a5a;
     --erp-text-soft: #7a7a7a;
+    --erp-text-muted: #9a9a9a;
 
-    --erp-accent: #a10f0f;
-    --erp-accent-gradient: linear-gradient(155deg, #b21414, #7c0d0d);
-    --erp-danger-gradient: linear-gradient(155deg, #c62828, #8e0000);
-    --erp-gold: #f5e9c8;
+    /* neutri */
+    --erp-neutral-300: #b3b3b3;
+    --erp-neutral-400: #a3a3a3;
+    --erp-neutral-500: #909090;
+    --erp-neutral-600: #838383;
 
+    /* ombre neumorfiche */
     --erp-shadow-light: #ffffff;
     --erp-shadow-dark: #c3c3c3;
     --erp-shadow-dark-2: #c8c8c8;
+    --erp-shadow-cool: #b8becc;
 
+    /* brand */
+    --erp-accent: #a10f0f;
+    --erp-accent-light: #b21414;
+    --erp-accent-bright: #d43737;
+    --erp-accent-dark: #7c0d0d;
+    --erp-accent-deep: #780a0a;
+    --erp-accent-shadow: #3c0505;
+    --erp-gold: #f5e9c8;
+    --erp-gold-strong: #d4a017;
+
+    /* semantici */
+    --erp-success: #2e7d32;
+    --erp-success-light: #4a9d4e;
+    --erp-warning: #b8860b;
+    --erp-error: #c62828;
+    --erp-error-dark: #8e0000;
+    --erp-info: #1565c0;
+    --erp-info-dark: #0d47a1;
+    --erp-black: #000000;
+
+    /* triplette RGB (per rgba con alpha) — derivate dagli hex sopra */
+    --erp-light-rgb: 255, 255, 255;
+    --erp-black-rgb: 0, 0, 0;
+    --erp-text-muted-rgb: 154, 154, 154;
+    --erp-text-soft-rgb: 122, 122, 122;
+    --erp-neutral-400-rgb: 163, 163, 163;
+    --erp-shadow-dark-rgb: 195, 195, 195;
+    --erp-shadow-cool-rgb: 184, 190, 204;
+    --erp-accent-rgb: 161, 15, 15;
+    --erp-accent-bright-rgb: 212, 55, 55;
+    --erp-accent-deep-rgb: 120, 10, 10;
+    --erp-accent-shadow-rgb: 60, 5, 5;
+    --erp-gold-strong-rgb: 212, 175, 55;
+    --erp-success-rgb: 46, 125, 50;
+    --erp-warning-rgb: 184, 134, 11;
+    --erp-error-rgb: 198, 40, 40;
+    --erp-info-rgb: 21, 101, 192;
+    --erp-info-dark-rgb: 13, 71, 161;
+
+    /* gradienti composti dai token */
+    --erp-accent-gradient: linear-gradient(155deg, var(--erp-accent-light), var(--erp-accent-dark));
+    --erp-danger-gradient: linear-gradient(155deg, var(--erp-error), var(--erp-error-dark));
+
+    /* forma e movimento */
     --erp-radius: 12px;
     --erp-radius-lg: 20px;
     --erp-ease: cubic-bezier(.22, 1, .36, 1);
-
-    --erp-success: #2e7d32;
-    --erp-error: #c62828;
-    --erp-info: #1565c0;
+    --erp-font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

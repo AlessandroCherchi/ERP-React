@@ -10,8 +10,8 @@ interface ClientTableProps {
     sortDir: SortDir;
     onSort: (key: SortKey) => void;
     onView: (id: number) => void;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    onEdit?: (id: number) => void;
+    onDelete?: (id: number) => void;
     total: number;
     currentPage: number;
     totalPages: number;
@@ -98,22 +98,26 @@ export function ClientTable({
                                             >
                                                 <i className="fa-solid fa-eye" />
                                             </button>
-                                            <button
-                                                className="neu-icon-btn neu-icon-btn--sm"
-                                                title="Modifica"
-                                                aria-label="Modifica"
-                                                onClick={(e) => { e.stopPropagation(); onEdit(c.id); }}
-                                            >
-                                                <i className="fa-solid fa-pen" />
-                                            </button>
-                                            <button
-                                                className="neu-icon-btn neu-icon-btn--sm"
-                                                title="Elimina"
-                                                aria-label="Elimina"
-                                                onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
-                                            >
-                                                <i className="fa-solid fa-trash-can" />
-                                            </button>
+                                            {onEdit && (
+                                                <button
+                                                    className="neu-icon-btn neu-icon-btn--sm"
+                                                    title="Modifica"
+                                                    aria-label="Modifica"
+                                                    onClick={(e) => { e.stopPropagation(); onEdit(c.id); }}
+                                                >
+                                                    <i className="fa-solid fa-pen" />
+                                                </button>
+                                            )}
+                                            {onDelete && (
+                                                <button
+                                                    className="neu-icon-btn neu-icon-btn--sm"
+                                                    title="Elimina"
+                                                    aria-label="Elimina"
+                                                    onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
+                                                >
+                                                    <i className="fa-solid fa-trash-can" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

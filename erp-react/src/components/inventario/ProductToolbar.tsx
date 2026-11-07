@@ -1,9 +1,11 @@
-import { CATEGORIE, type ProdottoStato } from '../../types/prodotto';
+import type { ProdottoStato } from '../../types/prodotto';
+import { useConfig } from '../../config/configStore';
 
 /** 'all' = nessun filtro di stato. */
 export type Filter = 'all' | ProdottoStato;
 /** 'all' = tutte le categorie merceologiche. */
-export type CategoriaFilter = 'all' | (typeof CATEGORIE)[number];
+/** 'all' o il valore di una categoria configurata dal tenant. */
+export type CategoriaFilter = 'all' | string;
 
 interface ProductToolbarProps {
     search: string;
@@ -13,7 +15,7 @@ interface ProductToolbarProps {
     categoria: CategoriaFilter;
     onCategoriaChange: (c: CategoriaFilter) => void;
     onExport: () => void;
-    onAdd: () => void;
+    onAdd?: () => void;
 }
 
 const FILTERS: { key: Filter; label: string }[] = [
@@ -28,6 +30,7 @@ export function ProductToolbar({
     search, onSearchChange, filter, onFilterChange,
     categoria, onCategoriaChange, onExport, onAdd,
 }: ProductToolbarProps) {
+    const { tables } = useConfig();
     return (
         <section className="toolbar-row">
             <div className="toolbar-left">
@@ -64,8 +67,8 @@ export function ProductToolbar({
                         onChange={(e) => onCategoriaChange(e.target.value as CategoriaFilter)}
                     >
                         <option value="all">Tutte le categorie</option>
-                        {CATEGORIE.map((c) => (
-                            <option value={c} key={c}>{c}</option>
+                        {tables.categorie.map((c) => (
+                            <option value={c.value} key={c.value}>{c.label}</option>
                         ))}
                     </select>
                     <i className="fa-solid fa-chevron-down" />
@@ -76,10 +79,12 @@ export function ProductToolbar({
                 <button type="button" className="neu-icon-btn" onClick={onExport} aria-label="Esporta CSV" title="Esporta CSV">
                     <i className="fa-solid fa-file-export" />
                 </button>
-                <button type="button" className="neu-action-btn" onClick={onAdd}>
-                    <i className="fa-solid fa-plus" />
-                    <span>Nuovo Prodotto</span>
-                </button>
+                {onAdd && (
+                    <button type="button" className="neu-action-btn" onClick={onAdd}>
+                        <i className="fa-solid fa-plus" />
+                        <span>Nuovo Prodotto</span>
+                    </button>
+                )}
             </div>
         </section>
     );

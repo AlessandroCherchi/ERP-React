@@ -16,8 +16,8 @@ import {
     impegnaMagazzino, transizioneValida,
     type Ordine, type OrdineFormValues, type OrdineStato,
 } from '../../types/ordine';
+import { collection, nextIdOf } from './db';
 
-let nextId = 17;
 
 // Gli ordini 1-6 sono quelli che compaiono già come causale nel registro
 // movimenti di mockApi/inventario.ts (`ordineId`): il magazzino e le vendite
@@ -27,7 +27,7 @@ let nextId = 17;
 // movimenti nel registro, oppure è una bozza (che il magazzino non lo tocca).
 // Così qualunque annullamento fatto dall'interfaccia storna esattamente ciò
 // che era stato scaricato — vedi cambiaStatoOrdine().
-const store: Ordine[] = [
+const SEED: Ordine[] = [
     {
         id: 1, numero: 'ORD-3081', clienteId: 1, cliente: 'Rossi S.r.l.',
         data: '2026-08-05', consegna: '2026-08-12', stato: 'consegnato', priorita: 'normale',
@@ -140,6 +140,9 @@ const store: Ordine[] = [
         note: '',
     },
 ];
+
+const store = collection('ordini', SEED);
+let nextId = nextIdOf(store);
 
 const LATENCY = 120;
 const delay = () => new Promise((r) => setTimeout(r, LATENCY));

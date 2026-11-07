@@ -16,9 +16,9 @@
 .fornitori-page {
     display: flex;
     min-height: 100vh;
-    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background: var(--erp-bg) url('../assets/img/prismatic-bg.svg') repeat center center;
     background-size: 160px;
-    color: #4a4a4a;
+    color: var(--erp-text);
     overflow-x: hidden;
 }
 
@@ -28,8 +28,8 @@
    pallino + pulse degli altri stati. */
 
 .status-badge--sospeso {
-    color: #b8860b;
-    background: rgba(184, 134, 11, .08);
+    color: var(--erp-warning);
+    background: rgba(var(--erp-warning-rgb), .08);
 }
 
 .status-badge--sospeso::before {
@@ -37,7 +37,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #b8860b;
+    background: var(--erp-warning);
     animation: statusPulse 2s ease-in-out infinite;
 }
 

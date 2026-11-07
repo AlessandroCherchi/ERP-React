@@ -192,26 +192,8 @@ export function inRitardo(o: Pick<Ordine, 'consegna' | 'stato'>, oggi: string): 
 }
 
 // ------------------------- NUMERAZIONE -------------------------
-
-const NUMERO_BASE = 3000;
-
-/**
- * Suggerisce il prossimo numero d'ordine leggendolo dai documenti esistenti.
- * Stessa logica (e stesso limite) di prossimoSku: Dashboard e pagina Vendite
- * creano ordini nello stesso registro, e due contatori indipendenti
- * finirebbero per assegnare lo stesso numero a documenti diversi.
- *
- * TODO(step Backend): la numerazione passerà al server, unico punto in cui
- * l'unicità è garantita in concorrenza — e per i documenti fiscali è anche
- * un requisito di legge (progressivo senza buchi).
- */
-export function prossimoNumeroOrdine(ordini: Pick<Ordine, 'numero'>[]): string {
-    const max = ordini.reduce((acc, o) => {
-        const n = Number(o.numero.replace(/\D/g, ''));
-        return Number.isFinite(n) && n > acc ? n : acc;
-    }, NUMERO_BASE);
-    return `ORD-${max + 1}`;
-}
+// config/numbering.ts → nextNumber(config.numbering.ordine, …): prefisso e
+// progressivo per tenant. Numerazione definitiva: backend (spec §2).
 
 // ------------------------- FORM -------------------------
 

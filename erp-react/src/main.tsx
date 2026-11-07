@@ -1,21 +1,25 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/queryClient';
-import { ToastProvider } from './components/ui/Toast';
-import { ConfirmProvider } from './components/ui/Confirm';
+import { AppProviders } from './app/AppProviders';
 import { App } from './App';
+// Font e icone self-hosted (spec §13: nessun CDN esterno con la CSP finale).
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource/poppins/800.css';
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import '@fortawesome/fontawesome-free/css/solid.min.css';
+// Il config del tenant va inizializzato prima del primo render: applica
+// tema, titolo e lingua (vedi config/configStore.ts).
+import './config/configStore';
 import './styles/base.css';
 import './styles/tokens.css';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <ToastProvider>
-                <ConfirmProvider>
-                    <App />
-                </ConfirmProvider>
-            </ToastProvider>
-        </QueryClientProvider>
+        <AppProviders>
+            <App />
+        </AppProviders>
     </StrictMode>
 );

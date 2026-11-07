@@ -9,10 +9,10 @@
 // /api/v1/fornitori, stesso envelope ApiResponse.
 
 import type { Fornitore, FornitoreFormValues } from '../../types/fornitore';
+import { collection, nextIdOf } from './db';
 
-let nextId = 13;
 
-const store: Fornitore[] = [
+const SEED: Fornitore[] = [
     { id: 1, nome: 'Tecnoforniture S.p.A.', email: 'ordini@tecnoforniture.it', telefono: '+39 02 5566778', citta: 'Milano', provincia: 'MI', indirizzo: 'Via Mecenate 90', piva: 'IT02233445566', cf: '02233445566', pec: 'tecnoforniture@pec.it', sdi: 'TFR1234', note: 'Fornitore principale elettronica. Sconto 8% sopra i 5.000 €.', stato: 'attivo', categoria: 'Elettronica', pagamento: '60', leadTime: 7, iban: 'IT60X0542811101000000123456', acquistato: 128400, ordini: 64, debito: 12300 },
     { id: 2, nome: 'Elettromeccanica Nord', email: 'acquisti@elettronord.it', telefono: '+39 035 4455667', citta: 'Bergamo', provincia: 'BG', indirizzo: 'Via Grumello 22', piva: 'IT03344556677', cf: '03344556677', pec: 'elettronord@pec.it', sdi: 'ELN5678', note: 'Componentistica su specifica. Lead time variabile in agosto.', stato: 'attivo', categoria: 'Componenti', pagamento: '30', leadTime: 12, iban: 'IT22K0300203280000400123457', acquistato: 96750, ordini: 51, debito: 8400 },
     { id: 3, nome: 'LuceItalia S.r.l.', email: 'commerciale@luceitalia.it', telefono: '+39 051 3344556', citta: 'Bologna', provincia: 'BO', indirizzo: 'Via Emilia 145', piva: 'IT04455667788', cf: '04455667788', pec: 'luceitalia@pec.it', sdi: 'LCI9012', note: '', stato: 'attivo', categoria: 'Illuminazione', pagamento: '60', leadTime: 5, iban: 'IT91L0306901234100000012345', acquistato: 74200, ordini: 43, debito: 5100 },
@@ -26,6 +26,9 @@ const store: Fornitore[] = [
     { id: 11, nome: 'Cavi & Connettori Srl', email: 'vendite@caviconnettori.it', telefono: '+39 02 6655447', citta: 'Monza', provincia: 'MB', indirizzo: 'Via Borgazzi 120', piva: 'IT12233445566', cf: '12233445566', pec: 'caviconn@pec.it', sdi: 'CVC2345', note: 'Fornitore secondario, attivato solo su rottura di stock.', stato: 'inattivo', categoria: 'Networking', pagamento: '0', leadTime: 2, iban: 'IT31A0503401633000000123456', acquistato: 6400, ordini: 8, debito: 0 },
     { id: 12, nome: 'Ottica Industriale Rossi', email: 'info@otticaindustriale.it', telefono: '+39 045 7788112', citta: 'Verona', provincia: 'VR', indirizzo: 'Via Torbido 33', piva: 'IT13344556677', cf: '13344556677', pec: 'otticaind@pec.it', sdi: 'OIR6789', note: '', stato: 'inattivo', categoria: 'Illuminazione', pagamento: '60', leadTime: 18, iban: 'IT66B0200811730000103456781', acquistato: 9300, ordini: 6, debito: 0 },
 ];
+
+const store = collection('fornitori', SEED);
+let nextId = nextIdOf(store);
 
 const LATENCY = 120;
 const delay = () => new Promise((r) => setTimeout(r, LATENCY));

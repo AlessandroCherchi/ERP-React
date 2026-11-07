@@ -12,8 +12,6 @@ interface UiState {
     toggleSidebar: () => void;
     closeMobileSidebar: () => void;
 
-    rememberMe: boolean;
-    setRememberMe: (v: boolean) => void;
 }
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 960;
@@ -27,6 +25,4 @@ export const useUiStore = create<UiState>((set) => ({
 
     closeMobileSidebar: () => set({ sidebarOpen: false }),
 
-    rememberMe: false,
-    setRememberMe: (v) => set({ rememberMe: v }),
 }));

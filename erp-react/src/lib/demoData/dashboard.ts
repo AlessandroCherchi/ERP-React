@@ -40,7 +40,7 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const DONUT_SEGMENTS = [
-    { value: 64, color: '#a10f0f' },
-    { value: 24, color: '#b8860b' },
-    { value: 12, color: '#c3c3c3' },
+    { value: 64, color: 'var(--erp-accent)' },
+    { value: 24, color: 'var(--erp-warning)' },
+    { value: 12, color: 'var(--erp-shadow-dark)' },
 ];

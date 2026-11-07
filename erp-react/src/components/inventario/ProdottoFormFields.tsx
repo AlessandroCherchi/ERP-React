@@ -1,8 +1,9 @@
 import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
 import { formatEuro, parseNum } from '../../lib/format';
-import { CATEGORIE } from '../../types/prodotto';
 import type { ProdottoForm } from '../../types/quickActions';
 import type { FieldErrors } from '../../lib/validation';
+import { useConfig } from '../../config/configStore';
+import { optionsWithCurrent } from '../../config';
 
 interface ProdottoFormFieldsProps {
     values: ProdottoForm;
@@ -30,6 +31,7 @@ interface ProdottoFormFieldsProps {
  * stessi campi in entrambi i posti (stesso pattern di ClientFormFields).
  */
 export function ProdottoFormFields({ values, errors, setField, mode, fornitori = [] }: ProdottoFormFieldsProps) {
+    const { tables } = useConfig();
     const margine = parseNum(values.prezzo) - parseNum(values.costo);
     const isEdit = mode === 'edit';
 
@@ -64,8 +66,8 @@ export function ProdottoFormFields({ values, errors, setField, mode, fornitori =
             <FormRow>
                 <FormGroup label="Categoria">
                     <SelectBox value={values.categoria} onChange={(e) => setField('categoria', e.target.value)}>
-                        {CATEGORIE.map((c) => (
-                            <option value={c} key={c}>{c}</option>
+                        {optionsWithCurrent(tables.categorie, values.categoria).map((c) => (
+                            <option value={c.value} key={c.value}>{c.label}</option>
                         ))}
                     </SelectBox>
                 </FormGroup>
@@ -151,18 +153,16 @@ export function ProdottoFormFields({ values, errors, setField, mode, fornitori =
             <FormRow>
                 <FormGroup label="Unità di misura">
                     <SelectBox value={values.unita} onChange={(e) => setField('unita', e.target.value)}>
-                        <option value="pz">Pezzi (pz)</option>
-                        <option value="cf">Confezioni (cf)</option>
-                        <option value="kg">Chilogrammi (kg)</option>
-                        <option value="m">Metri (m)</option>
-                        <option value="lt">Litri (lt)</option>
+                        {optionsWithCurrent(tables.unita, values.unita).map((u) => (
+                            <option value={u.value} key={u.value}>{u.label}</option>
+                        ))}
                     </SelectBox>
                 </FormGroup>
                 <FormGroup label="Aliquota IVA">
                     <SelectBox value={values.iva} onChange={(e) => setField('iva', e.target.value)}>
-                        <option value="22">22% — ordinaria</option>
-                        <option value="10">10% — ridotta</option>
-                        <option value="4">4% — minima</option>
+                        {optionsWithCurrent(tables.aliquoteIva.map((a) => ({ value: String(a.value), label: a.label })), values.iva).map((a) => (
+                            <option value={a.value} key={a.value}>{a.label}</option>
+                        ))}
                     </SelectBox>
                 </FormGroup>
             </FormRow>

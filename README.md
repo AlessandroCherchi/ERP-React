@@ -16,3 +16,17 @@ npm run dev
 ```
 
 Roadmap e stato: [`erp-react/MIGRATION.md`](erp-react/MIGRATION.md).
+
+## Comandi
+| Comando | Cosa fa |
+|---|---|
+| `npm run dev` | sviluppo su http://localhost:5173 |
+| `npm test` | test (dominio, permessi, config, smoke di tutte le route) |
+| `npm run typecheck` | TypeScript strict |
+| `npm run lint` | oxlint |
+| `npm run build` | build di produzione |
+
+Accesso demo: `owner@demo.it`, `admin@demo.it`, `contabilita@demo.it`,
+`magazzino@demo.it`, `viewer@demo.it` — password `demo`.
+
+Personalizzazione per cliente: [`erp-react/CUSTOMIZZAZIONE.md`](erp-react/CUSTOMIZZAZIONE.md).

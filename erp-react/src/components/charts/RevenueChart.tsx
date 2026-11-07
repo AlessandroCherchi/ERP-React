@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { readToken } from '../../config/theme';
 
 interface RevenueChartProps {
     labels: string[];
@@ -36,7 +37,7 @@ export function RevenueChart({ labels, data }: RevenueChartProps) {
 
             ctx.clearRect(0, 0, w, h);
 
-            ctx.strokeStyle = 'rgba(195,195,195,.25)';
+            ctx.strokeStyle = `rgba(${readToken('--erp-shadow-dark-rgb', '195, 195, 195')}, .25)`;
             ctx.lineWidth = 1;
             for (let g = 0; g < 5; g++) {
                 const gy = padT + (chartH / 4) * g;
@@ -45,7 +46,7 @@ export function RevenueChart({ labels, data }: RevenueChartProps) {
                 ctx.lineTo(w - padR, gy);
                 ctx.stroke();
 
-                ctx.fillStyle = '#9a9a9a';
+                ctx.fillStyle = readToken('--erp-text-muted', '#9a9a9a');
                 ctx.font = '500 10px Poppins';
                 ctx.textAlign = 'right';
                 const yLabel = Math.round(maxVal - (maxVal / 4) * g);
@@ -53,8 +54,8 @@ export function RevenueChart({ labels, data }: RevenueChartProps) {
             }
 
             const gradient = ctx.createLinearGradient(0, padT, 0, h - padB);
-            gradient.addColorStop(0, 'rgba(161,15,15,.18)');
-            gradient.addColorStop(1, 'rgba(161,15,15,.01)');
+            gradient.addColorStop(0, `rgba(${readToken('--erp-accent-rgb', '161, 15, 15')}, .18)`);
+            gradient.addColorStop(1, `rgba(${readToken('--erp-accent-rgb', '161, 15, 15')}, .01)`);
 
             const points = data.map((v, i) => ({
                 x: padL + stepX * i,
@@ -89,21 +90,21 @@ export function RevenueChart({ labels, data }: RevenueChartProps) {
                 const cp2x = p.x - stepX * 0.4;
                 ctx.bezierCurveTo(cp1x, prev.y, cp2x, p.y, p.x, p.y);
             });
-            ctx.strokeStyle = '#a10f0f';
+            ctx.strokeStyle = readToken('--erp-accent', '#a10f0f');
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
             points.forEach((p) => {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#e8e8e8';
+                ctx.fillStyle = readToken('--erp-bg', '#e8e8e8');
                 ctx.fill();
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#a10f0f';
+                ctx.strokeStyle = readToken('--erp-accent', '#a10f0f');
                 ctx.stroke();
             });
 
-            ctx.fillStyle = '#9a9a9a';
+            ctx.fillStyle = readToken('--erp-text-muted', '#9a9a9a');
             ctx.font = '500 10px Poppins';
             ctx.textAlign = 'center';
             labels.forEach((lbl, i) => {

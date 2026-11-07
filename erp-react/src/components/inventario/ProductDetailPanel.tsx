@@ -11,9 +11,9 @@ interface ProductDetailPanelProps {
     movimenti: Movimento[];
     open: boolean;
     onClose: () => void;
-    onMove: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onMove?: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
 }
 
 /** Segno con cui il movimento ha inciso sulla giacenza. */
@@ -160,15 +160,21 @@ export function ProductDetailPanel({
                 )}
 
                 <div className="detail-panel-footer">
-                    <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onMove}>
-                        <i className="fa-solid fa-right-left" /> <span>Movimento</span>
-                    </button>
-                    <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                        <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                    </button>
-                    <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                        <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                    </button>
+                    {onMove && (
+                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onMove}>
+                            <i className="fa-solid fa-right-left" /> <span>Movimento</span>
+                        </button>
+                    )}
+                    {onEdit && (
+                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
+                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
+                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
+                        </button>
+                    )}
                 </div>
             </aside>
         </>

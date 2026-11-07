@@ -18,8 +18,8 @@
 .clienti-page {
     display: flex;
     min-height: 100vh;
-    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background: var(--erp-bg) url('../assets/img/prismatic-bg.svg') repeat center center;
     background-size: 160px;
-    color: #4a4a4a;
+    color: var(--erp-text);
     overflow-x: hidden;
 }

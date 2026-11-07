@@ -11,8 +11,8 @@ interface FornitoreTableProps {
     sortDir: SortDir;
     onSort: (key: SortKey) => void;
     onView: (id: number) => void;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    onEdit?: (id: number) => void;
+    onDelete?: (id: number) => void;
     total: number;
     currentPage: number;
     totalPages: number;
@@ -113,24 +113,28 @@ export function FornitoreTable({
                                             >
                                                 <i className="fa-solid fa-eye" />
                                             </button>
-                                            <button
-                                                type="button"
-                                                className="neu-icon-btn neu-icon-btn--sm"
-                                                title="Modifica"
-                                                aria-label={`Modifica ${f.nome}`}
-                                                onClick={(e) => { e.stopPropagation(); onEdit(f.id); }}
-                                            >
-                                                <i className="fa-solid fa-pen" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="neu-icon-btn neu-icon-btn--sm"
-                                                title="Elimina"
-                                                aria-label={`Elimina ${f.nome}`}
-                                                onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
-                                            >
-                                                <i className="fa-solid fa-trash-can" />
-                                            </button>
+                                            {onEdit && (
+                                                <button
+                                                    type="button"
+                                                    className="neu-icon-btn neu-icon-btn--sm"
+                                                    title="Modifica"
+                                                    aria-label={`Modifica ${f.nome}`}
+                                                    onClick={(e) => { e.stopPropagation(); onEdit(f.id); }}
+                                                >
+                                                    <i className="fa-solid fa-pen" />
+                                                </button>
+                                            )}
+                                            {onDelete && (
+                                                <button
+                                                    type="button"
+                                                    className="neu-icon-btn neu-icon-btn--sm"
+                                                    title="Elimina"
+                                                    aria-label={`Elimina ${f.nome}`}
+                                                    onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
+                                                >
+                                                    <i className="fa-solid fa-trash-can" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

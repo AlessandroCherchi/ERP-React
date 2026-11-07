@@ -1,6 +1,7 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 completato** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite).
+Stato: **Step 6 + Fase A completati** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
 - Vite 8 + React 19.2 + TS strict (`strict`, `noImplicitAny`, `noUncheckedIndexedAccess`)
@@ -21,7 +22,7 @@ Stato: **Step 6 completato** (scaffold, Login, Dashboard, Clienti, Inventario, F
 ## Step 3 — Clienti (CRUD) — DONE
 - Porting `clienti.html/js` → componenti React + route `/clienti`
 - CRUD completo su mock adapter, `ClientFormFields` condiviso con la Dashboard
-- Permission matrix §5: ancora **non** applicata (attende Step 7, serve il ruolo dalla sessione)
+- Permission matrix §5: applicata nella Fase A (vedi sotto)
 
 ## Step 4 — Inventario (CRUD + movimenti) — DONE
 - Route `/inventario`, voce di sidebar attivata
@@ -194,6 +195,102 @@ Verificato pagina per pagina in browser: nessun overflow orizzontale a
 526 px, 1280 px e 1920 px, e stili condivisi (ombre, raggi, spaziature,
 tipografia della tabella) identici fra le quattro pagine.
 
+## Fase A — Fondamenta piattaforma (white-label, ruoli, data layer) — DONE
+
+Obiettivo: rendere il prodotto vendibile e personalizzabile per cliente
+senza toccare il codice dei moduli. Guida operativa: `CUSTOMIZZAZIONE.md`.
+
+### Configurazione per tenant — `src/config/`
+- `TenantConfig` (`types.ts`): brand, dati azienda, lingua/locale/valuta,
+  tema, moduli attivi, feature flag, **tabelle di dominio** (categorie,
+  unità, aliquote IVA con natura, termini e metodi di pagamento),
+  **numerazioni** (SKU, ordini, fatture: prefisso/progressivo/padding),
+  righe per pagina.
+- `defaults.ts` = prodotto di serie; `tenants/*.ts` = solo le differenze
+  (`TenantOverride`). Esempio completo: `tenants/acme.ts`.
+- Selezione: `VITE_TENANT` (build per cliente) o `?tenant=` in sviluppo.
+- `configStore.ts` (Zustand): leggibile anche fuori da React; override
+  locali persistiti per tenant (base per le Impostazioni, Fase B).
+- `numbering.ts` sostituisce `prossimoSku`/`prossimoNumeroOrdine`.
+
+### Tema — `styles/tokens.css` + `config/theme.ts`
+- **Tutti** i colori (≈350 letterali in 9 fogli) sostituiti da token
+  `var(--erp-*)`. I token `*-rgb` sono derivati in automatico dagli hex
+  del tenant: accento e sue trasparenze non possono divergere.
+- Grafici canvas: leggono i token al disegno (`readToken`).
+- Guardia: `styles/tokens.test.ts` fallisce se un foglio reintroduce un
+  colore letterale o usa un token non definito.
+- **Bug corretto**: in `app-shell.css` il blocco `@media (max-width: 600px)`
+  non era chiuso, quindi «Elementi condivisi» (`.row--alert`,
+  `.select-box--toolbar`, `.movement-list`…) stava annidato nella media
+  query e valeva solo sotto i 600 px.
+
+### Autenticazione e permessi — `src/auth/`
+- Sessione mock con 5 utenti demo, uno per ruolo (password `demo`),
+  scadenza, «ricordami», redirect alla pagina richiesta.
+- `permissions.ts`: matrice §5 trascritta, 45 test cella per cella.
+  Celle «da definire» fissate: *Read propria* → read (filtro dati lato
+  backend); *Limitato* (magazzino/ordini) → read + avanzamento
+  preparazione/spedizione/consegna, niente conferma/annullo/modifica.
+- UI: `usePermissions(resource)`; toolbar, tabelle e pannelli mostrano
+  Nuovo/Modifica/Elimina/Movimento solo se consentiti (prop opzionali).
+  Azioni rapide della Dashboard filtrate per ruolo e modulo attivo.
+- `RequireAuth` su tutte le route applicative.
+
+### Registro moduli e router — `src/app/`
+- `modules.ts`: una riga per modulo = route + voce di menu + permesso.
+  Sidebar e router generati da qui, filtrati per tenant e ruolo.
+- Moduli in roadmap (Acquisti, Fatture, Contabilità, Report, Impostazioni)
+  navigabili con pagina «in sviluppo» e badge «presto».
+- Pagine di sistema: 404, errore di route (`errorElement`, niente stack
+  trace a schermo), accesso negato, modulo non attivo; loader di pagina.
+- Icona Dashboard: `fa-grid-2` era Font Awesome **Pro** e non si vedeva.
+
+### i18n — `src/i18n/`
+- Dizionari tipizzati (`it` riferimento, `en`), chiavi verificate a
+  compile-time, interpolazione `{param}`, lingua dal tenant.
+- Migrati: shell, login, pagine di sistema, ruoli. Le pagine dei moduli
+  restano da migrare (A.2).
+
+### Data layer — `src/data/`
+- `contracts.ts`: interfacce `DataApi`; `api.ts`: implementazione mock
+  (punto unico di swap verso HTTP); `hooks.ts`: query e mutation per
+  entità con invalidazioni incluse; `queryKeys.ts`.
+- Nessuna pagina importa più `lib/mockApi`.
+- Mock **persistiti** in localStorage per tenant (`lib/mockApi/db.ts`),
+  salvati dal `MutationCache`: i dati sopravvivono al ricaricamento.
+- Formattatori locale/valuta-aware (`configureFormat`).
+
+### Login
+- Flusso reale (mock): validazione, stato di invio, errore accessibile,
+  switch «ricordami» accessibile, pannello account demo (feature flag).
+- Il retro non crea account: in un gestionale enterprise gli utenti sono
+  invitati dall'amministratore.
+
+### Security / tooling
+- Font Poppins e Font Awesome **self-hosted** via npm: CDN rimossi (§13).
+- Vitest + Testing Library: test di dominio (ordini, magazzino, permessi,
+  config, tema, i18n, token) e smoke test che monta ogni modulo per ogni
+  ruolo e verifica guard, permessi e tenant. `npm test`.
+- `.nvmrc` (Node 22), script `typecheck`, `test`, `test:watch`.
+
+### A.2 — residui della fase (prima della Fase B)
+- Tabella/pagina CRUD generica (`DataTable`) e migrazione di Clienti e
+  Inventario a `tableUtils`/`DetailPanelShell`.
+- Testi delle pagine modulo nei dizionari i18n.
+- Filtri e paginazione nell'URL (link condivisibili).
+- Prodotto→fornitore per id invece che per nome.
+
+## Roadmap frontend (backend in secondo piano)
+- **B — Impostazioni e tabelle base**: azienda, utenti/ruoli, numerazioni,
+  tabelle, branding, moduli attivi, campi personalizzati, modelli di stampa.
+- **C — Acquisti**: ordini fornitore, ricevimento merce con carico
+  automatico, riordino da sotto scorta.
+- **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,
+  lotti/seriali/scadenze, inventario fisico, valorizzazione.
+- **E — Ciclo attivo**: DDT, fatture/NC (bozze; SDI backend), scadenzario.
+- **F — Report, Dashboard su dati reali, audit, notifiche, ricerca globale.**
+
 ## Step 7 — RxDB + Sync Coordinator
 - Schema RxDB per cache/outbox (customer/order/invoice/product draft)
 - Sync Coordinator: leader election, lease/fencing, stati pending→succeeded
@@ -202,10 +299,12 @@ tipografia della tabella) identici fra le quattro pagine.
 ## Step 8 — Backend (non esiste ancora)
 - Provisioning Supabase/Postgres, RLS multi-tenant (§2)
 - Contract API versionato `/api/v1`, envelope SUCCESS/ERROR (§4)
-- Sostituire mock adapter con client reale in TanStack Query
+- Implementare `DataApi` (`src/data/contracts.ts`) con client HTTP e
+  selezionarlo in `src/data/api.ts`: nessuna pagina da toccare
 - Generazione SKU lato server (unico punto in cui l'unicità è garantita
   in concorrenza — vedi `prossimoSku`)
-- Permission matrix §5 applicata lato UI
+- Permission matrix §5: lato UI già applicata (Fase A); qui RLS/RPC +
+  test Given/When/Then lato server
 
 ## Step 9 — Money/Fiscalità/SDI
 - Base unit importi (decimal/minor units), rounding mode (§10)
@@ -228,16 +327,15 @@ Inventario, Vendite). Restano, in ordine di dipendenza:
    registri reali in quell'occasione
 
 ## Note aperte
-- CDN Font Awesome/Google Fonts attualmente in uso (come originale):
-  da sostituire con asset self-hosted prima del gate Security (§13).
+- ~~CDN Font Awesome/Google Fonts~~ — self-hosted nella Fase A (§13).
 - `assett/prismatic background 4Risorsa 3.svg` genera un warning Vite
   a build time (riferimento interno all'SVG) — non bloccante, innocuo.
 - Touch target: **risolto** in `base.css` (§ TOUCH TARGET). L'area sensibile
   dei pulsanti è portata a 44 px con uno pseudo-elemento trasparente, quindi
   la dimensione *visiva* — e con essa la densità di tutte le pagine — resta
   quella originale. La regola vive in `base.css` e non in `app-shell.css`
-  perché è l'unico foglio caricato da ogni route (`main.tsx`), mentre
-  `app-shell.css` lo importano solo Inventario e Fornitori.
+  perché è l'unico foglio caricato da ogni route (`main.tsx`), compreso il
+  Login che non importa `app-shell.css`.
   Risultato: icone topbar e chiudi-modale 44×44 pieni; azioni di riga e
   paginazione 44 px in altezza e 36 px in larghezza — l'espansione
   orizzontale è limitata a metà del gap perché due target adiacenti non si

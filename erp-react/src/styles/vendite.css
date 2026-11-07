@@ -9,8 +9,8 @@
    delle righe.
 
    Stessi token neumorfici delle altre pagine — nessun colore o
-   raggio nuovo: bg #e8e8e8, testo #4a4a4a, accento #a10f0f,
-   luci #ffffff, ombre #c3c3c3/#c8c8c8, raggio 12px,
+   raggio nuovo: bg var(--erp-bg), testo var(--erp-text), accento var(--erp-accent),
+   luci var(--erp-light), ombre var(--erp-shadow-dark)/var(--erp-shadow-dark-2), raggio 12px,
    easing .4s cubic-bezier(.22,1,.36,1).
 ============================================================ */
 
@@ -19,9 +19,9 @@
 .vendite-page {
     display: flex;
     min-height: 100vh;
-    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background: var(--erp-bg) url('../assets/img/prismatic-bg.svg') repeat center center;
     background-size: 160px;
-    color: #4a4a4a;
+    color: var(--erp-text);
     overflow-x: hidden;
 }
 
@@ -37,8 +37,8 @@
    segnala che c'è ancora qualcosa da fare. */
 
 .status-badge--bozza {
-    color: #7a7a7a;
-    background: rgba(122, 122, 122, .09);
+    color: var(--erp-text-soft);
+    background: rgba(var(--erp-text-soft-rgb), .09);
 }
 
 .status-badge--bozza::before {
@@ -46,12 +46,12 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #9a9a9a;
+    background: var(--erp-text-muted);
 }
 
 .status-badge--confermato {
-    color: #1565c0;
-    background: rgba(21, 101, 192, .08);
+    color: var(--erp-info);
+    background: rgba(var(--erp-info-rgb), .08);
 }
 
 .status-badge--confermato::before {
@@ -59,13 +59,13 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #1565c0;
+    background: var(--erp-info);
     animation: statusPulse 2s ease-in-out infinite;
 }
 
 .status-badge--in-preparazione {
-    color: #b8860b;
-    background: rgba(184, 134, 11, .08);
+    color: var(--erp-warning);
+    background: rgba(var(--erp-warning-rgb), .08);
 }
 
 .status-badge--in-preparazione::before {
@@ -73,13 +73,13 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #b8860b;
+    background: var(--erp-warning);
     animation: statusPulse 2s ease-in-out infinite;
 }
 
 .status-badge--spedito {
-    color: #0d47a1;
-    background: rgba(13, 71, 161, .08);
+    color: var(--erp-info-dark);
+    background: rgba(var(--erp-info-dark-rgb), .08);
 }
 
 .status-badge--spedito::before {
@@ -87,13 +87,13 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #0d47a1;
+    background: var(--erp-info-dark);
     animation: statusPulse 2s ease-in-out infinite;
 }
 
 .status-badge--consegnato {
-    color: #2e7d32;
-    background: rgba(46, 125, 50, .08);
+    color: var(--erp-success);
+    background: rgba(var(--erp-success-rgb), .08);
 }
 
 .status-badge--consegnato::before {
@@ -101,12 +101,12 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #2e7d32;
+    background: var(--erp-success);
 }
 
 .status-badge--annullato {
-    color: #c62828;
-    background: rgba(198, 40, 40, .08);
+    color: var(--erp-error);
+    background: rgba(var(--erp-error-rgb), .08);
 }
 
 .status-badge--annullato::before {
@@ -114,7 +114,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #c62828;
+    background: var(--erp-error);
 }
 
 
@@ -134,23 +134,23 @@
 }
 
 .priorita-tag--bassa {
-    color: #9a9a9a;
-    background: rgba(154, 154, 154, .1);
+    color: var(--erp-text-muted);
+    background: rgba(var(--erp-text-muted-rgb), .1);
 }
 
 .priorita-tag--normale {
-    color: #7a7a7a;
-    background: rgba(122, 122, 122, .1);
+    color: var(--erp-text-soft);
+    background: rgba(var(--erp-text-soft-rgb), .1);
 }
 
 .priorita-tag--alta {
-    color: #b8860b;
-    background: rgba(184, 134, 11, .1);
+    color: var(--erp-warning);
+    background: rgba(var(--erp-warning-rgb), .1);
 }
 
 .priorita-tag--urgente {
-    color: #c62828;
-    background: rgba(198, 40, 40, .1);
+    color: var(--erp-error);
+    background: rgba(var(--erp-error-rgb), .1);
 }
 
 /* Il ritardo non è uno stato: si somma allo stato. Sta accanto alla data
@@ -164,8 +164,8 @@
     border-radius: 20px;
     font-size: 10.5px;
     font-weight: 600;
-    color: #c62828;
-    background: rgba(198, 40, 40, .09);
+    color: var(--erp-error);
+    background: rgba(var(--erp-error-rgb), .09);
     white-space: nowrap;
 }
 
@@ -210,7 +210,7 @@
 .righe-editor-head label {
     font-size: 11.5px;
     font-weight: 600;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
     letter-spacing: .3px;
     text-transform: uppercase;
 }
@@ -237,10 +237,10 @@
     gap: 8px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        -4px -4px 8px #ffffff,
-        4px 4px 8px #c8c8c8;
+        -4px -4px 8px var(--erp-light),
+        4px 4px 8px var(--erp-shadow-dark-2);
 }
 
 .riga-item--head {
@@ -249,7 +249,7 @@
     box-shadow: none;
     font-size: 10.5px;
     font-weight: 600;
-    color: #9a9a9a;
+    color: var(--erp-text-muted);
     letter-spacing: .4px;
     text-transform: uppercase;
 }
@@ -263,9 +263,9 @@
    la riga compare comunque il testo dell'avviso. */
 .riga-item--warn {
     box-shadow:
-        -4px -4px 8px #ffffff,
-        4px 4px 8px #c8c8c8,
-        inset 3px 0 0 rgba(184, 134, 11, .6);
+        -4px -4px 8px var(--erp-light),
+        4px 4px 8px var(--erp-shadow-dark-2),
+        inset 3px 0 0 rgba(var(--erp-warning-rgb), .6);
 }
 
 .riga-prod {
@@ -278,7 +278,7 @@
 .riga-nome {
     font-size: 13px;
     font-weight: 600;
-    color: #4a4a4a;
+    color: var(--erp-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -287,7 +287,7 @@
 .riga-sku {
     font-size: 10.5px;
     font-weight: 500;
-    color: #9a9a9a;
+    color: var(--erp-text-muted);
     letter-spacing: .3px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -302,16 +302,16 @@
     padding: 0 10px;
     border: none;
     outline: none;
-    background: #e8e8e8;
-    color: #4a4a4a;
+    background: var(--erp-bg);
+    color: var(--erp-text);
     font-family: inherit;
     font-size: 12.5px;
     font-weight: 600;
     text-align: right;
     border-radius: 10px;
     box-shadow:
-        inset -3px -3px 6px rgba(255, 255, 255, .95),
-        inset 3px 3px 6px rgba(184, 190, 204, .4);
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .95),
+        inset 3px 3px 6px rgba(var(--erp-shadow-cool-rgb), .4);
     transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1);
     -moz-appearance: textfield;
     appearance: textfield;
@@ -325,14 +325,14 @@
 
 .riga-input:focus {
     box-shadow:
-        inset 3px 3px 6px rgba(120, 10, 10, .2),
-        inset -3px -3px 6px rgba(212, 55, 55, .15);
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .2),
+        inset -3px -3px 6px rgba(var(--erp-accent-bright-rgb), .15);
 }
 
 .riga-tot {
     font-size: 13px;
     font-weight: 700;
-    color: #4a4a4a;
+    color: var(--erp-text);
     text-align: right;
     white-space: nowrap;
 }
@@ -351,7 +351,7 @@
     font-size: 11.5px;
     font-weight: 500;
     line-height: 1.5;
-    color: #b8860b;
+    color: var(--erp-warning);
 }
 
 .riga-error {
@@ -360,7 +360,7 @@
     gap: 8px;
     font-size: 11.5px;
     font-weight: 600;
-    color: #c62828;
+    color: var(--erp-error);
 }
 
 .righe-empty {
@@ -372,16 +372,16 @@
     border-radius: 12px;
     font-size: 12.5px;
     font-weight: 500;
-    color: #9a9a9a;
-    background: #e8e8e8;
+    color: var(--erp-text-muted);
+    background: var(--erp-bg);
     box-shadow:
-        inset 3px 3px 6px rgba(184, 190, 204, .4),
-        inset -3px -3px 6px rgba(255, 255, 255, .9);
+        inset 3px 3px 6px rgba(var(--erp-shadow-cool-rgb), .4),
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .9);
 }
 
 .righe-empty i {
     font-size: 15px;
-    color: #b3b3b3;
+    color: var(--erp-neutral-300);
 }
 
 
@@ -396,10 +396,10 @@
     gap: 6px;
     padding: 14px 18px;
     border-radius: 12px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        inset -4px -4px 8px rgba(255, 255, 255, .95),
-        inset 4px 4px 8px rgba(184, 190, 204, .4);
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .95),
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4);
 }
 
 .ordine-totali-row {
@@ -409,13 +409,13 @@
     gap: 12px;
     font-size: 12.5px;
     font-weight: 600;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
 }
 
 .ordine-totali-row--grand {
     margin-top: 4px;
     padding-top: 8px;
-    border-top: 1px solid rgba(195, 195, 195, .45);
+    border-top: 1px solid rgba(var(--erp-shadow-dark-rgb), .45);
 }
 
 .ordine-totali-row--grand span:first-child {
@@ -427,7 +427,7 @@
 .ordine-totali-row--grand span:last-child {
     font-size: 18px;
     font-weight: 800;
-    color: #a10f0f;
+    color: var(--erp-accent);
     letter-spacing: .3px;
 }
 

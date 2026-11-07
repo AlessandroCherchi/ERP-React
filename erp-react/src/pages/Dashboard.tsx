@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
 import { KpiValue } from '../components/ui/KpiValue';
@@ -14,14 +13,18 @@ import { OrdineModal } from '../components/vendite/OrdineModal';
 import { FatturaModal } from '../components/dashboard/modals/FatturaModal';
 import { ProdottoModal } from '../components/inventario/ProdottoModal';
 import { ReportModal } from '../components/dashboard/modals/ReportModal';
-import { createCliente, fetchClienti, fetchClientiSelezionabili } from '../lib/mockApi/clienti';
-import { createProdotto, fetchProdotti } from '../lib/mockApi/inventario';
-import { fetchFornitoriNomi } from '../lib/mockApi/fornitori';
-import { createOrdine, fetchOrdini } from '../lib/mockApi/ordini';
+import {
+    useClienti, useClientiSelezionabili, useCreateCliente, useCreateOrdine, useCreateProdotto,
+    useFornitoriNomi, useOrdini, useProdotti,
+} from '../data';
+import { useCan } from '../auth/hooks';
+import { useSession } from '../auth/session';
+import { useConfig, isModuleEnabled } from '../config/configStore';
+import { formatNumber as formatCode, nextNumber } from '../config/numbering';
+import { useT, type TFunction } from '../i18n';
 import { downloadCsv, downloadJson, formatEuro, today } from '../lib/format';
 import { DONUT_SEGMENTS, INITIAL_ACTIVITIES, PRODUCTS, REVENUE_DATA, REVENUE_LABELS, type Activity } from '../lib/demoData/dashboard';
-import { prossimoSku } from '../types/prodotto';
-import { prossimoNumeroOrdine, totaliOrdine, type OrdineFormValues } from '../types/ordine';
+import { totaliOrdine, type OrdineFormValues } from '../types/ordine';
 import type { ClienteFormValues } from '../types/cliente';
 import type { FatturaForm, ProdottoForm, ReportForm } from '../types/quickActions';
 import '../styles/app-shell.css';
@@ -41,36 +44,49 @@ const REPORT_LABELS: Record<string, string> = {
     kpi: 'Riepilogo KPI',
 };
 
-function greeting(): { title: string; date: string } {
+function greeting(t: TFunction, name: string, intl: string): { title: string; date: string } {
     const h = new Date().getHours();
-    const saluto = h >= 18 ? 'Buonasera' : h >= 13 ? 'Buon pomeriggio' : 'Buongiorno';
-    const date = new Date().toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    return { title: `${saluto}, Admin`, date };
+    const saluto = t(h >= 18 ? 'greeting.evening' : h >= 13 ? 'greeting.afternoon' : 'greeting.morning');
+    const date = new Date().toLocaleDateString(intl, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return { title: `${saluto}, ${name.split(' ')[0]}`, date };
 }
 
 export function Dashboard() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const queryClient = useQueryClient();
     const staggerStyle = useStagger();
-    const { title: greetTitle, date: greetDate } = greeting();
+    const t = useT();
+    const config = useConfig();
+    const session = useSession();
+    const can = useCan();
+    const { title: greetTitle, date: greetDate } = greeting(t, session?.user.name ?? '', config.locale.intl);
 
-    const { data: clienti = [] } = useQuery({ queryKey: ['clienti'], queryFn: fetchClienti });
+    // Azioni rapide visibili solo se modulo attivo e ruolo autorizzato (§5).
+    const show = {
+        ordine: isModuleEnabled(config, 'vendite') && can('ordini', 'create'),
+        fattura: isModuleEnabled(config, 'fatture') && can('fatture', 'create'),
+        cliente: isModuleEnabled(config, 'clienti') && can('anagrafiche', 'create'),
+        prodotto: isModuleEnabled(config, 'inventario') && can('magazzino', 'create'),
+        report: can('ordini', 'export'),
+        backup: can('impostazioni', 'update'),
+    };
+
+    const { data: clienti = [] } = useClienti();
     const clientiNomi = useMemo(() => clienti.map((c) => c.nome), [clienti]);
 
     // Catalogo condiviso con la pagina Inventario: serve per suggerire
     // uno SKU che non collida con quelli già assegnati.
-    const { data: prodotti = [] } = useQuery({ queryKey: ['prodotti'], queryFn: fetchProdotti });
-    const { data: fornitoriNomi = [] } = useQuery({ queryKey: ['fornitori','nomi'], queryFn: fetchFornitoriNomi });
-    const nextSku = useMemo(() => prossimoSku(prodotti), [prodotti]);
+    const { data: prodotti = [] } = useProdotti();
+    const { data: fornitoriNomi = [] } = useFornitoriNomi();
+    const nextSku = useMemo(() => nextNumber(config.numbering.sku, prodotti.map((p) => p.sku)), [config.numbering.sku, prodotti]);
 
     // Registro ordini condiviso con la pagina Vendite: la quick action crea
     // un documento vero, non un evento della sola dashboard. Il numero
     // proposto è derivato dai dati per la stessa ragione dello SKU — due
     // contatori indipendenti assegnerebbero lo stesso numero.
-    const { data: ordini = [] } = useQuery({ queryKey: ['ordini'], queryFn: fetchOrdini });
-    const { data: clientiRef = [] } = useQuery({ queryKey: ['clienti', 'ref'], queryFn: fetchClientiSelezionabili });
-    const nextNumeroOrdine = useMemo(() => prossimoNumeroOrdine(ordini), [ordini]);
+    const { data: ordini = [] } = useOrdini();
+    const { data: clientiRef = [] } = useClientiSelezionabili();
+    const nextNumeroOrdine = useMemo(() => nextNumber(config.numbering.ordine, ordini.map((o) => o.numero)), [config.numbering.ordine, ordini]);
 
     const [activities, setActivities] = useState<Activity[]>(INITIAL_ACTIVITIES);
     const [counters, setCounters] = useState({ fattura: 142 });
@@ -86,10 +102,8 @@ export function Dashboard() {
         setActivities((prev) => [{ id: Date.now(), icon, title, desc, time: 'Adesso' }, ...prev].slice(0, 6));
     }
 
-    const createClienteMut = useMutation({
-        mutationFn: createCliente,
+    const createClienteMut = useCreateCliente({
         onSuccess: (c) => {
-            queryClient.invalidateQueries({ queryKey: ['clienti'] });
             pushActivity('fa-user-plus', 'Nuovo cliente registrato', c.nome + (c.citta ? ` — ${c.citta}` : ''));
             toast(`Cliente "${c.nome}" creato con successo.`, 'success');
         },
@@ -97,21 +111,17 @@ export function Dashboard() {
 
     // La quick action scrive nello stesso catalogo della pagina Inventario:
     // l'articolo creato qui compare subito lì (stesso pattern del cliente).
-    const createProdottoMut = useMutation({
-        mutationFn: createProdotto,
+    const createProdottoMut = useCreateProdotto({
         onSuccess: (p) => {
-            queryClient.invalidateQueries({ queryKey: ['prodotti'] });
             pushActivity('fa-box', 'Nuovo prodotto a catalogo', `${p.nome} (${p.sku})`);
             toast(`Prodotto "${p.nome}" salvato con successo.`, 'success');
         },
     });
 
-    const createOrdineMut = useMutation({
-        mutationFn: createOrdine,
+    const createOrdineMut = useCreateOrdine({
         onSuccess: (o) => {
-            queryClient.invalidateQueries({ queryKey: ['ordini'] });
-            const t = totaliOrdine(o.righe);
-            pushActivity('fa-cart-shopping', `Nuovo ordine ${o.numero}`, `${o.cliente} — ${t.pezzi} pezzi, ${formatEuro(t.totale, 0)}`);
+            const tot = totaliOrdine(o.righe);
+            pushActivity('fa-cart-shopping', `Nuovo ordine ${o.numero}`, `${o.cliente} — ${tot.pezzi} pezzi, ${formatEuro(tot.totale, 0)}`);
             toast(`Ordine "${o.numero}" creato in bozza.`, 'success');
         },
     });
@@ -290,30 +300,42 @@ export function Dashboard() {
                 <div className="neu-panel quick-panel" style={staggerStyle(7)}>
                     <div className="panel-header"><h2>Azioni Rapide</h2></div>
                     <div className="quick-grid">
-                        <button className="quick-btn" onClick={() => setOrdineOpen(true)}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-plus" /></div>
-                            <span>Nuovo Ordine</span>
-                        </button>
-                        <button className="quick-btn" onClick={() => setFatturaOpen(true)}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-file-invoice" /></div>
-                            <span>Nuova Fattura</span>
-                        </button>
-                        <button className="quick-btn" onClick={() => setClienteOpen(true)}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-user-plus" /></div>
-                            <span>Aggiungi Cliente</span>
-                        </button>
-                        <button className="quick-btn" onClick={() => setProdottoOpen(true)}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-box" /></div>
-                            <span>Aggiungi Prodotto</span>
-                        </button>
-                        <button className="quick-btn" onClick={() => setReportOpen(true)}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-download" /></div>
-                            <span>Scarica Report</span>
-                        </button>
-                        <button className="quick-btn" onClick={handleBackup}>
-                            <div className="quick-btn-icon"><i className="fa-solid fa-database" /></div>
-                            <span>Backup Dati</span>
-                        </button>
+                        {show.ordine && (
+                            <button className="quick-btn" onClick={() => setOrdineOpen(true)}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-plus" /></div>
+                                <span>Nuovo Ordine</span>
+                            </button>
+                        )}
+                        {show.fattura && (
+                            <button className="quick-btn" onClick={() => setFatturaOpen(true)}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-file-invoice" /></div>
+                                <span>Nuova Fattura</span>
+                            </button>
+                        )}
+                        {show.cliente && (
+                            <button className="quick-btn" onClick={() => setClienteOpen(true)}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-user-plus" /></div>
+                                <span>Aggiungi Cliente</span>
+                            </button>
+                        )}
+                        {show.prodotto && (
+                            <button className="quick-btn" onClick={() => setProdottoOpen(true)}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-box" /></div>
+                                <span>Aggiungi Prodotto</span>
+                            </button>
+                        )}
+                        {show.report && (
+                            <button className="quick-btn" onClick={() => setReportOpen(true)}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-download" /></div>
+                                <span>Scarica Report</span>
+                            </button>
+                        )}
+                        {show.backup && (
+                            <button className="quick-btn" onClick={handleBackup}>
+                                <div className="quick-btn-icon"><i className="fa-solid fa-database" /></div>
+                                <span>Backup Dati</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </section>
@@ -333,7 +355,7 @@ export function Dashboard() {
                                 {PRODUCTS.map((p) => (
                                     <tr key={p.rank}>
                                         <td>{p.rank}</td>
-                                        <td style={{ fontWeight: 600, color: '#4a4a4a' }}>{p.name}</td>
+                                        <td style={{ fontWeight: 600, color: 'var(--erp-text)' }}>{p.name}</td>
                                         <td>{p.cat}</td>
                                         <td>{p.sold.toLocaleString('it-IT')}</td>
                                         <td style={{ fontWeight: 600 }}>{p.revenue}</td>
@@ -364,7 +386,7 @@ export function Dashboard() {
                 open={fatturaOpen}
                 onClose={() => setFatturaOpen(false)}
                 onSubmit={handleSaveFattura}
-                defaults={{ numero: `${new Date().getFullYear()}/${String(counters.fattura + 1).padStart(4, '0')}`, data: today() }}
+                defaults={{ numero: `${new Date().getFullYear()}/${formatCode(config.numbering.fattura, counters.fattura + 1)}`, data: today() }}
                 clientiNomi={clientiNomi}
             />
             <ClientModal

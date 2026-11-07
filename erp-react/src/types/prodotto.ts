@@ -61,25 +61,8 @@ export function margineUnitario(p: Pick<Prodotto, 'prezzo' | 'costo'>): number {
     return p.prezzo - p.costo;
 }
 
-/** Primo SKU dopo quelli già assegnati. */
-const SKU_BASE = 4500;
-
-/**
- * Suggerisce il prossimo codice SKU libero leggendolo dal catalogo reale.
- * Va derivato dai dati e non da un contatore locale di pagina: Dashboard e
- * Inventario creano articoli nello stesso magazzino, e due contatori
- * indipendenti finirebbero per assegnare lo stesso SKU a prodotti diversi.
- *
- * TODO(step Backend): la generazione del codice passerà al server, che è
- * l'unico punto in cui può essere garantita l'unicità in concorrenza.
- */
-export function prossimoSku(prodotti: Prodotto[]): string {
-    const max = prodotti.reduce((acc, p) => {
-        const n = Number(p.sku.replace(/\D/g, ''));
-        return Number.isFinite(n) && n > acc ? n : acc;
-    }, SKU_BASE);
-    return `SKU-${max + 1}`;
-}
+// Codici SKU: config/numbering.ts → nextNumber(config.numbering.sku, …).
+// Il prefisso e il progressivo sono configurabili per tenant.
 
 // ------------------------- MOVIMENTI -------------------------
 
@@ -132,8 +115,7 @@ export function applicaMovimento(giacenza: number, tipo: MovimentoTipo, quantita
 
 // ------------------------- FORM -------------------------
 
-/** Categorie merceologiche gestite (allineate al modale Dashboard). */
-export const CATEGORIE = ['Elettronica', 'Componenti', 'Illuminazione', 'Networking', 'Accessori'] as const;
+// Categorie, unità e aliquote sono tabelle del tenant: config → tables.
 
 /** Valori del form movimento (string: parsing con parseNum al salvataggio). */
 export interface MovimentoFormValues {

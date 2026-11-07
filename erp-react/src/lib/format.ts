@@ -1,14 +1,55 @@
-// Porting 1:1 delle utility di formattazione da erp-ui.js.
-// Nessuna logica cambiata: stessa i/o, stessa localizzazione it-IT.
+// Utility di formattazione (porting da erp-ui.js), rese locale/valuta-aware:
+// locale e valuta arrivano dal config del tenant via configureFormat().
 
-export function formatEuro(value: number | string, decimals = 2): string {
-    const d = decimals == null ? 2 : decimals;
-    const n = Number(value) || 0;
-    return '€ ' + n.toLocaleString('it-IT', {
-        minimumFractionDigits: d,
-        maximumFractionDigits: d,
+interface FormatSettings {
+    intl: string;
+    currency: string;
+}
+
+/**
+ * Locale e valuta correnti, impostati dal config del tenant
+ * (config/configStore.ts). Modulo-level perché i formattatori sono
+ * chiamati ovunque, anche fuori da React.
+ */
+let settings: FormatSettings = { intl: 'it-IT', currency: 'EUR' };
+let currencySymbol = '€';
+
+export function configureFormat(next: FormatSettings): void {
+    settings = next;
+    try {
+        currencySymbol = new Intl.NumberFormat(next.intl, { style: 'currency', currency: next.currency })
+            .formatToParts(0)
+            .find((p) => p.type === 'currency')?.value ?? next.currency;
+    } catch {
+        currencySymbol = next.currency;
+    }
+}
+
+/** Locale Intl corrente (per toLocaleString/toLocaleDateString). */
+export function currentLocale(): string {
+    return settings.intl;
+}
+
+/** Numero localizzato (separatori del locale del tenant). */
+export function formatNumber(value: number, decimals = 0): string {
+    return (Number(value) || 0).toLocaleString(settings.intl, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
     });
 }
+
+/**
+ * Importo nella valuta del tenant, simbolo in testa ("€ 1.234,00") come nel
+ * design originale. Il nome resta formatEuro per non toccare ~40 chiamanti:
+ * la valuta effettiva è quella del config.
+ */
+export function formatEuro(value: number | string, decimals = 2): string {
+    const d = decimals == null ? 2 : decimals;
+    return `${currencySymbol} ${formatNumber(Number(value) || 0, d)}`;
+}
+
+/** Alias semantico di formatEuro per il codice nuovo. */
+export const formatMoney = formatEuro;
 
 export function parseNum(value: unknown): number {
     const n = parseFloat(String(value ?? '').replace(',', '.'));

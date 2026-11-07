@@ -9,8 +9,8 @@ interface FornitoreDetailPanelProps {
     articoli: Prodotto[];
     open: boolean;
     onClose: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
 }
 
 /** Pannello dettaglio fornitore — guscio condiviso, corpo specifico. */
@@ -24,12 +24,16 @@ export function FornitoreDetailPanel({
             onClose={onClose}
             footer={
                 <>
-                    <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                        <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                    </button>
-                    <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                        <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                    </button>
+                    {onEdit && (
+                        <button type="button" className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
+                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button type="button" className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
+                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
+                        </button>
+                    )}
                 </>
             }
         >

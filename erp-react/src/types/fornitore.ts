@@ -5,6 +5,7 @@
 // oggi è "server state" simulato (vedi lib/mockApi/fornitori.ts).
 
 import type { AnagraficaBase, StatoOption } from './anagrafica';
+import { getConfig } from '../config/configStore';
 
 /** 'sospeso' = rapporto temporaneamente bloccato (contenzioso, qualità, insoluti). */
 export type FornitoreStato = 'attivo' | 'inattivo' | 'sospeso';
@@ -61,15 +62,10 @@ export const STATO_FORNITORE_LABEL: Record<FornitoreStato, string> = {
     sospeso: 'Sospeso',
 };
 
-/** Termini di pagamento supportati, condivisi da form e dettaglio. */
-export const TERMINI_PAGAMENTO: StatoOption[] = [
-    { value: '0', label: 'Pagamento immediato' },
-    { value: '30', label: '30 giorni data fattura' },
-    { value: '60', label: '60 giorni data fattura' },
-    { value: '90', label: '90 giorni data fattura' },
-];
-
-/** Etichetta leggibile dei termini di pagamento (fallback: il valore grezzo). */
+/**
+ * Etichetta leggibile dei termini di pagamento dalla tabella del tenant
+ * (fallback: il valore grezzo). Non è un hook: legge il config corrente.
+ */
 export function labelPagamento(value: string): string {
-    return TERMINI_PAGAMENTO.find((t) => t.value === value)?.label ?? value;
+    return getConfig().tables.terminiPagamento.find((t) => t.value === value)?.label ?? value;
 }

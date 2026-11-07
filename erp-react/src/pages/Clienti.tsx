@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
 import { KpiValue } from '../components/ui/KpiValue';
@@ -11,20 +10,21 @@ import { useToast } from '../components/ui/Toast';
 import { useConfirm } from '../components/ui/Confirm';
 import { useStagger } from '../hooks/useStagger';
 import { downloadCsv } from '../lib/format';
-import { createCliente, deleteCliente, fetchClienti, updateCliente } from '../lib/mockApi/clienti';
+import { useClienti, useCreateCliente, useDeleteCliente, useUpdateCliente } from '../data';
+import { usePermissions } from '../auth/hooks';
+import { useConfig } from '../config/configStore';
 import type { ClienteFormValues } from '../types/cliente';
 import '../styles/app-shell.css';
 import '../styles/clienti.css';
 
-const PER_PAGE = 10;
-
 export function Clienti() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const queryClient = useQueryClient();
     const staggerStyle = useStagger();
+    const perm = usePermissions('anagrafiche');
+    const PER_PAGE = useConfig().pageSize;
 
-    const { data: clienti = [] } = useQuery({ queryKey: ['clienti'], queryFn: fetchClienti });
+    const { data: clienti = [] } = useClienti();
 
     // ---- stato UI effimero (filtri/ricerca/ordinamento/paginazione) ----
     const [search, setSearch] = useState('');
@@ -37,20 +37,14 @@ export function Clienti() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['clienti'] });
-
-    const createMut = useMutation({
-        mutationFn: createCliente,
-        onSuccess: (c) => { invalidate(); toast(`Cliente "${c.nome}" creato con successo.`, 'success'); },
+    const createMut = useCreateCliente({
+        onSuccess: (c) => toast(`Cliente "${c.nome}" creato con successo.`, 'success'),
     });
-    const updateMut = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: ClienteFormValues }) => updateCliente(id, data),
-        onSuccess: (c) => { invalidate(); toast(`Cliente "${c.nome}" aggiornato con successo.`, 'success'); },
+    const updateMut = useUpdateCliente({
+        onSuccess: (c) => toast(`Cliente "${c.nome}" aggiornato con successo.`, 'success'),
     });
-    const deleteMut = useMutation({
-        mutationFn: deleteCliente,
+    const deleteMut = useDeleteCliente({
         onSuccess: (_v, id) => {
-            invalidate();
             const nome = clienti.find((c) => c.id === id)?.nome;
             toast(`Cliente "${nome}" eliminato.`, 'info');
         },
@@ -181,7 +175,7 @@ export function Clienti() {
                     filter={filter}
                     onFilterChange={handleFilterChange}
                     onExport={handleExport}
-                    onAdd={() => { setEditingId(null); setModalOpen(true); }}
+                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
                 />
             </div>
 
@@ -192,8 +186,8 @@ export function Clienti() {
                     sortDir={sortDir}
                     onSort={handleSort}
                     onView={setDetailId}
-                    onEdit={(id) => { setEditingId(id); setModalOpen(true); }}
-                    onDelete={handleDelete}
+                    onEdit={perm.update ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
+                    onDelete={perm.delete ? handleDelete : undefined}
                     total={filtered.length}
                     currentPage={page}
                     totalPages={totalPages}
@@ -206,8 +200,8 @@ export function Clienti() {
                 cliente={detailCliente}
                 open={detailId != null}
                 onClose={() => setDetailId(null)}
-                onEdit={() => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); }}
-                onDelete={() => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); }}
+                onEdit={perm.update ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
+                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
             />
 
             <ClientModal

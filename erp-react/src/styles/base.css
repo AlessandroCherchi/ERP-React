@@ -11,12 +11,12 @@
 }
 
 html {
-    font-family: "Poppins", sans-serif;
+    font-family: var(--erp-font);
     font-size: 14px;
 }
 
 body {
-    color: #4a4a4a;
+    color: var(--erp-text);
 }
 
 
@@ -75,4 +75,45 @@ body {
    è già disattivato (::before display:none), quindi si può liberare. */
 .neu-action-btn--outline.neu-icon-btn--sm {
     overflow: visible;
+}
+
+
+/* ========================= LOADER DI PAGINA / A11Y =========================
+   In base.css perché serve prima che il CSS della pagina sia caricato. */
+
+.page-loader {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--erp-bg);
+}
+
+.page-loader-spinner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 4px solid rgba(var(--erp-accent-rgb), .15);
+    border-top-color: var(--erp-accent);
+    animation: pageLoaderSpin .8s linear infinite;
+}
+
+@keyframes pageLoaderSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-loader-spinner { animation-duration: 2.4s; }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

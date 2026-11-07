@@ -8,8 +8,8 @@
    grafici, attività recenti, azioni rapide e il trend di tabella.
 
    Stessi token neumorfici delle altre pagine — nessun colore o
-   raggio nuovo: bg #e8e8e8, testo #4a4a4a, accento #a10f0f,
-   luci #ffffff, ombre #c3c3c3/#c8c8c8, raggio 12px,
+   raggio nuovo: bg var(--erp-bg), testo var(--erp-text), accento var(--erp-accent),
+   luci var(--erp-light), ombre var(--erp-shadow-dark)/var(--erp-shadow-dark-2), raggio 12px,
    easing .4s cubic-bezier(.22,1,.36,1).
 ============================================================ */
 
@@ -18,16 +18,16 @@
 .dashboard-page {
     display: flex;
     min-height: 100vh;
-    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background: var(--erp-bg) url('../assets/img/prismatic-bg.svg') repeat center center;
     background-size: 160px;
-    color: #4a4a4a;
+    color: var(--erp-text);
     overflow-x: hidden;
 }
 
 /* ========================= PANNELLI (parti solo dashboard) ========================= */
 .panel-link {
     font-size: 12px;
-    color: #a10f0f;
+    color: var(--erp-accent);
     font-weight: 600;
     text-decoration: none;
     display: flex;
@@ -36,7 +36,7 @@
     transition: color .3s ease;
 }
 
-.panel-link:hover { color: #7c0d0d; }
+.panel-link:hover { color: var(--erp-accent-dark); }
 
 .panel-actions {
     display: flex;
@@ -81,7 +81,7 @@
     gap: 18px;
     margin-top: 16px;
     font-size: 11.5px;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
     font-weight: 500;
 }
 
@@ -97,9 +97,9 @@
     border-radius: 50%;
 }
 
-.dot--completed { background: #a10f0f; }
-.dot--pending   { background: #b8860b; }
-.dot--cancelled { background: #c3c3c3; }
+.dot--completed { background: var(--erp-accent); }
+.dot--pending   { background: var(--erp-warning); }
+.dot--cancelled { background: var(--erp-shadow-dark); }
 
 
 /* ========================= ACTIVITY LIST ========================= */
@@ -123,18 +123,18 @@
     gap: 14px;
     padding: 14px 16px;
     border-radius: 12px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        inset -3px -3px 6px rgba(255, 255, 255, .9),
-        inset 3px 3px 6px rgba(184, 190, 204, .25);
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .9),
+        inset 3px 3px 6px rgba(var(--erp-shadow-cool-rgb), .25);
     transition: all .35s cubic-bezier(.22,1,.36,1);
 }
 
 .activity-item:hover {
     transform: translateX(4px);
     box-shadow:
-        inset -3px -3px 6px rgba(255, 255, 255, .95),
-        inset 3px 3px 6px rgba(120, 10, 10, .08);
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .95),
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .08);
 }
 
 .activity-icon {
@@ -145,12 +145,12 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    color: #a10f0f;
-    background: #e8e8e8;
+    color: var(--erp-accent);
+    background: var(--erp-bg);
     flex-shrink: 0;
     box-shadow:
-        -3px -3px 6px #ffffff,
-        3px 3px 6px #c8c8c8;
+        -3px -3px 6px var(--erp-light),
+        3px 3px 6px var(--erp-shadow-dark-2);
 }
 
 .activity-text {
@@ -160,19 +160,19 @@
 .activity-text strong {
     font-size: 13px;
     font-weight: 600;
-    color: #4a4a4a;
+    color: var(--erp-text);
     display: block;
 }
 
 .activity-text span {
     font-size: 11px;
-    color: #9a9a9a;
+    color: var(--erp-text-muted);
     font-weight: 400;
 }
 
 .activity-time {
     font-size: 10.5px;
-    color: #b0b0b0;
+    color: var(--erp-neutral-300);
     font-weight: 500;
     white-space: nowrap;
 }
@@ -195,31 +195,31 @@
     border: none;
     outline: none;
     border-radius: 14px;
-    background: #e8e8e8;
-    color: #7a7a7a;
+    background: var(--erp-bg);
+    color: var(--erp-text-soft);
     font-family: inherit;
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     box-shadow:
-        -5px -5px 10px #ffffff,
-        5px 5px 10px #c8c8c8;
+        -5px -5px 10px var(--erp-light),
+        5px 5px 10px var(--erp-shadow-dark-2);
     transition: all .35s cubic-bezier(.22,1,.36,1);
 }
 
 .quick-btn:hover {
     transform: translateY(-3px);
-    color: #a10f0f;
+    color: var(--erp-accent);
     box-shadow:
-        -7px -7px 14px #ffffff,
-        7px 7px 14px #c3c3c3;
+        -7px -7px 14px var(--erp-light),
+        7px 7px 14px var(--erp-shadow-dark);
 }
 
 .quick-btn:active {
     transform: translateY(0) scale(.95);
     box-shadow:
-        inset 4px 4px 8px rgba(184, 190, 204, .4),
-        inset -4px -4px 8px rgba(255, 255, 255, .9);
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4),
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .9);
 }
 
 .quick-btn-icon {
@@ -230,17 +230,17 @@
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        inset 3px 3px 6px rgba(184, 190, 204, .3),
-        inset -3px -3px 6px rgba(255, 255, 255, .9);
+        inset 3px 3px 6px rgba(var(--erp-shadow-cool-rgb), .3),
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .9);
     transition: box-shadow .35s ease;
 }
 
 .quick-btn:hover .quick-btn-icon {
     box-shadow:
-        inset 3px 3px 6px rgba(120, 10, 10, .15),
-        inset -3px -3px 6px rgba(255, 255, 255, .85);
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .15),
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .85);
 }
 
 
@@ -265,13 +265,13 @@
 }
 
 .table-trend--up {
-    color: #2e7d32;
-    background: rgba(46, 125, 50, .08);
+    color: var(--erp-success);
+    background: rgba(var(--erp-success-rgb), .08);
 }
 
 .table-trend--down {
-    color: #c62828;
-    background: rgba(198, 40, 40, .08);
+    color: var(--erp-error);
+    background: rgba(var(--erp-error-rgb), .08);
 }
 
 

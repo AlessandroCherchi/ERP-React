@@ -13,7 +13,7 @@ interface OrdineToolbarProps {
     soloRitardo: boolean;
     onSoloRitardoChange: (v: boolean) => void;
     onExport: () => void;
-    onAdd: () => void;
+    onAdd?: () => void;
 }
 
 const FILTERS: { key: StatoFilter; label: string }[] = [
@@ -89,10 +89,12 @@ export function OrdineToolbar({
                 <button type="button" className="neu-icon-btn" onClick={onExport} aria-label="Esporta CSV" title="Esporta CSV">
                     <i className="fa-solid fa-file-export" />
                 </button>
-                <button type="button" className="neu-action-btn" onClick={onAdd}>
-                    <i className="fa-solid fa-plus" />
-                    <span>Nuovo Ordine</span>
-                </button>
+                {onAdd && (
+                    <button type="button" className="neu-action-btn" onClick={onAdd}>
+                        <i className="fa-solid fa-plus" />
+                        <span>Nuovo Ordine</span>
+                    </button>
+                )}
             </div>
         </section>
     );

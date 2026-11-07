@@ -13,8 +13,8 @@ interface OrdineTableProps {
     sortDir: SortDir;
     onSort: (key: SortKey) => void;
     onView: (id: number) => void;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    onEdit?: (id: number) => void;
+    onDelete?: (id: number) => void;
     /** Data ISO di riferimento per il calcolo del ritardo. */
     oggi: string;
     total: number;
@@ -129,26 +129,30 @@ export function OrdineTable({
                                                 >
                                                     <i className="fa-solid fa-eye" />
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="neu-icon-btn neu-icon-btn--sm"
-                                                    disabled={!modificabile}
-                                                    title={modificabile ? 'Modifica' : 'Solo le bozze sono modificabili'}
-                                                    aria-label={`Modifica ordine ${o.numero}`}
-                                                    onClick={(e) => { e.stopPropagation(); onEdit(o.id); }}
-                                                >
-                                                    <i className="fa-solid fa-pen" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="neu-icon-btn neu-icon-btn--sm"
-                                                    disabled={!eliminabile}
-                                                    title={eliminabile ? 'Elimina' : 'Un ordine confermato resta agli atti'}
-                                                    aria-label={`Elimina ordine ${o.numero}`}
-                                                    onClick={(e) => { e.stopPropagation(); onDelete(o.id); }}
-                                                >
-                                                    <i className="fa-solid fa-trash-can" />
-                                                </button>
+                                                {onEdit && (
+                                                    <button
+                                                        type="button"
+                                                        className="neu-icon-btn neu-icon-btn--sm"
+                                                        disabled={!modificabile}
+                                                        title={modificabile ? 'Modifica' : 'Solo le bozze sono modificabili'}
+                                                        aria-label={`Modifica ordine ${o.numero}`}
+                                                        onClick={(e) => { e.stopPropagation(); onEdit(o.id); }}
+                                                    >
+                                                        <i className="fa-solid fa-pen" />
+                                                    </button>
+                                                )}
+                                                {onDelete && (
+                                                    <button
+                                                        type="button"
+                                                        className="neu-icon-btn neu-icon-btn--sm"
+                                                        disabled={!eliminabile}
+                                                        title={eliminabile ? 'Elimina' : 'Un ordine confermato resta agli atti'}
+                                                        aria-label={`Elimina ordine ${o.numero}`}
+                                                        onClick={(e) => { e.stopPropagation(); onDelete(o.id); }}
+                                                    >
+                                                        <i className="fa-solid fa-trash-can" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

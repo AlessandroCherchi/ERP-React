@@ -8,7 +8,7 @@ interface ClientToolbarProps {
     filter: Filter;
     onFilterChange: (f: Filter) => void;
     onExport: () => void;
-    onAdd: () => void;
+    onAdd?: () => void;
 }
 
 const FILTERS: { key: Filter; label: string }[] = [
@@ -50,10 +50,12 @@ export function ClientToolbar({ search, onSearchChange, filter, onFilterChange, 
                 <button className="neu-icon-btn" onClick={onExport} aria-label="Esporta CSV" title="Esporta CSV">
                     <i className="fa-solid fa-file-export" />
                 </button>
-                <button className="neu-action-btn" onClick={onAdd}>
-                    <i className="fa-solid fa-plus" />
-                    <span>Nuovo Cliente</span>
-                </button>
+                {onAdd && (
+                    <button className="neu-action-btn" onClick={onAdd}>
+                        <i className="fa-solid fa-plus" />
+                        <span>Nuovo Cliente</span>
+                    </button>
+                )}
             </div>
         </section>
     );

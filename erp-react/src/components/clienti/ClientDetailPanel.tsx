@@ -4,8 +4,8 @@ interface ClientDetailPanelProps {
     cliente: Cliente | null;
     open: boolean;
     onClose: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
 }
 
 function capitalise(str: string): string {
@@ -107,12 +107,16 @@ export function ClientDetailPanel({ cliente, open, onClose, onEdit, onDelete }: 
                 )}
 
                 <div className="detail-panel-footer">
-                    <button className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
-                        <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                    </button>
-                    <button className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
-                        <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                    </button>
+                    {onEdit && (
+                        <button className="neu-action-btn neu-action-btn--outline" onClick={onEdit}>
+                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button className="neu-action-btn neu-action-btn--danger" onClick={onDelete}>
+                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
+                        </button>
+                    )}
                 </div>
             </aside>
         </>

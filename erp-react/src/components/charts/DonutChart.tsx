@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { readToken } from '../../config/theme';
 
 interface Segment {
     value: number;
@@ -45,10 +46,11 @@ export function DonutChart({ segments }: DonutChartProps) {
                 ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
                 ctx.arc(cx, cy, innerR, startAngle + sliceAngle, startAngle, true);
                 ctx.closePath();
-                ctx.fillStyle = seg.color;
+                // i segmenti possono dichiarare un token ("var(--erp-x)"): il canvas vuole il valore
+                ctx.fillStyle = seg.color.startsWith('var(') ? readToken(seg.color.slice(4, -1), '#999999') : seg.color;
                 ctx.fill();
 
-                ctx.shadowColor = 'rgba(0,0,0,.08)';
+                ctx.shadowColor = `rgba(${readToken('--erp-black-rgb', '0, 0, 0')}, .08)`;
                 ctx.shadowBlur = 6;
                 ctx.fill();
                 ctx.shadowColor = 'transparent';
@@ -56,13 +58,13 @@ export function DonutChart({ segments }: DonutChartProps) {
                 startAngle += sliceAngle;
             });
 
-            ctx.fillStyle = '#4a4a4a';
+            ctx.fillStyle = readToken('--erp-text', '#4a4a4a');
             ctx.font = '800 28px Poppins';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(String(total), cx, cy - 6);
             ctx.font = '500 10px Poppins';
-            ctx.fillStyle = '#9a9a9a';
+            ctx.fillStyle = readToken('--erp-text-muted', '#9a9a9a');
             ctx.fillText('Totale', cx, cy + 14);
         }
 

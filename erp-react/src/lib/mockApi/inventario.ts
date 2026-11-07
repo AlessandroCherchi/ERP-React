@@ -9,13 +9,12 @@
 import { applicaMovimento, type Movimento, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
 import type { ProdottoForm } from '../../types/quickActions';
 import { parseNum } from '../format';
+import { collection, nextIdOf } from './db';
 
-let nextId = 27;
-let nextMovimentoId = 41;
 
 // I primi 5 articoli sono gli stessi "Top Prodotti" della Dashboard:
 // le due pagine raccontano lo stesso magazzino.
-const store: Prodotto[] = [
+const SEED_PRODOTTI: Prodotto[] = [
     { id: 1, sku: 'SKU-4501', nome: 'Widget Pro X200', categoria: 'Elettronica', fornitore: 'Tecnoforniture S.p.A.', costo: 32, prezzo: 54, giacenza: 218, scorta: 40, unita: 'pz', iva: 22, ubicazione: 'A-01-2', descrizione: 'Modulo di controllo industriale con display OLED e connettività Modbus.' },
     { id: 2, sku: 'SKU-4502', nome: 'Sensore IoT Mk3', categoria: 'Componenti', fornitore: 'Elettromeccanica Nord', costo: 18.5, prezzo: 44.1, giacenza: 156, scorta: 30, unita: 'pz', iva: 22, ubicazione: 'A-03-1', descrizione: 'Sensore ambientale multiparametro con radio LoRaWAN integrata.' },
     { id: 3, sku: 'SKU-4503', nome: 'Pannello LED Ultra', categoria: 'Illuminazione', fornitore: 'LuceItalia S.r.l.', costo: 26, prezzo: 46, giacenza: 24, scorta: 35, unita: 'pz', iva: 22, ubicazione: 'B-02-4', descrizione: 'Pannello 60x60 4000K, 40W, driver dimmerabile DALI.' },
@@ -46,7 +45,7 @@ const store: Prodotto[] = [
 
 // Storico movimenti: solo per gli articoli più movimentati (gli altri
 // mostrano l'empty state nel pannello dettaglio, come in produzione).
-const movimenti: Movimento[] = [
+const SEED_MOVIMENTI: Movimento[] = [
     { id: 1, prodottoId: 1, tipo: 'carico', quantita: 120, causale: 'Ordine fornitore #F-2291', data: '2026-08-14', giacenzaFinale: 218, note: 'Consegna completa, merce conforme.' },
     { id: 2, prodottoId: 1, tipo: 'scarico', quantita: 45, causale: 'Ordine cliente ORD-3088', data: '2026-08-11', giacenzaFinale: 98, note: '', ordineId: 3 },
     { id: 3, prodottoId: 1, tipo: 'scarico', quantita: 30, causale: 'Ordine cliente ORD-3081', data: '2026-08-05', giacenzaFinale: 143, note: '', ordineId: 1 },
@@ -58,6 +57,11 @@ const movimenti: Movimento[] = [
     { id: 9, prodottoId: 15, tipo: 'scarico', quantita: 12, causale: 'Ordine cliente ORD-3089', data: '2026-08-15', giacenzaFinale: 0, note: '', ordineId: 4 },
     { id: 10, prodottoId: 9, tipo: 'rettifica', quantita: 8, causale: 'Inventario fisico Q3', data: '2026-08-01', giacenzaFinale: 8, note: 'Allineamento dopo conta fisica.' },
 ];
+
+const store = collection('prodotti', SEED_PRODOTTI);
+const movimenti = collection('movimenti', SEED_MOVIMENTI);
+let nextId = nextIdOf(store);
+let nextMovimentoId = nextIdOf(movimenti);
 
 const LATENCY = 120;
 const delay = () => new Promise((r) => setTimeout(r, LATENCY));

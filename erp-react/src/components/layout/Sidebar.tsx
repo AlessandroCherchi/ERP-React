@@ -1,66 +1,54 @@
-import { NavLink } from 'react-router-dom';
-import logo from '../../assets/img/logo.png';
+import { NavLink, useNavigate } from 'react-router-dom';
+import defaultLogo from '../../assets/img/logo.png';
 import { useUiStore } from '../../store/uiStore';
+import { useConfig } from '../../config/configStore';
+import { useVisibleModules } from '../../app/useModules';
+import { useAuthStore } from '../../auth/session';
+import { useT } from '../../i18n';
+import type { ModuleDef } from '../../app/modules';
 
-interface NavItem {
-    to: string;
-    icon: string;
-    label: string;
-    /** true = link non ancora implementato (porting futuro), resta '#'. */
-    stub?: boolean;
+function NavEntry({ m }: { m: ModuleDef }) {
+    const t = useT();
+    return (
+        <NavLink to={m.path} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+            <i className={`fa-solid ${m.icon}`} />
+            <span>{t(m.labelKey)}</span>
+            {!m.page && <em className="nav-badge">{t('nav.soon')}</em>}
+        </NavLink>
+    );
 }
 
-const NAV_ITEMS: NavItem[] = [
-    { to: '/dashboard', icon: 'fa-grid-2', label: 'Dashboard' },
-    { to: '/vendite', icon: 'fa-chart-line', label: 'Vendite' },
-    { to: '/inventario', icon: 'fa-boxes-stacked', label: 'Inventario' },
-    { to: '/clienti', icon: 'fa-users', label: 'Clienti' },
-    { to: '/fornitori', icon: 'fa-truck-field', label: 'Fornitori' },
-    { to: '#', icon: 'fa-file-invoice-dollar', label: 'Fatture', stub: true },
-    { to: '#', icon: 'fa-calculator', label: 'Contabilità', stub: true },
-    { to: '#', icon: 'fa-chart-pie', label: 'Report', stub: true },
-];
-
-/** Sidebar identica a dashboard.html/clienti.html: stessa nav, stesso stato collapsed/open. */
+/** Sidebar generata dal registro moduli, filtrata per tenant e ruolo. */
 export function Sidebar() {
     const { sidebarCollapsed, sidebarOpen } = useUiStore();
+    const config = useConfig();
+    const modules = useVisibleModules();
+    const logout = useAuthStore((s) => s.logout);
+    const navigate = useNavigate();
+    const t = useT();
+
+    function handleLogout() {
+        logout();
+        navigate('/login', { replace: true });
+    }
 
     return (
         <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}${sidebarOpen ? ' open' : ''}`} id="sidebar">
             <div className="sidebar-header">
-                <img src={logo} alt="Logo ERP" className="sidebar-logo" />
-                <span className="sidebar-brand">ERP Suite</span>
+                <img src={config.brand.logo || defaultLogo} alt={config.brand.name} className="sidebar-logo" />
+                <span className="sidebar-brand">{config.brand.name}</span>
             </div>
 
             <nav className="sidebar-nav">
-                {NAV_ITEMS.map((item) =>
-                    item.stub ? (
-                        <a href="#!" className="nav-item" key={item.label} onClick={(e) => e.preventDefault()}>
-                            <i className={`fa-solid ${item.icon}`} />
-                            <span>{item.label}</span>
-                        </a>
-                    ) : (
-                        <NavLink
-                            to={item.to}
-                            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-                            key={item.label}
-                        >
-                            <i className={`fa-solid ${item.icon}`} />
-                            <span>{item.label}</span>
-                        </NavLink>
-                    )
-                )}
+                {modules.filter((m) => m.placement === 'main').map((m) => <NavEntry key={m.id} m={m} />)}
             </nav>
 
             <div className="sidebar-footer">
-                <a href="#!" className="nav-item" onClick={(e) => e.preventDefault()}>
-                    <i className="fa-solid fa-gear" />
-                    <span>Impostazioni</span>
-                </a>
-                <NavLink to="/login" className="nav-item">
+                {modules.filter((m) => m.placement === 'footer').map((m) => <NavEntry key={m.id} m={m} />)}
+                <button type="button" className="nav-item nav-item--button" onClick={handleLogout}>
                     <i className="fa-solid fa-right-from-bracket" />
-                    <span>Esci</span>
-                </NavLink>
+                    <span>{t('nav.logout')}</span>
+                </button>
             </div>
         </aside>
     );

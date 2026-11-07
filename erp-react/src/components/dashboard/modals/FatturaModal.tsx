@@ -6,6 +6,7 @@ import { useValidatedForm } from '../../../lib/validation';
 import { fatturaSchema } from '../../../lib/schemas/quickActions';
 import { formatEuro, parseNum } from '../../../lib/format';
 import { EMPTY_FATTURA, type FatturaForm } from '../../../types/quickActions';
+import { useConfig } from '../../../config/configStore';
 
 interface FatturaModalProps {
     open: boolean;
@@ -17,6 +18,7 @@ interface FatturaModalProps {
 
 /** Modale "Nuova Fattura" — porting 1:1 di #modalFattura in dashboard.html (totale live). */
 export function FatturaModal({ open, onClose, onSubmit, defaults, clientiNomi }: FatturaModalProps) {
+    const { tables } = useConfig();
     const { values, errors, setField, validate, reset } = useValidatedForm<FatturaForm>(fatturaSchema, EMPTY_FATTURA);
 
     useEffect(() => {
@@ -74,18 +76,12 @@ export function FatturaModal({ open, onClose, onSubmit, defaults, clientiNomi }:
             <FormRow>
                 <FormGroup label="Termini di pagamento">
                     <SelectBox value={values.scadenza} onChange={(e) => setField('scadenza', e.target.value)}>
-                        <option value="30">30 giorni data fattura</option>
-                        <option value="60">60 giorni data fattura</option>
-                        <option value="90">90 giorni data fattura</option>
-                        <option value="0">Pagamento immediato</option>
+                        {tables.terminiPagamento.map((o) => <option value={o.value} key={o.value}>{o.label}</option>)}
                     </SelectBox>
                 </FormGroup>
                 <FormGroup label="Metodo di pagamento">
                     <SelectBox value={values.pagamento} onChange={(e) => setField('pagamento', e.target.value)}>
-                        <option value="bonifico">Bonifico bancario</option>
-                        <option value="riba">RIBA</option>
-                        <option value="carta">Carta di credito</option>
-                        <option value="contanti">Contanti</option>
+                        {tables.metodiPagamento.map((o) => <option value={o.value} key={o.value}>{o.label}</option>)}
                     </SelectBox>
                 </FormGroup>
             </FormRow>
@@ -97,10 +93,7 @@ export function FatturaModal({ open, onClose, onSubmit, defaults, clientiNomi }:
                 </FormGroup>
                 <FormGroup label="Aliquota IVA">
                     <SelectBox value={values.iva} onChange={(e) => setField('iva', e.target.value)}>
-                        <option value="22">22% — ordinaria</option>
-                        <option value="10">10% — ridotta</option>
-                        <option value="4">4% — minima</option>
-                        <option value="0">0% — esente / non imponibile</option>
+                        {tables.aliquoteIva.map((a) => <option value={String(a.value)} key={a.value}>{a.label}</option>)}
                     </SelectBox>
                 </FormGroup>
             </FormRow>

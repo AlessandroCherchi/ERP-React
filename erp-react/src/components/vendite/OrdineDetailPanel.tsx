@@ -11,9 +11,11 @@ interface OrdineDetailPanelProps {
     /** Data ISO di riferimento per il calcolo del ritardo. */
     oggi: string;
     onClose: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
     onCambiaStato: (nuovo: OrdineStato) => void;
+    /** Transizioni consentite al ruolo corrente (permission §5). Assente = tutte. */
+    canTransition?: (nuovo: OrdineStato) => boolean;
     /** true mentre una transizione è in corso: evita doppi click. */
     busy: boolean;
 }
@@ -30,7 +32,7 @@ const AZIONE: Record<OrdineStato, { label: string; icon: string; danger?: boolea
 
 /** Pannello dettaglio ordine — guscio condiviso, corpo specifico. */
 export function OrdineDetailPanel({
-    ordine, open, oggi, onClose, onEdit, onDelete, onCambiaStato, busy,
+    ordine, open, oggi, onClose, onEdit, onDelete, onCambiaStato, canTransition, busy,
 }: OrdineDetailPanelProps) {
     const modificabile = ordine?.stato === 'bozza';
     const eliminabile = ordine?.stato === 'bozza' || ordine?.stato === 'annullato';
@@ -42,31 +44,35 @@ export function OrdineDetailPanel({
             onClose={onClose}
             footer={
                 <>
-                    <button
-                        type="button"
-                        className="neu-action-btn neu-action-btn--outline"
-                        disabled={!modificabile}
-                        title={modificabile ? undefined : 'Solo le bozze sono modificabili'}
-                        onClick={onEdit}
-                    >
-                        <i className="fa-solid fa-pen" /> <span>Modifica</span>
-                    </button>
-                    <button
-                        type="button"
-                        className="neu-action-btn neu-action-btn--danger"
-                        disabled={!eliminabile}
-                        title={eliminabile ? undefined : 'Un ordine confermato resta agli atti'}
-                        onClick={onDelete}
-                    >
-                        <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
-                    </button>
+                    {onEdit && (
+                        <button
+                            type="button"
+                            className="neu-action-btn neu-action-btn--outline"
+                            disabled={!modificabile}
+                            title={modificabile ? undefined : 'Solo le bozze sono modificabili'}
+                            onClick={onEdit}
+                        >
+                            <i className="fa-solid fa-pen" /> <span>Modifica</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            type="button"
+                            className="neu-action-btn neu-action-btn--danger"
+                            disabled={!eliminabile}
+                            title={eliminabile ? undefined : 'Un ordine confermato resta agli atti'}
+                            onClick={onDelete}
+                        >
+                            <i className="fa-solid fa-trash-can" /> <span>Elimina</span>
+                        </button>
+                    )}
                 </>
             }
         >
             {ordine && (() => {
                 const totali = totaliOrdine(ordine.righe);
                 const ritardo = inRitardo(ordine, oggi);
-                const avanzamenti = prossimiStati(ordine.stato);
+                const avanzamenti = prossimiStati(ordine.stato).filter((s) => !canTransition || canTransition(s));
 
                 return (
                     <div className="detail-panel-body">
@@ -141,7 +147,9 @@ export function OrdineDetailPanel({
 
                             {avanzamenti.length === 0 ? (
                                 <p className="detail-notes detail-notes--compact">
-                                    Stato finale: non sono previsti ulteriori avanzamenti.
+                                    {prossimiStati(ordine.stato).length === 0
+                                        ? 'Stato finale: non sono previsti ulteriori avanzamenti.'
+                                        : 'Il tuo ruolo non può avanzare questo ordine.'}
                                 </p>
                             ) : (
                                 <div className="stato-actions">

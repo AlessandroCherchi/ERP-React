@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
 import { KpiValue } from '../components/ui/KpiValue';
@@ -13,19 +12,19 @@ import { useConfirm } from '../components/ui/Confirm';
 import { useStagger } from '../hooks/useStagger';
 import { downloadCsv, formatEuro, parseNum } from '../lib/format';
 import {
-    createProdotto, deleteProdotto, fetchMovimenti, fetchProdotti,
-    registraMovimento, updateProdotto,
-} from '../lib/mockApi/inventario';
-import { fetchFornitoriNomi } from '../lib/mockApi/fornitori';
+    useCreateProdotto, useDeleteProdotto, useFornitoriNomi, useMovimenti, useProdotti,
+    useRegistraMovimento, useUpdateProdotto,
+} from '../data';
+import { usePermissions } from '../auth/hooks';
+import { useConfig } from '../config/configStore';
+import { nextNumber } from '../config/numbering';
 import {
-    prossimoSku, statoProdotto, STATO_LABEL, valoreGiacenza,
+    statoProdotto, STATO_LABEL, valoreGiacenza,
     type MovimentoFormValues, type Prodotto,
 } from '../types/prodotto';
 import type { ProdottoForm } from '../types/quickActions';
 import '../styles/app-shell.css';
 import '../styles/inventario.css';
-
-const PER_PAGE = 10;
 
 /** Chiavi di ordinamento che non sono campi diretti di Prodotto. */
 function sortValue(p: Prodotto, key: SortKey): string | number {
@@ -36,12 +35,14 @@ function sortValue(p: Prodotto, key: SortKey): string | number {
 export function Inventario() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const queryClient = useQueryClient();
     const staggerStyle = useStagger();
+    const perm = usePermissions('magazzino');
+    const config = useConfig();
+    const PER_PAGE = config.pageSize;
 
-    const { data: prodotti = [] } = useQuery({ queryKey: ['prodotti'], queryFn: fetchProdotti });
-    const { data: movimenti = [] } = useQuery({ queryKey: ['movimenti'], queryFn: fetchMovimenti });
-    const { data: fornitoriNomi = [] } = useQuery({ queryKey: ['fornitori','nomi'], queryFn: fetchFornitoriNomi });
+    const { data: prodotti = [] } = useProdotti();
+    const { data: movimenti = [] } = useMovimenti();
+    const { data: fornitoriNomi = [] } = useFornitoriNomi();
 
     // ---- stato UI effimero (filtri/ricerca/ordinamento/paginazione) ----
     const [search, setSearch] = useState('');
@@ -56,33 +57,21 @@ export function Inventario() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [movimentoId, setMovimentoId] = useState<number | null>(null);
 
-    // una rettifica cambia la giacenza (prodotti) e aggiunge una riga al
-    // registro (movimenti): entrambe le query vanno invalidate.
-    const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey: ['prodotti'] });
-        queryClient.invalidateQueries({ queryKey: ['movimenti'] });
-    };
-
-    const createMut = useMutation({
-        mutationFn: createProdotto,
-        onSuccess: (p) => { invalidate(); toast(`Prodotto "${p.nome}" creato con successo.`, 'success'); },
+    // Le mutation di magazzino invalidano da sé giacenze e movimenti (data/hooks.ts).
+    const createMut = useCreateProdotto({
+        onSuccess: (p) => toast(`Prodotto "${p.nome}" creato con successo.`, 'success'),
     });
-    const updateMut = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: ProdottoForm }) => updateProdotto(id, data),
-        onSuccess: (p) => { invalidate(); toast(`Prodotto "${p.nome}" aggiornato con successo.`, 'success'); },
+    const updateMut = useUpdateProdotto({
+        onSuccess: (p) => toast(`Prodotto "${p.nome}" aggiornato con successo.`, 'success'),
     });
-    const deleteMut = useMutation({
-        mutationFn: deleteProdotto,
+    const deleteMut = useDeleteProdotto({
         onSuccess: (_v, id) => {
-            invalidate();
             const nome = prodotti.find((p) => p.id === id)?.nome;
             toast(`Prodotto "${nome}" eliminato.`, 'info');
         },
     });
-    const movimentoMut = useMutation({
-        mutationFn: registraMovimento,
+    const movimentoMut = useRegistraMovimento({
         onSuccess: (p) => {
-            invalidate();
             toast(`Giacenza di "${p.nome}" aggiornata: ${p.giacenza.toLocaleString('it-IT')} ${p.unita}.`, 'success');
         },
     });
@@ -188,8 +177,8 @@ export function Inventario() {
     const sottoScorta = prodotti.filter((p) => statoProdotto(p) === 'sotto-scorta').length;
     const esauriti = prodotti.filter((p) => statoProdotto(p) === 'esaurito').length;
 
-    // Prossimo SKU suggerito, derivato dal catalogo (vedi prossimoSku).
-    const nextSku = useMemo(() => prossimoSku(prodotti), [prodotti]);
+    // Prossimo SKU suggerito, derivato dal catalogo (config/numbering.ts).
+    const nextSku = useMemo(() => nextNumber(config.numbering.sku, prodotti.map((p) => p.sku)), [config.numbering.sku, prodotti]);
 
     return (
         <AppLayout pageClass="inventario-page">
@@ -242,7 +231,7 @@ export function Inventario() {
                     categoria={categoria}
                     onCategoriaChange={handleCategoriaChange}
                     onExport={handleExport}
-                    onAdd={() => { setEditingId(null); setModalOpen(true); }}
+                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
                 />
             </div>
 
@@ -253,9 +242,9 @@ export function Inventario() {
                     sortDir={sortDir}
                     onSort={handleSort}
                     onView={setDetailId}
-                    onMove={setMovimentoId}
-                    onEdit={(id) => { setEditingId(id); setModalOpen(true); }}
-                    onDelete={handleDelete}
+                    onMove={perm.update ? setMovimentoId : undefined}
+                    onEdit={perm.update ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
+                    onDelete={perm.delete ? handleDelete : undefined}
                     total={filtered.length}
                     currentPage={page}
                     totalPages={totalPages}
@@ -269,9 +258,9 @@ export function Inventario() {
                 movimenti={detailMovimenti}
                 open={detailId != null}
                 onClose={() => setDetailId(null)}
-                onMove={() => { const id = detailId; setDetailId(null); setMovimentoId(id); }}
-                onEdit={() => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); }}
-                onDelete={() => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); }}
+                onMove={perm.update ? () => { const id = detailId; setDetailId(null); setMovimentoId(id); } : undefined}
+                onEdit={perm.update ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
+                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
             />
 
             <ProdottoModal

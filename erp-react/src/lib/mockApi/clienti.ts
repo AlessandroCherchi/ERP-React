@@ -4,10 +4,9 @@
 // funzioni così TanStack Query non cambia in Dashboard/Clienti.
 
 import type { Cliente, ClienteFormValues } from '../../types/cliente';
+import { collection, nextIdOf } from './db';
 
-let nextId = 25;
-
-const store: Cliente[] = [
+const SEED: Cliente[] = [
     { id: 1, nome: 'Rossi S.r.l.', email: 'info@rossi-srl.it', telefono: '+39 02 4567890', citta: 'Milano', provincia: 'MI', indirizzo: 'Via Montenapoleone 12', piva: 'IT01234567890', cf: '01234567890', pec: 'rossi@pec.it', sdi: 'ABC1234', stato: 'attivo', fatturato: 45200, ordini: 32, credito: 3200, note: 'Cliente premium con condizioni speciali di pagamento a 60gg.' },
     { id: 2, nome: 'Bianchi & Co.', email: 'admin@bianchico.it', telefono: '+39 06 7891234', citta: 'Roma', provincia: 'RM', indirizzo: 'Via del Corso 88', piva: 'IT09876543210', cf: '09876543210', pec: 'bianchi@pec.it', sdi: 'XYZ7890', stato: 'attivo', fatturato: 32100, ordini: 21, credito: 1500, note: '' },
     { id: 3, nome: 'Verdi Elettronica', email: 'contatti@verdi-el.it', telefono: '+39 011 2345678', citta: 'Torino', provincia: 'TO', indirizzo: 'Corso Francia 45', piva: 'IT11223344556', cf: 'VRDLRC80A01L219X', pec: 'verdi@pec.it', sdi: 'DEF4567', stato: 'attivo', fatturato: 28500, ordini: 18, credito: 0, note: 'Fornitore e cliente — relazione bidirezionale.' },
@@ -33,6 +32,9 @@ const store: Cliente[] = [
     { id: 23, nome: 'Lilla Cosmetics', email: 'ordini@lillacosmetics.it', telefono: '+39 081 6789013', citta: 'Napoli', provincia: 'NA', indirizzo: 'Via Chiaia 200', piva: 'IT66001122335', cf: '66001122335', pec: 'lilla@pec.it', sdi: 'ZAB5678', stato: 'attivo', fatturato: 17600, ordini: 13, credito: 400, note: '' },
     { id: 24, nome: 'Cobalto Security', email: 'info@cobaltosecurity.it', telefono: '+39 06 7890124', citta: 'Roma', provincia: 'RM', indirizzo: 'Via Tuscolana 520', piva: 'IT77001122336', cf: '77001122336', pec: 'cobalto@pec.it', sdi: 'CDE6789', stato: 'attivo', fatturato: 26300, ordini: 19, credito: 1800, note: '' },
 ];
+
+const store = collection('clienti', SEED);
+let nextId = nextIdOf(store);
 
 const LATENCY = 120;
 const delay = () => new Promise((r) => setTimeout(r, LATENCY));

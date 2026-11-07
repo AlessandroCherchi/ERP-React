@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Topbar } from '../components/layout/Topbar';
 import { KpiValue } from '../components/ui/KpiValue';
@@ -12,15 +11,12 @@ import { useConfirm } from '../components/ui/Confirm';
 import { useStagger } from '../hooks/useStagger';
 import { downloadCsv, formatEuro } from '../lib/format';
 import { matchesQuery, paginate, sortRows, type SortDir } from '../lib/tableUtils';
-import {
-    createFornitore, deleteFornitore, fetchFornitori, updateFornitore,
-} from '../lib/mockApi/fornitori';
-import { fetchProdotti } from '../lib/mockApi/inventario';
+import { useCreateFornitore, useDeleteFornitore, useFornitori, useProdotti, useUpdateFornitore } from '../data';
+import { usePermissions } from '../auth/hooks';
+import { useConfig } from '../config/configStore';
 import { labelPagamento, STATO_FORNITORE_LABEL, type Fornitore, type FornitoreFormValues } from '../types/fornitore';
 import '../styles/app-shell.css';
 import '../styles/fornitori.css';
-
-const PER_PAGE = 10;
 
 /** Valore confrontabile per ciascuna colonna ordinabile. */
 function sortValue(f: Fornitore, key: SortKey): string | number {
@@ -30,12 +26,13 @@ function sortValue(f: Fornitore, key: SortKey): string | number {
 export function Fornitori() {
     const { toast } = useToast();
     const { confirm } = useConfirm();
-    const queryClient = useQueryClient();
     const staggerStyle = useStagger();
+    const perm = usePermissions('anagrafiche');
+    const PER_PAGE = useConfig().pageSize;
 
-    const { data: fornitori = [] } = useQuery({ queryKey: ['fornitori'], queryFn: fetchFornitori });
+    const { data: fornitori = [] } = useFornitori();
     // Serve solo per mostrare gli articoli collegati nel pannello dettaglio.
-    const { data: prodotti = [] } = useQuery({ queryKey: ['prodotti'], queryFn: fetchProdotti });
+    const { data: prodotti = [] } = useProdotti();
 
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<Filter>('all');
@@ -48,20 +45,14 @@ export function Fornitori() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['fornitori'] });
-
-    const createMut = useMutation({
-        mutationFn: createFornitore,
-        onSuccess: (f) => { invalidate(); toast(`Fornitore "${f.nome}" creato con successo.`, 'success'); },
+    const createMut = useCreateFornitore({
+        onSuccess: (f) => toast(`Fornitore "${f.nome}" creato con successo.`, 'success'),
     });
-    const updateMut = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: FornitoreFormValues }) => updateFornitore(id, data),
-        onSuccess: (f) => { invalidate(); toast(`Fornitore "${f.nome}" aggiornato con successo.`, 'success'); },
+    const updateMut = useUpdateFornitore({
+        onSuccess: (f) => toast(`Fornitore "${f.nome}" aggiornato con successo.`, 'success'),
     });
-    const deleteMut = useMutation({
-        mutationFn: deleteFornitore,
+    const deleteMut = useDeleteFornitore({
         onSuccess: (_v, id) => {
-            invalidate();
             const nome = fornitori.find((f) => f.id === id)?.nome;
             toast(`Fornitore "${nome}" eliminato.`, 'info');
         },
@@ -187,7 +178,7 @@ export function Fornitori() {
                     categoria={categoria}
                     onCategoriaChange={handleCategoriaChange}
                     onExport={handleExport}
-                    onAdd={() => { setEditingId(null); setModalOpen(true); }}
+                    onAdd={perm.create ? () => { setEditingId(null); setModalOpen(true); } : undefined}
                 />
             </div>
 
@@ -198,8 +189,8 @@ export function Fornitori() {
                     sortDir={sortDir}
                     onSort={handleSort}
                     onView={setDetailId}
-                    onEdit={(id) => { setEditingId(id); setModalOpen(true); }}
-                    onDelete={handleDelete}
+                    onEdit={perm.update ? (id) => { setEditingId(id); setModalOpen(true); } : undefined}
+                    onDelete={perm.delete ? handleDelete : undefined}
                     total={filtered.length}
                     currentPage={page}
                     totalPages={totalPages}
@@ -213,8 +204,8 @@ export function Fornitori() {
                 articoli={articoliCollegati}
                 open={detailId != null}
                 onClose={() => setDetailId(null)}
-                onEdit={() => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); }}
-                onDelete={() => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); }}
+                onEdit={perm.update ? () => { const id = detailId; setDetailId(null); setEditingId(id); setModalOpen(true); } : undefined}
+                onDelete={perm.delete ? () => { const id = detailId; setDetailId(null); if (id != null) handleDelete(id); } : undefined}
             />
 
             <FornitoreModal

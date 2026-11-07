@@ -12,9 +12,9 @@ interface ProductTableProps {
     sortDir: SortDir;
     onSort: (key: SortKey) => void;
     onView: (id: number) => void;
-    onMove: (id: number) => void;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    onMove?: (id: number) => void;
+    onEdit?: (id: number) => void;
+    onDelete?: (id: number) => void;
     total: number;
     currentPage: number;
     totalPages: number;
@@ -123,33 +123,39 @@ export function ProductTable({
                                                 >
                                                     <i className="fa-solid fa-eye" />
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="neu-icon-btn neu-icon-btn--sm"
-                                                    title="Movimento di magazzino"
-                                                    aria-label={`Registra movimento per ${p.nome}`}
-                                                    onClick={(e) => { e.stopPropagation(); onMove(p.id); }}
-                                                >
-                                                    <i className="fa-solid fa-right-left" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="neu-icon-btn neu-icon-btn--sm"
-                                                    title="Modifica"
-                                                    aria-label={`Modifica ${p.nome}`}
-                                                    onClick={(e) => { e.stopPropagation(); onEdit(p.id); }}
-                                                >
-                                                    <i className="fa-solid fa-pen" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="neu-icon-btn neu-icon-btn--sm"
-                                                    title="Elimina"
-                                                    aria-label={`Elimina ${p.nome}`}
-                                                    onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
-                                                >
-                                                    <i className="fa-solid fa-trash-can" />
-                                                </button>
+                                                {onMove && (
+                                                    <button
+                                                        type="button"
+                                                        className="neu-icon-btn neu-icon-btn--sm"
+                                                        title="Movimento di magazzino"
+                                                        aria-label={`Registra movimento per ${p.nome}`}
+                                                        onClick={(e) => { e.stopPropagation(); onMove(p.id); }}
+                                                    >
+                                                        <i className="fa-solid fa-right-left" />
+                                                    </button>
+                                                )}
+                                                {onEdit && (
+                                                    <button
+                                                        type="button"
+                                                        className="neu-icon-btn neu-icon-btn--sm"
+                                                        title="Modifica"
+                                                        aria-label={`Modifica ${p.nome}`}
+                                                        onClick={(e) => { e.stopPropagation(); onEdit(p.id); }}
+                                                    >
+                                                        <i className="fa-solid fa-pen" />
+                                                    </button>
+                                                )}
+                                                {onDelete && (
+                                                    <button
+                                                        type="button"
+                                                        className="neu-icon-btn neu-icon-btn--sm"
+                                                        title="Elimina"
+                                                        aria-label={`Elimina ${p.nome}`}
+                                                        onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
+                                                    >
+                                                        <i className="fa-solid fa-trash-can" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

@@ -1,8 +1,9 @@
 import { AnagraficaFormFields } from '../anagrafica/AnagraficaFormFields';
 import { FormGroup, FormRow, InputBox, SelectBox } from '../ui/FormField';
-import { CATEGORIE } from '../../types/prodotto';
-import { FORNITORE_STATI, TERMINI_PAGAMENTO, type FornitoreFormValues } from '../../types/fornitore';
+import { FORNITORE_STATI, type FornitoreFormValues } from '../../types/fornitore';
 import type { FieldErrors } from '../../lib/validation';
+import { useConfig } from '../../config/configStore';
+import { optionsWithCurrent } from '../../config';
 
 interface FornitoreFormFieldsProps {
     values: FornitoreFormValues;
@@ -17,6 +18,7 @@ interface FornitoreFormFieldsProps {
  * alle categorie merceologiche già esistenti in Inventario.
  */
 export function FornitoreFormFields({ values, errors, setField }: FornitoreFormFieldsProps) {
+    const { tables } = useConfig();
     return (
         <AnagraficaFormFields
             values={values}
@@ -32,8 +34,8 @@ export function FornitoreFormFields({ values, errors, setField }: FornitoreFormF
                         value={values.categoria}
                         onChange={(e) => setField('categoria', e.target.value)}
                     >
-                        {CATEGORIE.map((c) => (
-                            <option value={c} key={c}>{c}</option>
+                        {optionsWithCurrent(tables.categorie, values.categoria).map((c) => (
+                            <option value={c.value} key={c.value}>{c.label}</option>
                         ))}
                     </SelectBox>
                 </FormGroup>
@@ -42,7 +44,7 @@ export function FornitoreFormFields({ values, errors, setField }: FornitoreFormF
                         value={values.pagamento}
                         onChange={(e) => setField('pagamento', e.target.value)}
                     >
-                        {TERMINI_PAGAMENTO.map((t) => (
+                        {optionsWithCurrent(tables.terminiPagamento, values.pagamento).map((t) => (
                             <option value={t.value} key={t.value}>{t.label}</option>
                         ))}
                     </SelectBox>

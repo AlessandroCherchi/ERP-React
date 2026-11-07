@@ -9,9 +9,9 @@
    caricare erp-ui.js per il comportamento.
 
    Tokens (identici a dashboard.css / clienti.css):
-   bg #e8e8e8 | text #4a4a4a | text-muted #9a9a9a
-   accent #a10f0f | accent-gradient linear-gradient(155deg,#b21414,#7c0d0d)
-   gold #f5e9c8 | luci #ffffff | ombre #c3c3c3 / #c8c8c8
+   bg var(--erp-bg) | text var(--erp-text) | text-muted var(--erp-text-muted)
+   accent var(--erp-accent) | accent-gradient linear-gradient(155deg,var(--erp-accent-light),var(--erp-accent-dark))
+   gold var(--erp-gold) | luci var(--erp-light) | ombre var(--erp-shadow-dark) / var(--erp-shadow-dark-2)
    raggio 12px | easing .4s cubic-bezier(.22,1,.36,1)
 ============================================================ */
 
@@ -27,16 +27,16 @@
     border: none;
     outline: none;
     border-radius: 12px;
-    background: linear-gradient(155deg, #b21414, #7c0d0d);
-    color: #f5e9c8;
+    background: linear-gradient(155deg, var(--erp-accent-light), var(--erp-accent-dark));
+    color: var(--erp-gold);
     font-family: inherit;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: .5px;
     cursor: pointer;
     box-shadow:
-        0 6px 16px rgba(120, 10, 10, .3),
-        inset 0 1px 1px rgba(255, 255, 255, .2);
+        0 6px 16px rgba(var(--erp-accent-deep-rgb), .3),
+        inset 0 1px 1px rgba(var(--erp-light-rgb), .2);
     transition: all .35s cubic-bezier(.22, 1, .36, 1);
     position: relative;
     overflow: hidden;
@@ -50,7 +50,7 @@
     left: -60%;
     width: 40%;
     height: 100%;
-    background: linear-gradient(115deg, transparent, rgba(255, 255, 255, .25), transparent);
+    background: linear-gradient(115deg, transparent, rgba(var(--erp-light-rgb), .25), transparent);
     transform: skewX(-20deg);
     transition: left .6s ease;
 }
@@ -62,23 +62,23 @@
 .neu-action-btn:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 10px 22px rgba(120, 10, 10, .35),
-        inset 0 1px 1px rgba(255, 255, 255, .25);
+        0 10px 22px rgba(var(--erp-accent-deep-rgb), .35),
+        inset 0 1px 1px rgba(var(--erp-light-rgb), .25);
 }
 
 .neu-action-btn:active {
     transform: translateY(0) scale(.97);
     box-shadow:
-        inset 5px 5px 10px rgba(60, 5, 5, .4),
-        inset -5px -5px 10px rgba(212, 175, 55, .2);
+        inset 5px 5px 10px rgba(var(--erp-accent-shadow-rgb), .4),
+        inset -5px -5px 10px rgba(var(--erp-gold-strong-rgb), .2);
 }
 
 .neu-action-btn--outline {
-    background: #e8e8e8;
-    color: #7a7a7a;
+    background: var(--erp-bg);
+    color: var(--erp-text-soft);
     box-shadow:
-        -5px -5px 10px #ffffff,
-        5px 5px 10px #c8c8c8;
+        -5px -5px 10px var(--erp-light),
+        5px 5px 10px var(--erp-shadow-dark-2);
 }
 
 .neu-action-btn--outline::before {
@@ -86,20 +86,20 @@
 }
 
 .neu-action-btn--outline:hover {
-    color: #a10f0f;
+    color: var(--erp-accent);
     box-shadow:
-        -7px -7px 14px #ffffff,
-        7px 7px 14px #c3c3c3;
+        -7px -7px 14px var(--erp-light),
+        7px 7px 14px var(--erp-shadow-dark);
 }
 
 .neu-action-btn--outline:active {
     box-shadow:
-        inset 3px 3px 6px rgba(184, 190, 204, .45),
-        inset -3px -3px 6px rgba(255, 255, 255, .9);
+        inset 3px 3px 6px rgba(var(--erp-shadow-cool-rgb), .45),
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .9);
 }
 
 .neu-action-btn--danger {
-    background: linear-gradient(155deg, #c62828, #8e0000);
+    background: linear-gradient(155deg, var(--erp-error), var(--erp-error-dark));
 }
 
 /* variante compatta usata per chiudere modali e pannelli */
@@ -109,8 +109,8 @@
     font-size: 13px;
     border-radius: 10px;
     box-shadow:
-        -3px -3px 6px #ffffff,
-        3px 3px 6px #c8c8c8;
+        -3px -3px 6px var(--erp-light),
+        3px 3px 6px var(--erp-shadow-dark-2);
 }
 
 
@@ -119,7 +119,7 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .25);
+    background: rgba(var(--erp-black-rgb), .25);
     z-index: 300;
     opacity: 0;
     pointer-events: none;
@@ -139,12 +139,12 @@
     width: 680px;
     max-width: 94vw;
     max-height: 90vh;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     border-radius: 20px;
     box-shadow:
-        -12px -12px 24px #ffffff,
-        12px 12px 24px #c3c3c3,
-        0 20px 40px rgba(0, 0, 0, .1);
+        -12px -12px 24px var(--erp-light),
+        12px 12px 24px var(--erp-shadow-dark),
+        0 20px 40px rgba(var(--erp-black-rgb), .1);
     z-index: 310;
     display: flex;
     flex-direction: column;
@@ -169,16 +169,16 @@
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, .65);
+    border-bottom: 1px solid rgba(var(--erp-light-rgb), .65);
 }
 
 .modal-header h2 {
     font-size: 20px;
     font-weight: 700;
-    color: #4a4a4a;
+    color: var(--erp-text);
     text-shadow:
-        1px 1px 1px rgba(255, 255, 255, .9),
-        -2px -2px 1px rgba(163, 163, 163, .25);
+        1px 1px 1px rgba(var(--erp-light-rgb), .9),
+        -2px -2px 1px rgba(var(--erp-neutral-400-rgb), .25);
 }
 
 .modal-body {
@@ -192,7 +192,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 28px 22px;
-    border-top: 1px solid rgba(255, 255, 255, .65);
+    border-top: 1px solid rgba(var(--erp-light-rgb), .65);
 }
 
 
@@ -223,7 +223,7 @@
 .form-group label {
     font-size: 11.5px;
     font-weight: 600;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
     letter-spacing: .3px;
     text-transform: uppercase;
     transition: color .3s ease;
@@ -239,7 +239,7 @@
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #909090;
+    color: var(--erp-neutral-500);
     font-size: 13px;
     z-index: 2;
     transition: color .35s ease;
@@ -251,34 +251,34 @@
     padding: 0 16px 0 38px;
     border: none;
     outline: none;
-    background: #e8e8e8;
-    color: #4a4a4a;
+    background: var(--erp-bg);
+    color: var(--erp-text);
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
     letter-spacing: .2px;
     border-radius: 12px;
     box-shadow:
-        inset -4px -4px 8px rgba(255, 255, 255, .95),
-        inset 4px 4px 8px rgba(184, 190, 204, .4);
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .95),
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4);
     transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .4s cubic-bezier(.22, 1, .36, 1);
 }
 
 .input-box input::placeholder {
-    color: #a3a3a3;
+    color: var(--erp-neutral-400);
     font-weight: 400;
 }
 
 .input-box input:focus {
     transform: translateY(-1px);
     box-shadow:
-        inset 3px 3px 6px rgba(120, 10, 10, .2),
-        inset -3px -3px 6px rgba(212, 55, 55, .15);
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .2),
+        inset -3px -3px 6px rgba(var(--erp-accent-bright-rgb), .15);
 }
 
 .input-box input:focus~i,
 .input-box:focus-within i {
-    color: #a10f0f;
+    color: var(--erp-accent);
 }
 
 /* date e number: picker discreto e niente spinner, per non rompere l'inset */
@@ -309,8 +309,8 @@
     padding: 0 36px 0 14px;
     border: none;
     outline: none;
-    background: #e8e8e8;
-    color: #4a4a4a;
+    background: var(--erp-bg);
+    color: var(--erp-text);
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
@@ -319,15 +319,15 @@
     appearance: none;
     -webkit-appearance: none;
     box-shadow:
-        inset -4px -4px 8px rgba(255, 255, 255, .95),
-        inset 4px 4px 8px rgba(184, 190, 204, .4);
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .95),
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4);
     transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1);
 }
 
 .select-box select:focus {
     box-shadow:
-        inset 3px 3px 6px rgba(120, 10, 10, .2),
-        inset -3px -3px 6px rgba(212, 55, 55, .15);
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .2),
+        inset -3px -3px 6px rgba(var(--erp-accent-bright-rgb), .15);
 }
 
 .select-box i {
@@ -335,7 +335,7 @@
     right: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #909090;
+    color: var(--erp-neutral-500);
     font-size: 11px;
     pointer-events: none;
 }
@@ -346,8 +346,8 @@
     padding: 12px 16px;
     border: none;
     outline: none;
-    background: #e8e8e8;
-    color: #4a4a4a;
+    background: var(--erp-bg);
+    color: var(--erp-text);
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
@@ -355,41 +355,41 @@
     resize: vertical;
     min-height: 80px;
     box-shadow:
-        inset -4px -4px 8px rgba(255, 255, 255, .95),
-        inset 4px 4px 8px rgba(184, 190, 204, .4);
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .95),
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4);
     transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1);
 }
 
 .textarea-box textarea::placeholder {
-    color: #a3a3a3;
+    color: var(--erp-neutral-400);
     font-weight: 400;
 }
 
 .textarea-box textarea:focus {
     box-shadow:
-        inset 3px 3px 6px rgba(120, 10, 10, .2),
-        inset -3px -3px 6px rgba(212, 55, 55, .15);
+        inset 3px 3px 6px rgba(var(--erp-accent-deep-rgb), .2),
+        inset -3px -3px 6px rgba(var(--erp-accent-bright-rgb), .15);
 }
 
 /* stato di errore in validazione (gestito da erp-ui.js) */
 .form-group.has-error label,
 .form-group.has-error .input-box i {
-    color: #c62828;
+    color: var(--erp-error);
 }
 
 .form-group.has-error .input-box input,
 .form-group.has-error .select-box select,
 .form-group.has-error .textarea-box textarea {
     box-shadow:
-        inset 3px 3px 6px rgba(198, 40, 40, .26),
-        inset -3px -3px 6px rgba(255, 255, 255, .9);
+        inset 3px 3px 6px rgba(var(--erp-error-rgb), .26),
+        inset -3px -3px 6px rgba(var(--erp-light-rgb), .9);
 }
 
 /* testo di supporto sotto un campo */
 .form-hint {
     font-size: 11.5px;
     font-weight: 500;
-    color: #9a9a9a;
+    color: var(--erp-text-muted);
     line-height: 1.5;
 }
 
@@ -399,22 +399,22 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    color: #b8860b;
+    color: var(--erp-warning);
 }
 
 /* campo in sola lettura: superficie piatta, nessun rilievo interattivo */
 .input-box input:disabled,
 .select-box select:disabled,
 .textarea-box textarea:disabled {
-    color: #9a9a9a;
+    color: var(--erp-text-muted);
     cursor: not-allowed;
     box-shadow:
-        inset -2px -2px 5px rgba(255, 255, 255, .7),
-        inset 2px 2px 5px rgba(184, 190, 204, .28);
+        inset -2px -2px 5px rgba(var(--erp-light-rgb), .7),
+        inset 2px 2px 5px rgba(var(--erp-shadow-cool-rgb), .28);
 }
 
 .input-box:has(input:disabled) i {
-    color: #b4b4b4;
+    color: var(--erp-neutral-300);
 }
 
 /* riepilogo calcolato (es. totale fattura) */
@@ -426,16 +426,16 @@
     gap: 12px;
     padding: 14px 18px;
     border-radius: 12px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        inset -4px -4px 8px rgba(255, 255, 255, .95),
-        inset 4px 4px 8px rgba(184, 190, 204, .4);
+        inset -4px -4px 8px rgba(var(--erp-light-rgb), .95),
+        inset 4px 4px 8px rgba(var(--erp-shadow-cool-rgb), .4);
 }
 
 .form-total-label {
     font-size: 11.5px;
     font-weight: 600;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
     letter-spacing: .3px;
     text-transform: uppercase;
 }
@@ -443,7 +443,7 @@
 .form-total-value {
     font-size: 18px;
     font-weight: 800;
-    color: #a10f0f;
+    color: var(--erp-accent);
     letter-spacing: .3px;
 }
 
@@ -453,7 +453,7 @@
 .confirm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .3);
+    background: rgba(var(--erp-black-rgb), .3);
     z-index: 400;
     opacity: 0;
     pointer-events: none;
@@ -472,14 +472,14 @@
     transform: translate(-50%, -50%) scale(.9);
     width: 400px;
     max-width: 90vw;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     border-radius: 20px;
     padding: 32px;
     text-align: center;
     box-shadow:
-        -12px -12px 24px #ffffff,
-        12px 12px 24px #c3c3c3,
-        0 20px 40px rgba(0, 0, 0, .1);
+        -12px -12px 24px var(--erp-light),
+        12px 12px 24px var(--erp-shadow-dark),
+        0 20px 40px rgba(var(--erp-black-rgb), .1);
     z-index: 410;
     opacity: 0;
     pointer-events: none;
@@ -501,31 +501,31 @@
     align-items: center;
     justify-content: center;
     font-size: 26px;
-    color: #c62828;
-    background: #e8e8e8;
+    color: var(--erp-error);
+    background: var(--erp-bg);
     box-shadow:
-        -6px -6px 12px #ffffff,
-        6px 6px 12px #c8c8c8;
+        -6px -6px 12px var(--erp-light),
+        6px 6px 12px var(--erp-shadow-dark-2);
 }
 
 /* variante non distruttiva (es. backup, conferme informative) */
 .confirm-icon--accent {
-    color: #a10f0f;
+    color: var(--erp-accent);
 }
 
 .confirm-dialog h3 {
     font-size: 18px;
     font-weight: 700;
-    color: #4a4a4a;
+    color: var(--erp-text);
     margin-bottom: 8px;
     text-shadow:
-        1px 1px 1px rgba(255, 255, 255, .9),
-        -1px -1px 1px rgba(163, 163, 163, .2);
+        1px 1px 1px rgba(var(--erp-light-rgb), .9),
+        -1px -1px 1px rgba(var(--erp-neutral-400-rgb), .2);
 }
 
 .confirm-dialog p {
     font-size: 13px;
-    color: #7a7a7a;
+    color: var(--erp-text-soft);
     line-height: 1.5;
     margin-bottom: 24px;
 }
@@ -556,11 +556,11 @@
     gap: 12px;
     padding: 14px 22px;
     border-radius: 14px;
-    background: #e8e8e8;
+    background: var(--erp-bg);
     box-shadow:
-        -6px -6px 12px #ffffff,
-        6px 6px 12px #c3c3c3,
-        0 8px 20px rgba(0, 0, 0, .08);
+        -6px -6px 12px var(--erp-light),
+        6px 6px 12px var(--erp-shadow-dark),
+        0 8px 20px rgba(var(--erp-black-rgb), .08);
     pointer-events: auto;
     animation: toastIn .4s cubic-bezier(.22, 1, .36, 1) forwards;
     min-width: 280px;
@@ -606,24 +606,24 @@
 }
 
 .toast--success .toast-icon {
-    color: #2e7d32;
-    background: rgba(46, 125, 50, .08);
+    color: var(--erp-success);
+    background: rgba(var(--erp-success-rgb), .08);
 }
 
 .toast--error .toast-icon {
-    color: #c62828;
-    background: rgba(198, 40, 40, .08);
+    color: var(--erp-error);
+    background: rgba(var(--erp-error-rgb), .08);
 }
 
 .toast--info .toast-icon {
-    color: #1565c0;
-    background: rgba(21, 101, 192, .08);
+    color: var(--erp-info);
+    background: rgba(var(--erp-info-rgb), .08);
 }
 
 .toast-message {
     font-size: 13px;
     font-weight: 500;
-    color: #4a4a4a;
+    color: var(--erp-text);
 }
 
 
