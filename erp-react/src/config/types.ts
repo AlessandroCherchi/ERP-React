@@ -62,6 +62,8 @@ export interface TenantConfig {
         giacenzaNegativa: boolean;
         /** Mostra il blocco account demo nella pagina di login. */
         demoLogin: boolean;
+        /** Gestione di più magazzini (giacenze per magazzino, trasferimenti). */
+        multiMagazzino: boolean;
     };
     /** Tabelle di dominio configurabili (future: modificabili da Impostazioni). */
     tables: {

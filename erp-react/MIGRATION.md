@@ -1,6 +1,6 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 + Fasi A, B, C, E, F completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+Stato: **Step 6 + Fasi A–F completate** (frontend completo su adapter mock; backend: Step 7+) (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
 piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
@@ -402,11 +402,33 @@ Fatturato, numero ordini e credito non sono più campi dell'anagrafica:
 - Grafici canvas accessibili (`role="img"` + descrizione), font dal tema,
   scala robusta a serie vuote.
 
+## Fase D — Magazzino avanzato — DONE (lotti/DDT: vedi sotto)
+
+Inventario organizzato in viste (`?vista=`): **Articoli**, **Movimenti**,
+**Inventario fisico**, **Magazzini** (feature flag `multiMagazzino`).
+
+- **Multi-magazzino**: giacenza per magazzino (`Prodotto.giacenze`) con totale
+  allineato dall'adapter; un solo magazzino principale (default di vendite,
+  acquisti e movimenti); anagrafica con valore e pezzi per sede; eliminazione
+  solo di magazzini vuoti e non principali.
+- **Trasferimenti** fra magazzini (totale invariato, movimento dedicato).
+- **Unico punto di scrittura delle giacenze** (`movimenta()` nell'adapter):
+  movimenti manuali, ordini, ricevimenti, conte e trasferimenti passano tutti
+  da lì — registro e giacenze non possono divergere.
+- **Registro movimenti** completo, filtrabile per tipo e magazzino, esportabile.
+- **Inventario fisico**: apertura con snapshot delle giacenze a sistema,
+  conteggi salvabili in più sessioni, filtro "solo differenze", chiusura con
+  rettifiche automatiche delle sole righe contate, valorizzazione delle
+  differenze al costo; una sola conta aperta per magazzino.
+- Schema mock v4.
+
+Da fare in una fase successiva (dipendono dal backend per la tracciabilità):
+**lotti/seriali/scadenze** (FEFO) e **DDT** con fatturazione differita da DDT.
+
 ## Roadmap frontend (backend in secondo piano)
 - ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
 - ~~C — Acquisti~~ — fatto.
-- **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,
-  lotti/seriali/scadenze, inventario fisico, valorizzazione.
+- ~~D — Magazzino avanzato~~ — fatto (lotti/seriali/scadenze e DDT: prossima fase).
 - ~~E — Ciclo attivo~~ — fatto (DDT: vedi D).
 - ~~F — Report, Dashboard reale, audit, notifiche, ricerca~~ — fatto.
 

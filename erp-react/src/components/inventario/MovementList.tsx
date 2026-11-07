@@ -5,11 +5,13 @@ const ICON: Record<Movimento['tipo'], string> = {
     carico: 'fa-arrow-down',
     scarico: 'fa-arrow-up',
     rettifica: 'fa-scale-balanced',
+    trasferimento: 'fa-right-left',
 };
 
 /** Segno con cui il movimento ha inciso sulla giacenza. */
 function segno(m: Movimento): string {
     if (m.tipo === 'rettifica') return '=';
+    if (m.tipo === 'trasferimento') return '⇄';
     return m.tipo === 'carico' ? '+' : '−';
 }
 

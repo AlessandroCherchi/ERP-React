@@ -25,6 +25,7 @@ export const DEFAULT_CONFIG: TenantConfig = {
     features: {
         giacenzaNegativa: false,
         demoLogin: true,
+        multiMagazzino: true,
     },
     tables: {
         categorie: [

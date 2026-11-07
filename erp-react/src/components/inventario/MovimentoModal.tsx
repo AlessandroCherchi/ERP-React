@@ -5,7 +5,8 @@ import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from 
 import { useValidatedForm } from '../../lib/validation';
 import { movimentoSchema } from '../../lib/schemas/prodotto';
 import { formatNumber, parseNum, today } from '../../lib/format';
-import { applicaMovimento, type MovimentoFormValues, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
+import type { MovimentoFormValues, MovimentoManuale, Prodotto } from '../../types/prodotto';
+import { applicaInMagazzino, giacenzaIn, totaleGiacenze, type Magazzino } from '../../types/magazzino';
 
 interface MovimentoModalProps {
     open: boolean;
@@ -14,10 +15,14 @@ interface MovimentoModalProps {
     prodotto: Prodotto | null;
     onSubmit: (values: MovimentoFormValues) => void;
     saving?: boolean;
+    /** Magazzini attivi; con uno solo la scelta non viene mostrata. */
+    magazzini: Magazzino[];
+    magazzinoDefault: number;
 }
 
 const EMPTY_MOVIMENTO: MovimentoFormValues = {
     tipo: 'carico',
+    magazzinoId: '',
     quantita: '',
     causale: '',
     data: '',
@@ -25,7 +30,7 @@ const EMPTY_MOVIMENTO: MovimentoFormValues = {
 };
 
 /** Causali suggerite per tipo — evitano il campo libero incoerente. */
-const CAUSALI: Record<MovimentoTipo, string[]> = {
+const CAUSALI: Record<MovimentoManuale, string[]> = {
     carico: ['Ordine fornitore', 'Reso da cliente', 'Produzione interna', 'Trasferimento in entrata'],
     scarico: ['Ordine cliente', 'Reso a fornitore', 'Consumo interno', 'Scarto / danneggiamento'],
     rettifica: ['Inventario fisico', 'Correzione errore di carico', 'Allineamento contabile'],
@@ -33,19 +38,18 @@ const CAUSALI: Record<MovimentoTipo, string[]> = {
 
 /**
  * Modale "Movimento di magazzino": unico punto da cui la giacenza può
- * cambiare dopo la creazione dell'articolo. Mostra in tempo reale la
- * giacenza risultante calcolata con applicaMovimento() — la stessa
- * funzione usata dalla mock API, così anteprima e salvataggio non
- * possono divergere.
+ * cambiare a mano dopo la creazione dell'articolo. Mostra in tempo reale la
+ * giacenza risultante nel magazzino scelto, calcolata con applicaInMagazzino()
+ * — la stessa funzione usata dall'adapter: anteprima e salvataggio coincidono.
  */
-export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = false }: MovimentoModalProps) {
+export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = false, magazzini, magazzinoDefault }: MovimentoModalProps) {
     const { values, errors, setField, validate, reset } = useValidatedForm<MovimentoFormValues>(
         movimentoSchema,
         EMPTY_MOVIMENTO
     );
 
     useEffect(() => {
-        if (open) reset({ ...EMPTY_MOVIMENTO, data: today() });
+        if (open) reset({ ...EMPTY_MOVIMENTO, data: today(), magazzinoId: String(magazzinoDefault) });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
@@ -54,9 +58,12 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
         onSubmit(values);
     }
 
-    const giacenzaAttuale = prodotto?.giacenza ?? 0;
+    const magazzinoId = Number(values.magazzinoId) || magazzinoDefault;
+    const giacenzaAttuale = prodotto ? giacenzaIn(prodotto.giacenze, magazzinoId) : 0;
     const quantita = parseNum(values.quantita);
-    const giacenzaFinale = applicaMovimento(giacenzaAttuale, values.tipo, quantita);
+    const dopo = prodotto ? applicaInMagazzino(prodotto.giacenze, magazzinoId, values.tipo, quantita) : {};
+    const giacenzaFinale = giacenzaIn(dopo, magazzinoId);
+    const multi = magazzini.length > 1;
     const unita = prodotto?.unita ?? 'pz';
 
     // Uno scarico superiore alla giacenza verrebbe troncato a 0: meglio
@@ -83,8 +90,19 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
                     <p className="form-hint form-group--full">
                         <strong>{prodotto.nome}</strong> — {prodotto.sku}
                         <br />
-                        Giacenza attuale: {formatNumber(giacenzaAttuale)} {unita}
+                        Giacenza {multi ? 'nel magazzino' : 'attuale'}: {formatNumber(giacenzaAttuale)} {unita}
+                        {multi && <> · totale {formatNumber(prodotto.giacenza)} {unita}</>}
                     </p>
+                </FormRow>
+            )}
+
+            {multi && (
+                <FormRow>
+                    <FormGroup label="Magazzino" full error={errors.magazzinoId}>
+                        <SelectBox value={values.magazzinoId} onChange={(e) => setField('magazzinoId', e.target.value)}>
+                            {magazzini.map((m) => <option key={m.id} value={m.id}>{m.codice} — {m.nome}</option>)}
+                        </SelectBox>
+                    </FormGroup>
                 </FormRow>
             )}
 
@@ -95,7 +113,7 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
                         onChange={(e) => {
                             // cambiando tipo la causale suggerita non è più
                             // pertinente: la si azzera invece di trascinarla
-                            setField('tipo', e.target.value as MovimentoTipo);
+                            setField('tipo', e.target.value as MovimentoManuale);
                             setField('causale', '');
                         }}
                     >
@@ -144,8 +162,8 @@ export function MovimentoModal({ open, onClose, prodotto, onSubmit, saving = fal
 
             <FormRow>
                 <FormTotal
-                    label="Giacenza risultante"
-                    value={`${formatNumber(giacenzaFinale)} ${unita}`}
+                    label={multi ? 'Giacenza risultante nel magazzino' : 'Giacenza risultante'}
+                    value={`${formatNumber(giacenzaFinale)} ${unita}${multi ? ` (totale ${formatNumber(totaleGiacenze(dopo))})` : ''}`}
                 />
             </FormRow>
 

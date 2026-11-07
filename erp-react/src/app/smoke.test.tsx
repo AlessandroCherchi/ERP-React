@@ -155,6 +155,16 @@ describe('shell: ricerca globale e notifiche', () => {
     });
 });
 
+describe('inventario: viste', () => {
+    for (const [vista, testo] of [['movimenti', 'Giacenza dopo'], ['inventari', 'Nuovo inventario'], ['magazzini', 'Magazzino Sede']] as const) {
+        it(`vista ${vista}`, async () => {
+            await loginAs('warehouse');
+            await renderAt(`/inventario?vista=${vista}`);
+            expect(await screen.findAllByText(testo)).not.toHaveLength(0);
+        });
+    }
+});
+
 describe('tenant', () => {
     it('brand e moduli seguono il config del tenant', async () => {
         act(() => useConfigStore.getState().setTenant('acme'));

@@ -12,6 +12,8 @@ import * as utenti from '../lib/mockApi/utenti';
 import * as acquisti from '../lib/mockApi/acquisti';
 import * as fatture from '../lib/mockApi/fatture';
 import * as audit from '../lib/mockApi/audit';
+import * as magazzini from '../lib/mockApi/magazzini';
+import * as conte from '../lib/mockApi/conte';
 
 const mockApi: DataApi = {
     clienti: {
@@ -35,6 +37,16 @@ const mockApi: DataApi = {
         updateProdotto: inventario.updateProdotto,
         removeProdotto: inventario.deleteProdotto,
         registraMovimento: inventario.registraMovimento,
+        trasferisci: inventario.trasferisci,
+        listMagazzini: magazzini.fetchMagazzini,
+        createMagazzino: magazzini.createMagazzino,
+        updateMagazzino: magazzini.updateMagazzino,
+        removeMagazzino: magazzini.deleteMagazzino,
+        listConte: conte.fetchConte,
+        apriConta: conte.apriConta,
+        salvaConteggi: conte.salvaConteggi,
+        chiudiConta: conte.chiudiConta,
+        annullaConta: conte.annullaConta,
     },
     ordini: {
         list: ordini.fetchOrdini,

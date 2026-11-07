@@ -11,7 +11,7 @@ const riga = (p: Partial<RigaAcquisto>): RigaAcquisto => ({
 
 const prodotto = (p: Partial<Prodotto>): Prodotto => ({
     id: 1, sku: 'S', nome: 'N', categoria: 'C', fornitoreId: 1, costo: 10, prezzo: 20,
-    giacenza: 0, scorta: 10, unita: 'pz', iva: 22, ubicazione: '', descrizione: '', ...p,
+    giacenza: 0, giacenze: {}, scorta: 10, unita: 'pz', iva: 22, ubicazione: '', descrizione: '', ...p,
 });
 
 describe('ciclo di vita ordine d’acquisto', () => {

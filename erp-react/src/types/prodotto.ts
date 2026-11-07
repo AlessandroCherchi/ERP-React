@@ -5,6 +5,8 @@
 // Postgres/RLS reale; oggi è "server state" simulato
 // (vedi lib/mockApi/inventario.ts).
 
+import type { Giacenze } from './magazzino';
+
 /**
  * Stato di magazzino: NON è un campo persistito ma una funzione pura di
  * (giacenza, scorta). Tenerlo derivato evita che il flag vada fuori sync
@@ -23,8 +25,10 @@ export interface Prodotto {
     costo: number;
     /** Prezzo di vendita unitario (€). */
     prezzo: number;
-    /** Quantità attualmente disponibile. */
+    /** Quantità totale disponibile (somma delle giacenze per magazzino). */
     giacenza: number;
+    /** Giacenza per magazzino (types/magazzino.ts). */
+    giacenze: Giacenze;
     /** Soglia di riordino: sotto o pari a questa si è "sotto scorta". */
     scorta: number;
     /** Unità di misura: pz | cf | kg | m | lt. */
@@ -67,11 +71,15 @@ export function margineUnitario(p: Pick<Prodotto, 'prezzo' | 'costo'>): number {
 
 /**
  * Tipo di movimento di magazzino.
- * - carico:    merce in ingresso (+)
- * - scarico:   merce in uscita (−)
- * - rettifica: allineamento all'inventario fisico (valore assoluto)
+ * - carico:        merce in ingresso (+)
+ * - scarico:       merce in uscita (−)
+ * - rettifica:     allineamento all'inventario fisico (valore assoluto)
+ * - trasferimento: spostamento fra magazzini (totale invariato; solo di sistema)
  */
-export type MovimentoTipo = 'carico' | 'scarico' | 'rettifica';
+export type MovimentoTipo = 'carico' | 'scarico' | 'rettifica' | 'trasferimento';
+
+/** Tipi registrabili a mano dal modale movimento. */
+export type MovimentoManuale = Exclude<MovimentoTipo, 'trasferimento'>;
 
 export interface Movimento {
     id: number;
@@ -82,8 +90,12 @@ export interface Movimento {
     causale: string;
     /** Data ISO (yyyy-mm-dd). */
     data: string;
-    /** Giacenza risultante dopo il movimento — traccia di audit. */
+    /** Giacenza totale risultante dopo il movimento — traccia di audit. */
     giacenzaFinale: number;
+    /** Magazzino interessato (origine, per i trasferimenti). */
+    magazzinoId: number;
+    /** Magazzino di destinazione (solo trasferimenti). */
+    magazzinoDestId?: number;
     note: string;
     /**
      * Ordine di vendita che ha generato il movimento, se ne esiste uno.
@@ -100,6 +112,7 @@ export const MOVIMENTO_LABEL: Record<MovimentoTipo, string> = {
     carico: 'Carico',
     scarico: 'Scarico',
     rettifica: 'Rettifica',
+    trasferimento: 'Trasferimento',
 };
 
 /**
@@ -109,6 +122,7 @@ export const MOVIMENTO_LABEL: Record<MovimentoTipo, string> = {
  * La giacenza non scende mai sotto zero.
  */
 export function applicaMovimento(giacenza: number, tipo: MovimentoTipo, quantita: number): number {
+    if (tipo === 'trasferimento') return giacenza;
     if (tipo === 'rettifica') return Math.max(0, quantita);
     const delta = tipo === 'carico' ? quantita : -quantita;
     return Math.max(0, giacenza + delta);
@@ -149,7 +163,9 @@ export const EMPTY_PRODOTTO: ProdottoForm = {
 
 /** Valori del form movimento (string: parsing con parseNum al salvataggio). */
 export interface MovimentoFormValues {
-    tipo: MovimentoTipo;
+    tipo: MovimentoManuale;
+    /** Id magazzino come stringa (valore della <select>). */
+    magazzinoId: string;
     quantita: string;
     causale: string;
     data: string;

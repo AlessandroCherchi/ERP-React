@@ -12,6 +12,8 @@ interface ProductDetailPanelProps {
     prodotto: Prodotto | null;
     /** Ragione sociale del fornitore abituale, risolta dalla pagina. */
     fornitore: string;
+    /** Giacenza per magazzino (solo con multi-magazzino). */
+    giacenzePerMagazzino?: Array<{ nome: string; quantita: number }>;
     /** Movimenti del solo prodotto aperto, già ordinati dal più recente. */
     movimenti: Movimento[];
     open: boolean;
@@ -20,7 +22,7 @@ interface ProductDetailPanelProps {
 }
 
 /** Pannello dettaglio articolo: scorta, anagrafica, valorizzazione, storico movimenti. */
-export function ProductDetailPanel({ prodotto, fornitore, movimenti, open, onClose, actions }: ProductDetailPanelProps) {
+export function ProductDetailPanel({ prodotto, fornitore, giacenzePerMagazzino, movimenti, open, onClose, actions }: ProductDetailPanelProps) {
     return (
         <DetailPanelShell open={open} title="Dettaglio Articolo" onClose={onClose} footer={<PanelActions actions={actions} />}>
             {prodotto && (() => {
@@ -35,6 +37,16 @@ export function ProductDetailPanel({ prodotto, fornitore, movimenti, open, onClo
                                 Soglia di riordino: {formatNumber(prodotto.scorta)} {prodotto.unita}
                             </p>
                         </DetailSection>
+
+                        {giacenzePerMagazzino && (
+                            <DetailSection title="Giacenza per Magazzino">
+                                <div className="detail-grid">
+                                    {giacenzePerMagazzino.map((g) => (
+                                        <DetailField key={g.nome} label={g.nome} value={`${formatNumber(g.quantita)} ${prodotto.unita}`} />
+                                    ))}
+                                </div>
+                            </DetailSection>
+                        )}
 
                         <DetailSection title="Dati Articolo">
                             <div className="detail-grid">

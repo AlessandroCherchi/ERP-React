@@ -17,6 +17,12 @@ export const qk = {
     movimenti: {
         all: ['movimenti'] as const,
     },
+    magazzini: {
+        all: ['magazzini'] as const,
+    },
+    conte: {
+        all: ['conte'] as const,
+    },
     ordini: {
         all: ['ordini'] as const,
     },

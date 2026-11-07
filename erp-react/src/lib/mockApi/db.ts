@@ -18,7 +18,8 @@ import { getConfig } from '../../config/configStore';
 
 // v2: Prodotto.fornitore (nome) → Prodotto.fornitoreId (relazione per id)
 // v3: Cliente senza fatturato/ordini/credito (derivati da documenti e incassi)
-const SCHEMA_VERSION = 3;
+// v4: giacenze per magazzino, movimenti con magazzinoId
+const SCHEMA_VERSION = 4;
 const registry = new Map<string, unknown[]>();
 
 function prefix(): string {

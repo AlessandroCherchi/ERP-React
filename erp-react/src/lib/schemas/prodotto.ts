@@ -24,6 +24,7 @@ const quantita = v.pipe(
 
 export const movimentoSchema = v.object({
     tipo: v.picklist(['carico', 'scarico', 'rettifica'] as const),
+    magazzinoId: v.pipe(v.string(), v.minLength(1, 'Seleziona un magazzino')),
     quantita,
     causale: required,
     data: required,

@@ -640,3 +640,42 @@
     background: rgba(var(--erp-error-rgb), .07);
     color: var(--erp-error);
 }
+
+/* inventario fisico */
+.conta-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--erp-text-soft);
+}
+
+.conta-summary strong {
+    color: var(--erp-text);
+}
+
+.conta-row {
+    grid-template-columns: minmax(0, 1fr) 100px 100px 70px;
+}
+
+.conta-list {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.neg { color: var(--erp-error); font-weight: 600; }
+.pos { color: var(--erp-success); font-weight: 600; }
+
+.check-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.check-inline input {
+    accent-color: var(--erp-accent);
+    margin-right: 8px;
+}

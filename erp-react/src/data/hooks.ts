@@ -9,7 +9,8 @@ import {
 } from '@tanstack/react-query';
 import { api } from './api';
 import { qk } from './queryKeys';
-import type { IncassoInput, RettificaInput, RicevimentoInput } from './contracts';
+import type { AperturaContaInput, IncassoInput, RettificaInput, RicevimentoInput, TrasferimentoInput } from './contracts';
+import type { ContaInventario, Magazzino, MagazzinoFormValues } from '../types/magazzino';
 import type { AuditDescriptor } from '../types/audit';
 import type { ClienteFormValues } from '../types/cliente';
 import type { FornitoreFormValues } from '../types/fornitore';
@@ -90,6 +91,29 @@ export const useDeleteProdotto = (o?: Opts<void, number>) =>
     useEntityMutation(api.magazzino.removeProdotto, MAGAZZINO, o, (_d, id) => ({ icon: 'fa-trash-can', text: `Articolo #${id} eliminato`, modulo: 'inventario' }));
 export const useRegistraMovimento = (o?: Opts<Data<typeof api.magazzino.registraMovimento>, RettificaInput>) =>
     useEntityMutation(api.magazzino.registraMovimento, MAGAZZINO, o, (p, v) => ({ icon: 'fa-right-left', text: `${v.tipo === 'carico' ? 'Carico' : v.tipo === 'scarico' ? 'Scarico' : 'Rettifica'} ${p.sku}: ${v.quantita} ${p.unita}`, modulo: 'inventario' }));
+
+export const useTrasferisci = (o?: Opts<Data<typeof api.magazzino.trasferisci>, TrasferimentoInput>) =>
+    useEntityMutation(api.magazzino.trasferisci, MAGAZZINO, o, (p, v) => ({ icon: 'fa-right-left', text: `Trasferimento ${p.sku}: ${v.quantita} ${p.unita}`, modulo: 'inventario' }));
+
+export const useMagazzini = () => useQuery({ queryKey: qk.magazzini.all, queryFn: api.magazzino.listMagazzini });
+export const useCreateMagazzino = (o?: Opts<Magazzino, MagazzinoFormValues>) =>
+    useEntityMutation(api.magazzino.createMagazzino, [qk.magazzini.all], o, (m) => ({ icon: 'fa-warehouse', text: `Nuovo magazzino ${m.codice}`, modulo: 'inventario' }));
+export const useUpdateMagazzino = (o?: Opts<Magazzino, { id: number; data: MagazzinoFormValues }>) =>
+    useEntityMutation(({ id, data }) => api.magazzino.updateMagazzino(id, data), [qk.magazzini.all], o, (m) => ({ icon: 'fa-pen', text: `Magazzino ${m.codice} aggiornato`, modulo: 'inventario' }));
+export const useDeleteMagazzino = (o?: Opts<void, { id: number; giacenza: number }>) =>
+    useEntityMutation(({ id, giacenza }) => api.magazzino.removeMagazzino(id, giacenza), [qk.magazzini.all], o, (_d, v) => ({ icon: 'fa-trash-can', text: `Magazzino #${v.id} eliminato`, modulo: 'inventario' }));
+
+const CONTE = [qk.conte.all];
+export const useConte = () => useQuery({ queryKey: qk.conte.all, queryFn: api.magazzino.listConte });
+export const useApriConta = (o?: Opts<ContaInventario, AperturaContaInput>) =>
+    useEntityMutation(api.magazzino.apriConta, CONTE, o, (c) => ({ icon: 'fa-clipboard-list', text: `Inventario fisico ${c.numero} aperto`, modulo: 'inventario' }));
+export const useSalvaConteggi = (o?: Opts<ContaInventario, { id: number; contate: Array<number | null> }>) =>
+    useEntityMutation(({ id, contate }) => api.magazzino.salvaConteggi(id, contate), CONTE, o);
+/** La chiusura rettifica le giacenze: invalida anche il magazzino. */
+export const useChiudiConta = (o?: Opts<{ conta: ContaInventario; rettifiche: number }, number>) =>
+    useEntityMutation(api.magazzino.chiudiConta, [...CONTE, ...MAGAZZINO], o, (r) => ({ icon: 'fa-clipboard-check', text: `Inventario ${r.conta.numero} chiuso: ${r.rettifiche} rettifiche`, modulo: 'inventario' }));
+export const useAnnullaConta = (o?: Opts<ContaInventario, number>) =>
+    useEntityMutation(api.magazzino.annullaConta, CONTE, o, (c) => ({ icon: 'fa-ban', text: `Inventario ${c.numero} annullato`, modulo: 'inventario' }));
 
 // ------------------------- ORDINI DI VENDITA -------------------------
 

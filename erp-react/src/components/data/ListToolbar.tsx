@@ -7,9 +7,10 @@ export interface ChipOption<V extends string> {
 }
 
 interface ListToolbarProps<V extends string> {
-    search: string;
-    onSearchChange: (v: string) => void;
-    searchPlaceholder: string;
+    /** Assenti = nessun campo di ricerca (elenchi brevi). */
+    search?: string;
+    onSearchChange?: (v: string) => void;
+    searchPlaceholder?: string;
     /** Filtro rapido a chip (es. stato). */
     chips?: { value: V; options: ChipOption<V>[]; onChange: (v: V) => void; label: string };
     /** Filtri aggiuntivi (select, toggle) a destra delle chip. */
@@ -28,17 +29,19 @@ export function ListToolbar<V extends string>({
     return (
         <section className="toolbar-row">
             <div className="toolbar-left">
-                <div className="search-box search-box--table">
-                    <i className="fa-solid fa-magnifying-glass" />
-                    <input
-                        type="search"
-                        placeholder={searchPlaceholder}
-                        aria-label={searchPlaceholder}
-                        autoComplete="off"
-                        value={search}
-                        onChange={(e) => onSearchChange(e.target.value)}
-                    />
-                </div>
+                {onSearchChange && (
+                    <div className="search-box search-box--table">
+                        <i className="fa-solid fa-magnifying-glass" />
+                        <input
+                            type="search"
+                            placeholder={searchPlaceholder}
+                            aria-label={searchPlaceholder ?? t('common.search')}
+                            autoComplete="off"
+                            value={search ?? ''}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                        />
+                    </div>
+                )}
 
                 {chips && (
                     <div className="filter-group" role="group" aria-label={chips.label}>

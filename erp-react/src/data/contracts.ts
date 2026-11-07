@@ -14,9 +14,12 @@ import type { RicevimentoInput } from '../lib/mockApi/acquisti';
 import type { Fattura, FatturaFormValues, Incasso } from '../types/fattura';
 import type { IncassoInput } from '../lib/mockApi/fatture';
 import type { AuditEntry } from '../types/audit';
+import type { ContaInventario, Magazzino, MagazzinoFormValues } from '../types/magazzino';
+import type { TrasferimentoInput } from '../lib/mockApi/inventario';
+import type { AperturaContaInput } from '../lib/mockApi/conte';
 import type { RettificaInput } from '../lib/mockApi/inventario';
 
-export type { ClienteRef, RettificaInput, RicevimentoInput, IncassoInput };
+export type { ClienteRef, RettificaInput, RicevimentoInput, IncassoInput, TrasferimentoInput, AperturaContaInput };
 
 export interface ClientiApi {
     list(): Promise<Cliente[]>;
@@ -41,6 +44,16 @@ export interface MagazzinoApi {
     updateProdotto(id: number, data: ProdottoForm): Promise<Prodotto>;
     removeProdotto(id: number): Promise<void>;
     registraMovimento(input: RettificaInput): Promise<Prodotto>;
+    trasferisci(input: TrasferimentoInput): Promise<Prodotto>;
+    listMagazzini(): Promise<Magazzino[]>;
+    createMagazzino(data: MagazzinoFormValues): Promise<Magazzino>;
+    updateMagazzino(id: number, data: MagazzinoFormValues): Promise<Magazzino>;
+    removeMagazzino(id: number, giacenzaResidua: number): Promise<void>;
+    listConte(): Promise<ContaInventario[]>;
+    apriConta(input: AperturaContaInput): Promise<ContaInventario>;
+    salvaConteggi(id: number, contate: Array<number | null>): Promise<ContaInventario>;
+    chiudiConta(id: number): Promise<{ conta: ContaInventario; rettifiche: number }>;
+    annullaConta(id: number): Promise<ContaInventario>;
 }
 
 export interface OrdiniApi {

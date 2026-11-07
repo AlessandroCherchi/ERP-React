@@ -6,7 +6,9 @@
 // /api/v1/prodotti e /api/v1/movimenti, stesso envelope ApiResponse
 // e stessa firma delle funzioni.
 
-import { applicaMovimento, type Movimento, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
+import { type Movimento, type MovimentoManuale, type Prodotto } from '../../types/prodotto';
+import { applicaInMagazzino, giacenzaIn, totaleGiacenze, trasferisci as trasferisciGiacenze, type Giacenze } from '../../types/magazzino';
+import { magazzinoPrincipaleId } from './magazzini';
 import type { ProdottoForm } from '../../types/prodotto';
 import { parseNum } from '../format';
 import { collection, delay, nextIdOf } from './db';
@@ -15,7 +17,7 @@ import { costoMedioPonderato } from '../../types/acquisto';
 
 // I primi 5 articoli sono gli stessi "Top Prodotti" della Dashboard:
 // le due pagine raccontano lo stesso magazzino.
-const SEED_PRODOTTI: Prodotto[] = [
+const SEED_PRODOTTI: Omit<Prodotto, 'giacenze'>[] = [
     { id: 1, sku: 'SKU-4501', nome: 'Widget Pro X200', categoria: 'Elettronica', fornitoreId: 1, costo: 32, prezzo: 54, giacenza: 218, scorta: 40, unita: 'pz', iva: 22, ubicazione: 'A-01-2', descrizione: 'Modulo di controllo industriale con display OLED e connettività Modbus.' },
     { id: 2, sku: 'SKU-4502', nome: 'Sensore IoT Mk3', categoria: 'Componenti', fornitoreId: 2, costo: 18.5, prezzo: 44.1, giacenza: 156, scorta: 30, unita: 'pz', iva: 22, ubicazione: 'A-03-1', descrizione: 'Sensore ambientale multiparametro con radio LoRaWAN integrata.' },
     { id: 3, sku: 'SKU-4503', nome: 'Pannello LED Ultra', categoria: 'Illuminazione', fornitoreId: 3, costo: 26, prezzo: 46, giacenza: 24, scorta: 35, unita: 'pz', iva: 22, ubicazione: 'B-02-4', descrizione: 'Pannello 60x60 4000K, 40W, driver dimmerabile DALI.' },
@@ -46,7 +48,7 @@ const SEED_PRODOTTI: Prodotto[] = [
 
 // Storico movimenti: solo per gli articoli più movimentati (gli altri
 // mostrano l'empty state nel pannello dettaglio, come in produzione).
-const SEED_MOVIMENTI: Movimento[] = [
+const SEED_MOVIMENTI: Array<Omit<Movimento, 'magazzinoId'> & { magazzinoId?: number }> = [
     { id: 1, prodottoId: 1, tipo: 'carico', quantita: 120, causale: 'Ordine fornitore #F-2291', data: '2026-08-14', giacenzaFinale: 218, note: 'Consegna completa, merce conforme.' },
     { id: 2, prodottoId: 1, tipo: 'scarico', quantita: 45, causale: 'Ordine cliente ORD-3088', data: '2026-08-11', giacenzaFinale: 98, note: '', ordineId: 3 },
     { id: 3, prodottoId: 1, tipo: 'scarico', quantita: 30, causale: 'Ordine cliente ORD-3081', data: '2026-08-05', giacenzaFinale: 143, note: '', ordineId: 1 },
@@ -59,14 +61,40 @@ const SEED_MOVIMENTI: Movimento[] = [
     { id: 10, prodottoId: 9, tipo: 'rettifica', quantita: 8, causale: 'Inventario fisico Q3', data: '2026-08-01', giacenzaFinale: 8, note: 'Allineamento dopo conta fisica.' },
 ];
 
-const store = collection('prodotti', SEED_PRODOTTI);
-const movimenti = collection('movimenti', SEED_MOVIMENTI);
+/**
+ * Distribuzione iniziale: tutto nel magazzino Sede, tranne il cavo Cat.7
+ * ripartito con il Deposito Nord (per mostrare giacenze e trasferimenti).
+ */
+const SEED_CON_GIACENZE: Prodotto[] = SEED_PRODOTTI.map((p) => ({
+    ...p,
+    giacenze: (p.id === 4 ? { '1': 440, '2': 200 } : { '1': p.giacenza }) as Giacenze,
+}));
+
+const store = collection('prodotti', SEED_CON_GIACENZE);
+const movimenti = collection('movimenti', SEED_MOVIMENTI.map((m) => ({ ...m, magazzinoId: m.magazzinoId ?? 1 })));
 let nextId = nextIdOf(store);
 let nextMovimentoId = nextIdOf(movimenti);
 
+type MovimentoMeta = Pick<Movimento, 'causale' | 'data' | 'note'> & Partial<Pick<Movimento, 'ordineId' | 'acquistoId' | 'magazzinoDestId'>>;
 
-/** Converte i valori string del form nei tipi numerici del dominio. */
-function fromForm(data: ProdottoForm): Omit<Prodotto, 'id'> {
+/**
+ * Unico punto che scrive giacenze: aggiorna il magazzino interessato, il
+ * totale dell'articolo e registra il movimento. Tutte le operazioni di
+ * magazzino (manuali, ordini, ricevimenti, conte, trasferimenti) passano qui,
+ * così registro movimenti e giacenze non possono divergere.
+ */
+function movimenta(idx: number, magazzinoId: number, tipo: MovimentoManuale, quantita: number, meta: MovimentoMeta, patch: Partial<Prodotto> = {}): Prodotto {
+    const prodotto = store[idx]!;
+    const giacenze = applicaInMagazzino(prodotto.giacenze, magazzinoId, tipo, quantita);
+    const giacenzaFinale = totaleGiacenze(giacenze);
+    store[idx] = { ...prodotto, ...patch, giacenze, giacenza: giacenzaFinale };
+    movimenti.unshift({ id: nextMovimentoId++, prodottoId: prodotto.id, tipo, quantita, giacenzaFinale, magazzinoId, ...meta });
+    return store[idx]!;
+}
+
+
+/** Converte i valori string del form nei tipi numerici del dominio (giacenze escluse). */
+function fromForm(data: ProdottoForm): Omit<Prodotto, 'id' | 'giacenze' | 'giacenza'> {
     return {
         sku: data.sku.trim(),
         nome: data.nome.trim(),
@@ -74,7 +102,6 @@ function fromForm(data: ProdottoForm): Omit<Prodotto, 'id'> {
         fornitoreId: data.fornitoreId ? Number(data.fornitoreId) : null,
         costo: parseNum(data.costo),
         prezzo: parseNum(data.prezzo),
-        giacenza: parseNum(data.giacenza),
         scorta: parseNum(data.scorta),
         unita: data.unita,
         iva: parseNum(data.iva),
@@ -95,7 +122,9 @@ export async function fetchMovimenti(): Promise<Movimento[]> {
 
 export async function createProdotto(data: ProdottoForm): Promise<Prodotto> {
     await delay();
-    const prodotto: Prodotto = { ...fromForm(data), id: nextId++ };
+    // La giacenza iniziale entra nel magazzino principale.
+    const iniziale = parseNum(data.giacenza);
+    const prodotto: Prodotto = { ...fromForm(data), id: nextId++, giacenza: iniziale, giacenze: { [String(magazzinoPrincipaleId())]: iniziale } };
     store.push(prodotto);
     return prodotto;
 }
@@ -104,6 +133,7 @@ export async function updateProdotto(id: number, data: ProdottoForm): Promise<Pr
     await delay();
     const idx = store.findIndex((p) => p.id === id);
     if (idx === -1) throw new Error('Prodotto non trovato');
+    // In modifica la giacenza non cambia: si movimenta solo dal registro.
     store[idx] = { ...store[idx]!, ...fromForm(data) };
     return store[idx]!;
 }
@@ -116,39 +146,63 @@ export async function deleteProdotto(id: number): Promise<void> {
 
 export interface RettificaInput {
     prodottoId: number;
-    tipo: MovimentoTipo;
+    tipo: MovimentoManuale;
+    /** Magazzino interessato; assente = principale. */
+    magazzinoId?: number;
     quantita: number;
     causale: string;
     data: string;
     note: string;
 }
 
-/**
- * Registra un movimento e aggiorna la giacenza in modo atomico.
- * Il nuovo saldo è calcolato con applicaMovimento(), la stessa funzione
- * usata dall'anteprima nel modale: preview e persistenza non divergono.
- */
+/** Registra un movimento manuale (carico, scarico, rettifica) su un magazzino. */
 export async function registraMovimento(input: RettificaInput): Promise<Prodotto> {
     await delay();
     const idx = store.findIndex((p) => p.id === input.prodottoId);
     if (idx === -1) throw new Error('Prodotto non trovato');
+    return movimenta(idx, input.magazzinoId ?? magazzinoPrincipaleId(), input.tipo, input.quantita, { causale: input.causale, data: input.data, note: input.note });
+}
 
+export interface TrasferimentoInput {
+    prodottoId: number;
+    da: number;
+    a: number;
+    quantita: number;
+    data: string;
+    note: string;
+}
+
+/** Trasferisce merce fra magazzini: un movimento "trasferimento", totale invariato. */
+export async function trasferisci(input: TrasferimentoInput): Promise<Prodotto> {
+    await delay();
+    const idx = store.findIndex((p) => p.id === input.prodottoId);
+    if (idx === -1) throw new Error('Prodotto non trovato');
     const prodotto = store[idx]!;
-    const giacenzaFinale = applicaMovimento(prodotto.giacenza, input.tipo, input.quantita);
-
-    store[idx] = { ...prodotto, giacenza: giacenzaFinale };
+    const giacenze = trasferisciGiacenze(prodotto.giacenze, input.da, input.a, input.quantita);
+    store[idx] = { ...prodotto, giacenze };
     movimenti.unshift({
-        id: nextMovimentoId++,
-        prodottoId: input.prodottoId,
-        tipo: input.tipo,
-        quantita: input.quantita,
-        causale: input.causale,
-        data: input.data,
-        giacenzaFinale,
-        note: input.note,
+        id: nextMovimentoId++, prodottoId: prodotto.id, tipo: 'trasferimento', quantita: input.quantita,
+        causale: 'Trasferimento tra magazzini', data: input.data, note: input.note,
+        giacenzaFinale: prodotto.giacenza, magazzinoId: input.da, magazzinoDestId: input.a,
     });
-
     return store[idx]!;
+}
+
+/** Rettifiche in blocco da inventario fisico (stesso magazzino, tutto o niente). */
+export function rettificheDaConta(input: { magazzinoId: number; numero: string; data: string; righe: Array<{ prodottoId: number; contata: number }> }): number {
+    let n = 0;
+    for (const r of input.righe) {
+        const idx = store.findIndex((p) => p.id === r.prodottoId);
+        if (idx === -1 || giacenzaIn(store[idx]!.giacenze, input.magazzinoId) === r.contata) continue;
+        movimenta(idx, input.magazzinoId, 'rettifica', r.contata, { causale: `Inventario fisico ${input.numero}`, data: input.data, note: '' });
+        n++;
+    }
+    return n;
+}
+
+/** Lettura sincrona per l'apertura di una conta (snapshot nello stesso istante). */
+export function prodottiSnapshot(): Prodotto[] {
+    return structuredClone(store);
 }
 
 // ------------------------- EVASIONE ORDINI -------------------------
@@ -187,9 +241,9 @@ export function verificaDisponibilita(righe: RigaDaEvadere[]): Scoperto[] {
     for (const [prodottoId, richiesta] of aggrega(righe)) {
         const p = store.find((x) => x.id === prodottoId);
         if (!p) continue;
-        if (p.giacenza < richiesta) {
-            scoperti.push({ prodottoId, nome: p.nome, richiesta, disponibile: p.giacenza });
-        }
+        // Le vendite si evadono dal magazzino principale.
+        const disponibile = giacenzaIn(p.giacenze, magazzinoPrincipaleId());
+        if (disponibile < richiesta) scoperti.push({ prodottoId, nome: p.nome, richiesta, disponibile });
     }
     return scoperti;
 }
@@ -244,21 +298,7 @@ export async function movimentaOrdine(input: MovimentoOrdineInput): Promise<void
         // movimentare.
         if (idx === -1) continue;
 
-        const prodotto = store[idx]!;
-        const giacenzaFinale = applicaMovimento(prodotto.giacenza, input.tipo, quantita);
-        store[idx] = { ...prodotto, giacenza: giacenzaFinale };
-
-        movimenti.unshift({
-            id: nextMovimentoId++,
-            prodottoId,
-            tipo: input.tipo,
-            quantita,
-            causale,
-            data: input.data,
-            giacenzaFinale,
-            note: '',
-            ordineId: input.ordineId,
-        });
+        movimenta(idx, magazzinoPrincipaleId(), input.tipo, quantita, { causale, data: input.data, note: '', ordineId: input.ordineId });
     }
 }
 
@@ -285,28 +325,15 @@ export interface RigaRicevuta {
  * TODO(step Backend): stessa transazione server-side dell'aggiornamento
  * dell'ordine d'acquisto.
  */
-export function caricaDaAcquisto(input: { acquistoId: number; numero: string; data: string; righe: RigaRicevuta[] }): void {
+export function caricaDaAcquisto(input: { acquistoId: number; numero: string; data: string; righe: RigaRicevuta[]; magazzinoId?: number }): void {
+    const magazzinoId = input.magazzinoId ?? magazzinoPrincipaleId();
     for (const r of input.righe) {
         if (r.quantita <= 0) continue;
         const idx = store.findIndex((p) => p.id === r.prodottoId);
         if (idx === -1) continue;
         const prodotto = store[idx]!;
-        const giacenzaFinale = applicaMovimento(prodotto.giacenza, 'carico', r.quantita);
-        store[idx] = {
-            ...prodotto,
-            giacenza: giacenzaFinale,
-            costo: costoMedioPonderato(prodotto.giacenza, prodotto.costo, r.quantita, r.costoUnitario),
-        };
-        movimenti.unshift({
-            id: nextMovimentoId++,
-            prodottoId: r.prodottoId,
-            tipo: 'carico',
-            quantita: r.quantita,
-            causale: `Ricevimento ${input.numero}`,
-            data: input.data,
-            giacenzaFinale,
-            note: '',
-            acquistoId: input.acquistoId,
-        });
+        movimenta(idx, magazzinoId, 'carico', r.quantita,
+            { causale: `Ricevimento ${input.numero}`, data: input.data, note: '', acquistoId: input.acquistoId },
+            { costo: costoMedioPonderato(prodotto.giacenza, prodotto.costo, r.quantita, r.costoUnitario) });
     }
 }
