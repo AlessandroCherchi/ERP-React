@@ -263,3 +263,8 @@ export async function cambiaStatoOrdine(id: number, nuovo: OrdineStato): Promise
 }
 
 export { DisponibilitaInsufficienteError };
+
+/** Lettura sincrona per altri adapter mock (fatturazione da ordini). */
+export function ordiniSnapshot(): Ordine[] {
+    return structuredClone(store);
+}

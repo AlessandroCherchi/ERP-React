@@ -15,7 +15,8 @@ import type { OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { RettificaInput } from './contracts';
 import type { Utente, UtenteFormValues } from '../types/utente';
 import type { AcquistoFormValues, OrdineAcquisto } from '../types/acquisto';
-import type { RicevimentoInput } from './contracts';
+import type { IncassoInput, RicevimentoInput } from './contracts';
+import type { Fattura, FatturaFormValues, Incasso } from '../types/fattura';
 
 /** Opzioni che una pagina può passare: callback di feedback, non invalidazioni. */
 type MutationHookOptions<TData, TVars> = Pick<
@@ -118,3 +119,19 @@ export const useCambiaStatoAcquisto = (o?: MutationHookOptions<OrdineAcquisto, {
 /** Il ricevimento carica il magazzino e ricalcola il costo medio: invalida anche giacenze e movimenti. */
 export const useRiceviAcquisto = (o?: MutationHookOptions<OrdineAcquisto, RicevimentoInput>) =>
     useEntityMutation(api.acquisti.ricevi, [qk.acquisti.all, ...MAGAZZINO], o);
+
+// ------------------------- FATTURE E INCASSI -------------------------
+
+const FATTURE = [qk.fatture.all];
+const CREDITI = [qk.fatture.all, qk.incassi.all];
+
+export const useFatture = () => useQuery({ queryKey: qk.fatture.all, queryFn: api.fatture.list });
+export const useIncassi = () => useQuery({ queryKey: qk.incassi.all, queryFn: api.fatture.listIncassi });
+export const useCreateFattura = (o?: MutationHookOptions<Fattura, FatturaFormValues>) => useEntityMutation(api.fatture.create, FATTURE, o);
+export const useUpdateFattura = (o?: MutationHookOptions<Fattura, { id: number; data: FatturaFormValues }>) =>
+    useEntityMutation(({ id, data }) => api.fatture.update(id, data), FATTURE, o);
+export const useDeleteFattura = (o?: MutationHookOptions<void, number>) => useEntityMutation(api.fatture.remove, FATTURE, o);
+export const useEmettiFattura = (o?: MutationHookOptions<Fattura, number>) => useEntityMutation(api.fatture.emetti, FATTURE, o);
+export const useInviaSdi = (o?: MutationHookOptions<Fattura, number>) => useEntityMutation(api.fatture.inviaSdi, FATTURE, o);
+export const useRegistraIncasso = (o?: MutationHookOptions<Incasso, IncassoInput>) => useEntityMutation(api.fatture.registraIncasso, CREDITI, o);
+export const useEliminaIncasso = (o?: MutationHookOptions<void, number>) => useEntityMutation(api.fatture.eliminaIncasso, CREDITI, o);

@@ -11,9 +11,11 @@ import type { Ordine, OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { Utente, UtenteFormValues } from '../types/utente';
 import type { AcquistoFormValues, OrdineAcquisto } from '../types/acquisto';
 import type { RicevimentoInput } from '../lib/mockApi/acquisti';
+import type { Fattura, FatturaFormValues, Incasso } from '../types/fattura';
+import type { IncassoInput } from '../lib/mockApi/fatture';
 import type { RettificaInput } from '../lib/mockApi/inventario';
 
-export type { ClienteRef, RettificaInput, RicevimentoInput };
+export type { ClienteRef, RettificaInput, RicevimentoInput, IncassoInput };
 
 export interface ClientiApi {
     list(): Promise<Cliente[]>;
@@ -64,6 +66,19 @@ export interface AcquistiApi {
     ricevi(input: RicevimentoInput): Promise<OrdineAcquisto>;
 }
 
+export interface FattureApi {
+    list(): Promise<Fattura[]>;
+    listIncassi(): Promise<Incasso[]>;
+    create(data: FatturaFormValues): Promise<Fattura>;
+    update(id: number, data: FatturaFormValues): Promise<Fattura>;
+    remove(id: number): Promise<void>;
+    /** Numerazione fiscale e immutabilità: operazione server. */
+    emetti(id: number): Promise<Fattura>;
+    inviaSdi(id: number): Promise<Fattura>;
+    registraIncasso(input: IncassoInput): Promise<Incasso>;
+    eliminaIncasso(id: number): Promise<void>;
+}
+
 export interface DataApi {
     clienti: ClientiApi;
     fornitori: FornitoriApi;
@@ -71,4 +86,5 @@ export interface DataApi {
     ordini: OrdiniApi;
     utenti: UtentiApi;
     acquisti: AcquistiApi;
+    fatture: FattureApi;
 }

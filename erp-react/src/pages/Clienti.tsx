@@ -10,10 +10,11 @@ import { useStagger } from '../hooks/useStagger';
 import { useListState } from '../hooks/useListState';
 import { useCrudDialogs } from '../hooks/useCrudDialogs';
 import { useDeleteConfirm } from '../hooks/useDeleteConfirm';
-import { useClienti, useCreateCliente, useDeleteCliente, useUpdateCliente } from '../data';
+import { useClienti, useCreateCliente, useDeleteCliente, useFatture, useIncassi, useOrdini, useUpdateCliente } from '../data';
+import { statisticheClienti } from '../types/statistiche';
 import { usePermissions } from '../auth/hooks';
 import { useConfig } from '../config/configStore';
-import { formatEuro, formatNumber } from '../lib/format';
+import { formatEuro, formatNumber, today } from '../lib/format';
 import { exportCsv } from '../lib/csv';
 import { byKey, queryRows } from '../lib/listQuery';
 import { initials } from '../lib/text';
@@ -39,6 +40,11 @@ export function Clienti() {
     const { pageSize } = useConfig();
 
     const { data: clienti = [] } = useClienti();
+    const { data: ordini = [] } = useOrdini();
+    const { data: fatture = [] } = useFatture();
+    const { data: incassi = [] } = useIncassi();
+    // Indicatori commerciali derivati dai documenti, non campi dell'anagrafica.
+    const stats = useMemo(() => statisticheClienti(ordini, fatture, incassi, today()), [ordini, fatture, incassi]);
     const list = useListState<SortKey, { stato: StatoFilter }>({ sort: { key: 'id', dir: 'asc' }, filters: { stato: 'all' } });
     const dlg = useCrudDialogs(clienti);
 
@@ -50,9 +56,9 @@ export function Clienti() {
         filters: list.filters.stato === 'all' ? [] : [(c) => c.stato === list.filters.stato],
         search: list.search,
         searchFields: (c) => [c.nome, c.email, c.citta, c.telefono, c.piva],
-        sort: { key: list.sortKey, dir: list.sortDir, value: byKey },
+        sort: { key: list.sortKey, dir: list.sortDir, value: (c, k) => (k === 'fatturato' ? stats(c.id).fatturato : byKey(c, k)) },
         page: { current: list.page, size: pageSize },
-    }), [clienti, list.filters.stato, list.search, list.sortKey, list.sortDir, list.page, pageSize]);
+    }), [clienti, list.filters.stato, list.search, list.sortKey, list.sortDir, list.page, pageSize, stats]);
 
     function handleDelete(c: Cliente) {
         confirmDelete(`"${c.nome}"`, () => deleteMut.mutate(c.id));
@@ -77,9 +83,9 @@ export function Clienti() {
             { header: 'PEC', value: (c) => c.pec },
             { header: 'SDI', value: (c) => c.sdi },
             { header: 'Stato', value: (c) => STATO_CLIENTE_LABEL[c.stato] },
-            { header: 'Fatturato', value: (c) => c.fatturato },
-            { header: 'Ordini', value: (c) => c.ordini },
-            { header: 'Credito', value: (c) => c.credito },
+            { header: 'Fatturato', value: (c) => stats(c.id).fatturato },
+            { header: 'Ordini', value: (c) => stats(c.id).ordini },
+            { header: 'Credito', value: (c) => stats(c.id).credito },
         ]);
         toast('Export CSV completato.', 'success');
     }
@@ -90,7 +96,7 @@ export function Clienti() {
         { id: 'email', header: 'Email', sortKey: 'email', cell: (c) => c.email },
         { id: 'telefono', header: 'Telefono', cell: (c) => c.telefono },
         { id: 'citta', header: 'Città', sortKey: 'citta', cell: (c) => c.citta },
-        { id: 'fatturato', header: 'Fatturato', sortKey: 'fatturato', className: 'cell-strong', cell: (c) => formatEuro(c.fatturato, 0) },
+        { id: 'fatturato', header: 'Fatturato', sortKey: 'fatturato', className: 'cell-strong', cell: (c) => formatEuro(stats(c.id).fatturato, 0) },
         { id: 'stato', header: 'Stato', sortKey: 'stato', cell: (c) => <span className={`status-badge status-badge--${c.stato}`}>{STATO_CLIENTE_LABEL[c.stato]}</span> },
     ];
 
@@ -109,7 +115,7 @@ export function Clienti() {
     // KPI derivati dall'anagrafica corrente
     const attivi = clienti.filter((c) => c.stato === 'attivo').length;
     const prospect = clienti.filter((c) => c.stato === 'prospect').length;
-    const creditoTot = clienti.reduce((s, c) => s + c.credito, 0);
+    const creditoTot = clienti.reduce((s, c) => s + stats(c.id).credito, 0);
 
     return (
         <AppLayout pageClass="clienti-page">
@@ -151,7 +157,7 @@ export function Clienti() {
                 />
             </div>
 
-            <ClientDetailPanel cliente={detail} open={dlg.detailOpen} onClose={dlg.closeDetail} actions={panelActions} />
+            <ClientDetailPanel cliente={detail} stats={stats(detail?.id ?? 0)} open={dlg.detailOpen} onClose={dlg.closeDetail} actions={panelActions} />
 
             <ClientModal
                 open={dlg.modalOpen}

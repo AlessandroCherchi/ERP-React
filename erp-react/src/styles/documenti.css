@@ -579,3 +579,64 @@
         grid-template-columns: minmax(0, 1fr) 1fr;
     }
 }
+
+/* elenco con checkbox (scelta ordini da fatturare) */
+.check-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.check-list label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--erp-radius);
+    background: var(--erp-bg);
+    box-shadow: -3px -3px 6px var(--erp-light), 3px 3px 6px var(--erp-shadow-dark-2);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.check-list input {
+    accent-color: var(--erp-accent);
+    width: 16px;
+    height: 16px;
+}
+
+.check-list span {
+    flex: 1;
+}
+
+.check-list em {
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* stati SDI e pagamento */
+.status-badge--da-inviare { color: var(--erp-text-soft); background: rgba(var(--erp-neutral-400-rgb), .2); }
+.status-badge--consegnata,
+.status-badge--pagata { color: var(--erp-success); background: rgba(var(--erp-success-rgb), .08); }
+.status-badge--inviata,
+.status-badge--da-incassare { color: var(--erp-info); background: rgba(var(--erp-info-rgb), .08); }
+.status-badge--mancata-consegna,
+.status-badge--parziale { color: var(--erp-warning); background: rgba(var(--erp-warning-rgb), .1); }
+.status-badge--scartata,
+.status-badge--scaduta { color: var(--erp-error); background: rgba(var(--erp-error-rgb), .08); }
+.status-badge--emessa { color: var(--erp-accent); background: rgba(var(--erp-accent-rgb), .08); }
+
+.esito-sdi {
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-radius: var(--erp-radius);
+    font-size: 12.5px;
+    background: rgba(var(--erp-info-rgb), .06);
+}
+
+.esito-sdi--errore {
+    background: rgba(var(--erp-error-rgb), .07);
+    color: var(--erp-error);
+}

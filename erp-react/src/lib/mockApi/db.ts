@@ -17,7 +17,8 @@ import { safeStorage } from '../storage';
 import { getConfig } from '../../config/configStore';
 
 // v2: Prodotto.fornitore (nome) → Prodotto.fornitoreId (relazione per id)
-const SCHEMA_VERSION = 2;
+// v3: Cliente senza fatturato/ordini/credito (derivati da documenti e incassi)
+const SCHEMA_VERSION = 3;
 const registry = new Map<string, unknown[]>();
 
 function prefix(): string {

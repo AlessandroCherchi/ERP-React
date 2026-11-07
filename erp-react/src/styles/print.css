@@ -1,0 +1,206 @@
+/* ============================================================
+   ANTEPRIMA E STAMPA DOCUMENTI
+   A schermo: foglio A4 su overlay. In stampa: solo il foglio,
+   bianco e nero leggibile, senza ombre né sfondi.
+============================================================ */
+
+.print-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    overflow: auto;
+    padding: 24px;
+    background: rgba(var(--erp-black-rgb), .45);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.print-toolbar {
+    display: flex;
+    gap: 12px;
+}
+
+.print-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 16mm 14mm;
+    background: var(--erp-light);
+    color: var(--erp-black);
+    font-family: var(--erp-font);
+    font-size: 10pt;
+    box-shadow: 0 10px 40px rgba(var(--erp-black-rgb), .3);
+}
+
+.print-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--erp-accent);
+}
+
+.print-company {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.print-company img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.print-company div,
+.print-parties > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.print-company strong {
+    font-size: 12pt;
+}
+
+.print-doc {
+    text-align: right;
+}
+
+.print-doc h1 {
+    font-size: 16pt;
+    color: var(--erp-accent);
+    margin-bottom: 4px;
+}
+
+.print-parties {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 18px 0;
+}
+
+.print-parties small {
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-size: 8pt;
+    color: var(--erp-text-soft);
+}
+
+.print-strong {
+    font-weight: 700;
+}
+
+.print-parties dl {
+    display: grid;
+    gap: 4px;
+    min-width: 200px;
+}
+
+.print-parties dl div,
+.print-totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.print-parties dt {
+    color: var(--erp-text-soft);
+}
+
+.print-table,
+.print-iva {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.print-table th,
+.print-iva th {
+    text-align: left;
+    font-size: 8pt;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--erp-black);
+    padding: 6px 4px;
+}
+
+.print-table td,
+.print-iva td {
+    padding: 5px 4px;
+    border-bottom: 1px solid var(--erp-shadow-dark);
+    vertical-align: top;
+}
+
+.print-table td:nth-child(n + 3),
+.print-table th:nth-child(n + 3) {
+    text-align: right;
+}
+
+.print-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 18px;
+    align-items: flex-start;
+}
+
+.print-iva {
+    max-width: 55%;
+}
+
+.print-totals {
+    min-width: 220px;
+    display: grid;
+    gap: 6px;
+}
+
+.print-grand {
+    border-top: 2px solid var(--erp-black);
+    padding-top: 6px;
+    font-size: 12pt;
+    font-weight: 700;
+}
+
+.print-note {
+    margin-top: 18px;
+    font-size: 9pt;
+}
+
+.print-footer {
+    margin-top: 24px;
+    font-size: 8pt;
+    color: var(--erp-text-soft);
+    text-align: center;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .print-area,
+    .print-area * {
+        visibility: visible;
+    }
+
+    .print-overlay {
+        position: static;
+        padding: 0;
+        background: none;
+    }
+
+    .print-area {
+        position: absolute;
+        inset: 0;
+        box-shadow: none;
+    }
+
+    .no-print {
+        display: none;
+    }
+}

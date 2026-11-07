@@ -10,6 +10,7 @@ import * as inventario from '../lib/mockApi/inventario';
 import * as ordini from '../lib/mockApi/ordini';
 import * as utenti from '../lib/mockApi/utenti';
 import * as acquisti from '../lib/mockApi/acquisti';
+import * as fatture from '../lib/mockApi/fatture';
 
 const mockApi: DataApi = {
     clienti: {
@@ -54,6 +55,17 @@ const mockApi: DataApi = {
         remove: acquisti.deleteAcquisto,
         cambiaStato: acquisti.cambiaStatoAcquisto,
         ricevi: acquisti.riceviAcquisto,
+    },
+    fatture: {
+        list: fatture.fetchFatture,
+        listIncassi: fatture.fetchIncassi,
+        create: fatture.createFattura,
+        update: fatture.updateFattura,
+        remove: fatture.deleteFattura,
+        emetti: fatture.emettiFattura,
+        inviaSdi: fatture.inviaSdi,
+        registraIncasso: fatture.registraIncasso,
+        eliminaIncasso: fatture.eliminaIncasso,
     },
 };
 

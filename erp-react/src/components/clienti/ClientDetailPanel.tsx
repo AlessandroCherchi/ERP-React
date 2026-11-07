@@ -3,16 +3,19 @@ import {
 } from '../ui/DetailPanelShell';
 import { formatEuro } from '../../lib/format';
 import { STATO_CLIENTE_LABEL, type Cliente } from '../../types/cliente';
+import type { StatisticheCliente } from '../../types/statistiche';
 
 interface ClientDetailPanelProps {
     cliente: Cliente | null;
+    /** Indicatori derivati da ordini, fatture e incassi. */
+    stats: StatisticheCliente;
     open: boolean;
     onClose: () => void;
     actions: PanelAction[];
 }
 
 /** Pannello dettaglio cliente: anagrafica, dati fiscali, panoramica economica. */
-export function ClientDetailPanel({ cliente, open, onClose, actions }: ClientDetailPanelProps) {
+export function ClientDetailPanel({ cliente, stats, open, onClose, actions }: ClientDetailPanelProps) {
     return (
         <DetailPanelShell open={open} title="Dettaglio Cliente" onClose={onClose} footer={<PanelActions actions={actions} />}>
             {cliente && (
@@ -43,9 +46,9 @@ export function ClientDetailPanel({ cliente, open, onClose, actions }: ClientDet
 
                     <DetailSection title="Panoramica Economica">
                         <div className="detail-stats-row">
-                            <DetailStat label="Fatturato" value={formatEuro(cliente.fatturato, 0)} />
-                            <DetailStat label="Ordini" value={cliente.ordini} />
-                            <DetailStat label="Credito" value={formatEuro(cliente.credito, 0)} />
+                            <DetailStat label="Fatturato" value={formatEuro(stats.fatturato, 0)} />
+                            <DetailStat label="Ordini" value={stats.ordini} />
+                            <DetailStat label="Credito" value={formatEuro(stats.credito, 0)} />
                         </div>
                     </DetailSection>
 

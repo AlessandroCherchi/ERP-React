@@ -26,4 +26,10 @@ export const qk = {
     acquisti: {
         all: ['acquisti'] as const,
     },
+    fatture: {
+        all: ['fatture'] as const,
+    },
+    incassi: {
+        all: ['incassi'] as const,
+    },
 };

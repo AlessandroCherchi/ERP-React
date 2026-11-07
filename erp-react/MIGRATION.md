@@ -1,6 +1,6 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 + Fasi A, B, C completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+Stato: **Step 6 + Fasi A, B, C, E completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
 piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
@@ -352,12 +352,40 @@ Le regole fra layer sono verificate a ogni `npm test`: pagine/componenti non
 importano i mock, il dominio non dipende da React/UI, niente colori
 esadecimali nei componenti.
 
+## Fase E — Fatture e Contabilità (ciclo attivo) — DONE
+
+### Fatture (`/fatture`)
+- Bozze di **fattura (TD01)**, **differita (TD24)** e **nota di credito (TD04)**;
+  **fatturazione da ordini consegnati** (un ordine → TD01, più ordini → TD24),
+  con blocco della doppia fatturazione.
+- **Emissione**: il numero fiscale (progressivo annuale `AAAA/NNNN`) è
+  assegnato all'emissione dall'adapter, come farà il backend; un documento
+  emesso è immutabile e si corregge solo con nota di credito.
+- **SDI simulato** con codici reali di notifica: consegnata, mancata consegna
+  (nessun recapito), **scarto 00305** (P.IVA non valida) con reinvio dopo la
+  correzione dell'anagrafica. Nessun XML né logica fiscale definitiva nel
+  client (spec §2, §11).
+- **Incassi** parziali/totali (mai oltre il residuo), situazione di pagamento
+  derivata (pagata, parziale, da incassare, scaduta) che tiene conto delle NC.
+- **Stampa**: modello unico `PrintPreview` (A4, intestazione dal config del
+  tenant, riepilogo IVA, "copia di cortesia"), `styles/print.css`.
+
+### Contabilità (`/contabilita`)
+- **Scadenzario crediti** con fasce di anzianità (aging) cliccabili, ritardo
+  medio ponderato, registrazione incassi.
+- **Prima nota incassi**.
+- **Registro IVA vendite** per mese e aliquota (NC a sottrarre), indicativo.
+
+### Clienti: indicatori derivati
+Fatturato, numero ordini e credito non sono più campi dell'anagrafica:
+`types/statistiche.ts` li calcola da ordini, fatture e incassi (schema mock v3).
+
 ## Roadmap frontend (backend in secondo piano)
 - ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
 - ~~C — Acquisti~~ — fatto.
 - **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,
   lotti/seriali/scadenze, inventario fisico, valorizzazione.
-- **E — Ciclo attivo**: DDT, fatture/NC (bozze; SDI backend), scadenzario.
+- ~~E — Ciclo attivo~~ — fatto (DDT: vedi D).
 - **F — Report, Dashboard su dati reali, audit, notifiche, ricerca globale.**
 
 ## Step 7 — RxDB + Sync Coordinator

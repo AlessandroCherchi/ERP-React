@@ -6,13 +6,14 @@ import type { AnagraficaBase, StatoOption } from './anagrafica';
 
 export type ClienteStato = 'attivo' | 'inattivo' | 'prospect';
 
-/** Anagrafica comune (vedi types/anagrafica.ts) + i dati commerciali del cliente. */
+/**
+ * Anagrafica comune (vedi types/anagrafica.ts) + stato commerciale.
+ * Fatturato, numero ordini e credito NON sono campi: si derivano da ordini,
+ * fatture e incassi (types/statistiche.ts), così non vanno mai fuori sync.
+ */
 export interface Cliente extends AnagraficaBase {
     id: number;
     stato: ClienteStato;
-    fatturato: number;
-    ordini: number;
-    credito: number;
 }
 
 /** Riferimento minimo a un cliente, per le <select> dei documenti. */
@@ -33,8 +34,8 @@ export const STATO_CLIENTE_LABEL: Record<ClienteStato, string> = {
     prospect: 'Prospect',
 };
 
-/** Campi compilabili dal form (Cliente meno i derivati/generati server-side). */
-export type ClienteFormValues = Omit<Cliente, 'id' | 'fatturato' | 'ordini' | 'credito'>;
+/** Campi compilabili dal form (Cliente meno l'id generato server-side). */
+export type ClienteFormValues = Omit<Cliente, 'id'>;
 
 export const EMPTY_CLIENTE_FORM: ClienteFormValues = {
     nome: '',
