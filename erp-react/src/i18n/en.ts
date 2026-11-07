@@ -139,6 +139,7 @@ export const en: Dictionary = {
         numbering: {
             sku: 'Item code (SKU)',
             ordine: 'Sales order',
+            acquisto: 'Purchase order',
             fattura: 'Invoice',
             prefix: 'Prefix',
             start: 'Last number used',

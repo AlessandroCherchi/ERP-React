@@ -2,7 +2,7 @@ import { SettingsCard } from './SettingsCard';
 import { ActionButton } from '../ui/Button';
 import { useConfirm } from '../ui/confirmContext';
 import { useConfig } from '../../config/configStore';
-import { resetDemoData } from '../../lib/mockApi/db';
+import { resetDemoData } from '../../data';
 import { downloadJson, today } from '../../lib/format';
 import { useT } from '../../i18n';
 

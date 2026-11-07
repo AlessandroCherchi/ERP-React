@@ -14,6 +14,8 @@ import type { ProdottoForm } from '../types/quickActions';
 import type { OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { RettificaInput } from './contracts';
 import type { Utente, UtenteFormValues } from '../types/utente';
+import type { AcquistoFormValues, OrdineAcquisto } from '../types/acquisto';
+import type { RicevimentoInput } from './contracts';
 
 /** Opzioni che una pagina può passare: callback di feedback, non invalidazioni. */
 type MutationHookOptions<TData, TVars> = Pick<
@@ -99,3 +101,20 @@ export const useInvitaUtente = (o?: MutationHookOptions<Utente, UtenteFormValues
     useEntityMutation(api.utenti.invite, [qk.utenti.all], o);
 export const useAggiornaUtente = (o?: MutationHookOptions<Utente, { id: string; patch: Partial<Pick<Utente, 'name' | 'role' | 'attivo'>> }>) =>
     useEntityMutation(({ id, patch }) => api.utenti.update(id, patch), [qk.utenti.all], o);
+
+// ------------------------- ACQUISTI -------------------------
+
+export const useAcquisti = () => useQuery({ queryKey: qk.acquisti.all, queryFn: api.acquisti.list });
+export const useCreateAcquisto = (o?: MutationHookOptions<OrdineAcquisto, AcquistoFormValues>) =>
+    useEntityMutation(api.acquisti.create, [qk.acquisti.all], o);
+export const useCreateAcquistiBatch = (o?: MutationHookOptions<OrdineAcquisto[], AcquistoFormValues[]>) =>
+    useEntityMutation(api.acquisti.createBatch, [qk.acquisti.all], o);
+export const useUpdateAcquisto = (o?: MutationHookOptions<OrdineAcquisto, { id: number; data: AcquistoFormValues }>) =>
+    useEntityMutation(({ id, data }) => api.acquisti.update(id, data), [qk.acquisti.all], o);
+export const useDeleteAcquisto = (o?: MutationHookOptions<void, number>) =>
+    useEntityMutation(api.acquisti.remove, [qk.acquisti.all], o);
+export const useCambiaStatoAcquisto = (o?: MutationHookOptions<OrdineAcquisto, { id: number; nuovo: 'inviato' | 'annullato' }>) =>
+    useEntityMutation(({ id, nuovo }) => api.acquisti.cambiaStato(id, nuovo), [qk.acquisti.all], o);
+/** Il ricevimento carica il magazzino e ricalcola il costo medio: invalida anche giacenze e movimenti. */
+export const useRiceviAcquisto = (o?: MutationHookOptions<OrdineAcquisto, RicevimentoInput>) =>
+    useEntityMutation(api.acquisti.ricevi, [qk.acquisti.all, ...MAGAZZINO], o);

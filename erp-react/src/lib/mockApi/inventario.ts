@@ -10,6 +10,7 @@ import { applicaMovimento, type Movimento, type MovimentoTipo, type Prodotto } f
 import type { ProdottoForm } from '../../types/quickActions';
 import { parseNum } from '../format';
 import { collection, delay, nextIdOf } from './db';
+import { costoMedioPonderato } from '../../types/acquisto';
 
 
 // I primi 5 articoli sono gli stessi "Top Prodotti" della Dashboard:
@@ -264,4 +265,48 @@ export async function movimentaOrdine(input: MovimentoOrdineInput): Promise<void
 /** True se l'ordine ha già movimentato il magazzino nel verso indicato. */
 export function ordineGiaMovimentato(ordineId: number, tipo: 'scarico' | 'carico'): boolean {
     return movimenti.some((m) => m.ordineId === ordineId && m.tipo === tipo);
+}
+
+// ------------------------- RICEVIMENTO MERCE -------------------------
+
+export interface RigaRicevuta {
+    prodottoId: number;
+    quantita: number;
+    /** Costo unitario netto d'acquisto: entra nel costo medio ponderato. */
+    costoUnitario: number;
+}
+
+/**
+ * Carica a magazzino la merce ricevuta da un ordine d'acquisto.
+ * Per ogni riga: movimento di carico collegato al documento e nuovo costo
+ * medio ponderato dell'articolo. Come movimentaOrdine, il magazzino resta
+ * l'unico proprietario di giacenza e costo.
+ *
+ * TODO(step Backend): stessa transazione server-side dell'aggiornamento
+ * dell'ordine d'acquisto.
+ */
+export function caricaDaAcquisto(input: { acquistoId: number; numero: string; data: string; righe: RigaRicevuta[] }): void {
+    for (const r of input.righe) {
+        if (r.quantita <= 0) continue;
+        const idx = store.findIndex((p) => p.id === r.prodottoId);
+        if (idx === -1) continue;
+        const prodotto = store[idx]!;
+        const giacenzaFinale = applicaMovimento(prodotto.giacenza, 'carico', r.quantita);
+        store[idx] = {
+            ...prodotto,
+            giacenza: giacenzaFinale,
+            costo: costoMedioPonderato(prodotto.giacenza, prodotto.costo, r.quantita, r.costoUnitario),
+        };
+        movimenti.unshift({
+            id: nextMovimentoId++,
+            prodottoId: r.prodottoId,
+            tipo: 'carico',
+            quantita: r.quantita,
+            causale: `Ricevimento ${input.numero}`,
+            data: input.data,
+            giacenzaFinale,
+            note: '',
+            acquistoId: input.acquistoId,
+        });
+    }
 }

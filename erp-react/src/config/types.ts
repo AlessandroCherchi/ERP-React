@@ -74,6 +74,7 @@ export interface TenantConfig {
     numbering: {
         sku: NumberingRule;
         ordine: NumberingRule;
+        acquisto: NumberingRule;
         fattura: NumberingRule;
     };
     /** Righe per pagina delle tabelle elenco. */

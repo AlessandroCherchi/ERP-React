@@ -64,6 +64,7 @@ export const DEFAULT_CONFIG: TenantConfig = {
     numbering: {
         sku: { prefix: 'SKU-', start: 4500, pad: 0 },
         ordine: { prefix: 'ORD-', start: 3000, pad: 0 },
+        acquisto: { prefix: 'OA-', start: 2300, pad: 0 },
         fattura: { prefix: '', start: 0, pad: 4 },
     },
     pageSize: 10,

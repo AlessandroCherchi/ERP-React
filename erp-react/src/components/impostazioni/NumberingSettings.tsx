@@ -11,6 +11,7 @@ type RuleKey = keyof TenantConfig['numbering'];
 const RULES: { key: RuleKey; label: TKey; icon: string }[] = [
     { key: 'sku', label: 'settings.numbering.sku', icon: 'fa-barcode' },
     { key: 'ordine', label: 'settings.numbering.ordine', icon: 'fa-cart-shopping' },
+    { key: 'acquisto', label: 'settings.numbering.acquisto', icon: 'fa-cart-flatbed' },
     { key: 'fattura', label: 'settings.numbering.fattura', icon: 'fa-file-invoice' },
 ];
 

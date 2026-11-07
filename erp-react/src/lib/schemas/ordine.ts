@@ -10,8 +10,8 @@ import * as v from 'valibot';
 
 const required = v.pipe(v.string(), v.trim(), v.minLength(1, 'Campo obbligatorio'));
 
-/** Riga d'ordine già tipizzata (l'editor la costruisce dal prodotto). */
-const rigaSchema = v.object({
+/** Riga di documento già tipizzata (l'editor la costruisce dal prodotto): condivisa da ordini, acquisti, fatture. */
+export const rigaSchema = v.object({
     prodottoId: v.pipe(v.number(), v.minValue(1)),
     sku: v.string(),
     nome: v.string(),

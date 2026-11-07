@@ -15,6 +15,12 @@ export interface Cliente extends AnagraficaBase {
     credito: number;
 }
 
+/** Riferimento minimo a un cliente, per le <select> dei documenti. */
+export interface ClienteRef {
+    id: number;
+    nome: string;
+}
+
 export const CLIENTE_STATI: StatoOption[] = [
     { value: 'attivo', label: 'Attivo' },
     { value: 'inattivo', label: 'Inattivo' },

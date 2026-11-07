@@ -142,6 +142,7 @@ export const it = {
         numbering: {
             sku: 'Codice articolo (SKU)',
             ordine: 'Ordine di vendita',
+            acquisto: 'Ordine d’acquisto',
             fattura: 'Fattura',
             prefix: 'Prefisso',
             start: 'Ultimo numero usato',

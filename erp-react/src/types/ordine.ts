@@ -8,6 +8,9 @@
 // TODO(step Backend, spec §2/§9): sostituire con lo schema Postgres/RLS
 // reale; oggi è "server state" simulato (vedi lib/mockApi/ordini.ts).
 
+import { createStateMachine } from '../lib/stateMachine';
+import { totaliDocumento, type RigaDocumento, type TotaliDocumento } from './documento';
+
 // ------------------------- STATI -------------------------
 
 /**
@@ -41,26 +44,25 @@ export const PRIORITA_LABEL: Record<OrdinePriorita, string> = {
 };
 
 /**
- * Transizioni ammesse. Tenerle in tabella invece che sparse negli if
- * dell'interfaccia è ciò che impedisce a un ordine consegnato di tornare
- * in bozza (e quindi di scaricare due volte il magazzino).
+ * Transizioni ammesse (vedi lib/stateMachine.ts): un consegnato non torna
+ * indietro, uno spedito non si annulla (la merce è già partita).
  */
-const TRANSIZIONI: Record<OrdineStato, OrdineStato[]> = {
+export const ordineMachine = createStateMachine<OrdineStato>({
     bozza: ['confermato', 'annullato'],
     confermato: ['in-preparazione', 'annullato'],
     'in-preparazione': ['spedito', 'annullato'],
     spedito: ['consegnato'],
     consegnato: [],
     annullato: [],
-};
+});
 
 /** Stati raggiungibili da `stato`. Array vuoto = stato terminale. */
-export function prossimiStati(stato: OrdineStato): OrdineStato[] {
-    return TRANSIZIONI[stato];
+export function prossimiStati(stato: OrdineStato): readonly OrdineStato[] {
+    return ordineMachine.next(stato);
 }
 
 export function transizioneValida(da: OrdineStato, a: OrdineStato): boolean {
-    return TRANSIZIONI[da].includes(a);
+    return ordineMachine.canTransition(da, a);
 }
 
 /**
@@ -109,25 +111,8 @@ export function ordineAperto(stato: OrdineStato): boolean {
 
 // ------------------------- RIGHE E TESTATA -------------------------
 
-/**
- * Riga d'ordine. Denormalizza sku/nome/unità/IVA dal prodotto: sono uno
- * snapshot al momento dell'ordine, non un join. Se domani l'articolo viene
- * rinominato o riprezzato, l'ordine già emesso deve continuare a dire cosa
- * è stato venduto e a quanto — è un documento, non una vista.
- */
-export interface RigaOrdine {
-    prodottoId: number;
-    sku: string;
-    nome: string;
-    unita: string;
-    quantita: number;
-    /** Prezzo unitario applicato (€), modificabile rispetto al listino. */
-    prezzo: number;
-    /** Sconto di riga in percentuale (0-100). */
-    sconto: number;
-    /** Aliquota IVA di riga (%), copiata dall'articolo. */
-    iva: number;
-}
+/** Riga d'ordine di vendita: la riga di documento comune (types/documento.ts). */
+export type RigaOrdine = RigaDocumento;
 
 export interface Ordine {
     id: number;
@@ -147,53 +132,11 @@ export interface Ordine {
 }
 
 // ------------------------- TOTALI (DERIVATI) -------------------------
+// Aritmetica in centesimi e riepilogo IVA per aliquota: types/documento.ts.
 
-/**
- * Arrotondamento a 2 decimali. Gli importi sono `number` in euro: è la
- * scelta ereditata dal prototipo, non quella definitiva.
- *
- * TODO(spec §10 — Money): passare a minor units (interi in centesimi) con
- * rounding mode esplicito. Finché si resta su float, l'arrotondamento va
- * fatto in un punto solo — qui — e per riga, che è l'ordine di operazioni
- * della prassi fiscale italiana: imponibile di riga arrotondato e poi
- * sommato, non somma di valori grezzi arrotondata alla fine.
- */
-function round2(n: number): number {
-    return Math.round((n + Number.EPSILON) * 100) / 100;
-}
-
-/** Imponibile della riga: quantità × prezzo, al netto dello sconto. */
-export function imponibileRiga(r: Pick<RigaOrdine, 'quantita' | 'prezzo' | 'sconto'>): number {
-    return round2(r.quantita * r.prezzo * (1 - r.sconto / 100));
-}
-
-/** IVA della riga, calcolata sull'imponibile già arrotondato. */
-export function ivaRiga(r: Pick<RigaOrdine, 'quantita' | 'prezzo' | 'sconto' | 'iva'>): number {
-    return round2(imponibileRiga(r) * (r.iva / 100));
-}
-
-export interface TotaliOrdine {
-    imponibile: number;
-    iva: number;
-    totale: number;
-    /** Pezzi complessivi — il numero che finisce in colonna "Articoli". */
-    pezzi: number;
-}
-
-/** Totali dell'ordine: sempre ricalcolati, mai persistiti (vedi §10). */
-export function totaliOrdine(righe: RigaOrdine[]): TotaliOrdine {
-    let imponibile = 0;
-    let iva = 0;
-    let pezzi = 0;
-    for (const r of righe) {
-        imponibile += imponibileRiga(r);
-        iva += ivaRiga(r);
-        pezzi += r.quantita;
-    }
-    imponibile = round2(imponibile);
-    iva = round2(iva);
-    return { imponibile, iva, totale: round2(imponibile + iva), pezzi };
-}
+export { imponibileRiga, ivaRiga, riepilogoIva } from './documento';
+export type TotaliOrdine = TotaliDocumento;
+export const totaliOrdine = totaliDocumento;
 
 /**
  * Ordine in ritardo: consegna promessa già scaduta e documento ancora aperto.

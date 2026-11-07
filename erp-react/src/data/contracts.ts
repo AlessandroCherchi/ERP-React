@@ -3,16 +3,17 @@
 // /api/v1 (spec §4). Le pagine dipendono da queste interfacce tramite gli
 // hook di data/hooks.ts, mai dall'implementazione.
 
-import type { Cliente, ClienteFormValues } from '../types/cliente';
+import type { Cliente, ClienteFormValues, ClienteRef } from '../types/cliente';
 import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../types/fornitore';
 import type { Movimento, Prodotto } from '../types/prodotto';
 import type { ProdottoForm } from '../types/quickActions';
 import type { Ordine, OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { Utente, UtenteFormValues } from '../types/utente';
-import type { ClienteRef } from '../lib/mockApi/clienti';
+import type { AcquistoFormValues, OrdineAcquisto } from '../types/acquisto';
+import type { RicevimentoInput } from '../lib/mockApi/acquisti';
 import type { RettificaInput } from '../lib/mockApi/inventario';
 
-export type { ClienteRef, RettificaInput };
+export type { ClienteRef, RettificaInput, RicevimentoInput };
 
 export interface ClientiApi {
     list(): Promise<Cliente[]>;
@@ -53,10 +54,21 @@ export interface UtentiApi {
     update(id: string, patch: Partial<Pick<Utente, 'name' | 'role' | 'attivo'>>): Promise<Utente>;
 }
 
+export interface AcquistiApi {
+    list(): Promise<OrdineAcquisto[]>;
+    create(data: AcquistoFormValues): Promise<OrdineAcquisto>;
+    createBatch(list: AcquistoFormValues[]): Promise<OrdineAcquisto[]>;
+    update(id: number, data: AcquistoFormValues): Promise<OrdineAcquisto>;
+    remove(id: number): Promise<void>;
+    cambiaStato(id: number, nuovo: 'inviato' | 'annullato'): Promise<OrdineAcquisto>;
+    ricevi(input: RicevimentoInput): Promise<OrdineAcquisto>;
+}
+
 export interface DataApi {
     clienti: ClientiApi;
     fornitori: FornitoriApi;
     magazzino: MagazzinoApi;
     ordini: OrdiniApi;
     utenti: UtentiApi;
+    acquisti: AcquistiApi;
 }

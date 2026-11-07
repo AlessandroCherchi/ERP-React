@@ -94,6 +94,8 @@ export interface Movimento {
      * scaricare due volte e per stornare l'esatta quantità in annullamento.
      */
     ordineId?: number;
+    /** Ordine d'acquisto che ha generato il carico (ricevimento merce). */
+    acquistoId?: number;
 }
 
 export const MOVIMENTO_LABEL: Record<MovimentoTipo, string> = {

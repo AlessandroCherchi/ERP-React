@@ -3,7 +3,7 @@
 // /api/v1/clienti, stesso envelope ApiResponse, stessa firma delle
 // funzioni così TanStack Query non cambia in Dashboard/Clienti.
 
-import type { Cliente, ClienteFormValues } from '../../types/cliente';
+import type { Cliente, ClienteFormValues, ClienteRef } from '../../types/cliente';
 import { collection, delay, nextIdOf } from './db';
 
 const SEED: Cliente[] = [
@@ -67,12 +67,6 @@ export async function deleteCliente(id: number): Promise<void> {
 export async function fetchClientiNomi(): Promise<string[]> {
     await delay();
     return store.map((c) => c.nome);
-}
-
-/** Riferimento minimo a un cliente, per le <select> dei documenti. */
-export interface ClienteRef {
-    id: number;
-    nome: string;
 }
 
 /**

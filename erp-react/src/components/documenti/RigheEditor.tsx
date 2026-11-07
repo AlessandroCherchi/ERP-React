@@ -1,19 +1,28 @@
 import { useMemo } from 'react';
 import { formatEuro, formatNumber } from '../../lib/format';
-import { imponibileRiga, totaliOrdine, type RigaOrdine } from '../../types/ordine';
+import { imponibileRiga, riepilogoIva, totaliDocumento, type RigaDocumento } from '../../types/documento';
 import type { Prodotto } from '../../types/prodotto';
+import '../../styles/documenti.css';
 
-interface RigheOrdineEditorProps {
-    righe: RigaOrdine[];
+interface RigheEditorProps {
+    righe: RigaDocumento[];
     /** Catalogo di magazzino: sorgente dei prezzi e delle disponibilità. */
     prodotti: Prodotto[];
-    onChange: (righe: RigaOrdine[]) => void;
+    onChange: (righe: RigaDocumento[]) => void;
     /** Messaggio dello schema quando le righe non sono valide. */
     error?: string | undefined;
+    /** Prezzo proposto per l'articolo: listino in vendita, costo in acquisto. */
+    prezzoDi?: (p: Prodotto) => number;
+    /** Avvisa se la quantità supera la giacenza (documenti di uscita). */
+    verificaGiacenza?: boolean;
+    /** Etichetta del totale ("Totale ordine", "Totale documento"…). */
+    totaleLabel?: string;
 }
 
 /**
- * Editor delle righe d'ordine.
+ * Editor delle righe di un documento (ordine di vendita, ordine d'acquisto,
+ * fattura): stesso componente, cambia solo il prezzo proposto e se va
+ * verificata la giacenza.
  *
  * L'articolo si sceglie dal catalogo, mai a testo libero: è ciò che permette
  * di conoscere prezzo, unità di misura, aliquota e giacenza senza chiederli
@@ -21,11 +30,15 @@ interface RigheOrdineEditorProps {
  * la parte negoziata dell'ordine.
  *
  * La riga porta con sé sku/nome/unità/IVA: dal momento in cui è inserita è
- * uno snapshot, non un riferimento (vedi types/ordine.ts → RigaOrdine).
+ * uno snapshot, non un riferimento (vedi types/documento.ts → RigaDocumento).
  */
-export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrdineEditorProps) {
+export function RigheEditor({
+    righe, prodotti, onChange, error,
+    prezzoDi = (p) => p.prezzo, verificaGiacenza = true, totaleLabel = 'Totale documento',
+}: RigheEditorProps) {
     const perId = useMemo(() => new Map(prodotti.map((p) => [p.id, p])), [prodotti]);
-    const totali = totaliOrdine(righe);
+    const totali = totaliDocumento(righe);
+    const riepilogo = riepilogoIva(righe);
 
     /**
      * Aggiunge l'articolo scelto. Se è già in ordine incrementa la riga
@@ -51,14 +64,14 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                 nome: p.nome,
                 unita: p.unita,
                 quantita: 1,
-                prezzo: p.prezzo,
+                prezzo: prezzoDi(p),
                 sconto: 0,
                 iva: p.iva,
             },
         ]);
     }
 
-    function aggiorna(index: number, patch: Partial<RigaOrdine>) {
+    function aggiorna(index: number, patch: Partial<RigaDocumento>) {
         onChange(righe.map((r, i) => (i === index ? { ...r, ...patch } : r)));
     }
 
@@ -69,7 +82,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
     return (
         <div className={`righe-editor${error ? ' has-error' : ''}`}>
             <div className="righe-editor-head">
-                <label htmlFor="riga-add">Righe ordine</label>
+                <label htmlFor="riga-add">Righe</label>
                 <div className="select-box righe-add">
                     <select
                         id="riga-add"
@@ -113,7 +126,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                         const disponibile = p ? p.giacenza : null;
                         // Quantità disponibile quando la riga è scoperta, altrimenti null:
                         // un solo valore da controllare, sia per la classe sia per l'avviso.
-                        const scoperto = disponibile !== null && r.quantita > disponibile ? disponibile : null;
+                        const scoperto = verificaGiacenza && disponibile !== null && r.quantita > disponibile ? disponibile : null;
 
                         return (
                             <li className={`riga-item${scoperto !== null ? ' riga-item--warn' : ''}`} key={r.prodottoId}>
@@ -177,7 +190,7 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                                     <p className="riga-warn">
                                         <i className="fa-solid fa-triangle-exclamation" />
                                         Giacenza insufficiente: disponibili {formatNumber(scoperto)} {r.unita}.
-                                        L&apos;ordine si salva comunque, ma la conferma verrà rifiutata.
+                                        Il documento si salva comunque, ma la conferma verrà rifiutata.
                                     </p>
                                 )}
                             </li>
@@ -193,12 +206,14 @@ export function RigheOrdineEditor({ righe, prodotti, onChange, error }: RigheOrd
                     <span>Imponibile</span>
                     <span>{formatEuro(totali.imponibile)}</span>
                 </div>
-                <div className="ordine-totali-row">
-                    <span>IVA</span>
-                    <span>{formatEuro(totali.iva)}</span>
-                </div>
+                {riepilogo.map((x) => (
+                    <div className="ordine-totali-row" key={x.aliquota}>
+                        <span>IVA {x.aliquota}% su {formatEuro(x.imponibile)}</span>
+                        <span>{formatEuro(x.imposta)}</span>
+                    </div>
+                ))}
                 <div className="ordine-totali-row ordine-totali-row--grand">
-                    <span>Totale ordine</span>
+                    <span>{totaleLabel}</span>
                     <span>{formatEuro(totali.totale)}</span>
                 </div>
             </div>

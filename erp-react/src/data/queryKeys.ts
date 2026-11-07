@@ -23,4 +23,7 @@ export const qk = {
     utenti: {
         all: ['utenti'] as const,
     },
+    acquisti: {
+        all: ['acquisti'] as const,
+    },
 };

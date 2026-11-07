@@ -1,3 +1,4 @@
+import '../../styles/documenti.css';
 import { DetailField, DetailPanelShell, DetailStat, PanelActions, type PanelAction } from '../ui/DetailPanelShell';
 import { formatDate, formatEuro, formatNumber } from '../../lib/format';
 import {

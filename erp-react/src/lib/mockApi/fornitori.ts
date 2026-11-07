@@ -62,3 +62,8 @@ export async function fetchFornitoriRef(): Promise<FornitoreRef[]> {
     await delay();
     return store.map((f) => ({ id: f.id, nome: f.nome, attivo: f.stato === 'attivo' }));
 }
+
+/** Ragione sociale per lo snapshot nei documenti (sincrona: stessa transazione lato backend). */
+export function nomeFornitore(id: number): string {
+    return store.find((f) => f.id === id)?.nome ?? '';
+}

@@ -9,6 +9,7 @@ import * as fornitori from '../lib/mockApi/fornitori';
 import * as inventario from '../lib/mockApi/inventario';
 import * as ordini from '../lib/mockApi/ordini';
 import * as utenti from '../lib/mockApi/utenti';
+import * as acquisti from '../lib/mockApi/acquisti';
 
 const mockApi: DataApi = {
     clienti: {
@@ -45,9 +46,21 @@ const mockApi: DataApi = {
         invite: utenti.invitaUtente,
         update: utenti.aggiornaUtente,
     },
+    acquisti: {
+        list: acquisti.fetchAcquisti,
+        create: acquisti.createAcquisto,
+        createBatch: acquisti.createAcquistiBatch,
+        update: acquisti.updateAcquisto,
+        remove: acquisti.deleteAcquisto,
+        cambiaStato: acquisti.cambiaStatoAcquisto,
+        ricevi: acquisti.riceviAcquisto,
+    },
 };
 
 export const api: DataApi = mockApi;
 
 /** Errori di dominio che le pagine possono riconoscere (instanceof). */
 export { DisponibilitaInsufficienteError } from '../lib/mockApi/inventario';
+
+/** Ripristino del dataset dimostrativo (solo mock: col backend sparisce). */
+export { resetDemoData } from '../lib/mockApi/db';

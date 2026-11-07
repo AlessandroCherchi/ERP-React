@@ -27,6 +27,7 @@ import {
     type Ordine, type OrdineFormValues, type OrdinePriorita, type OrdineStato, type StatoFilter,
 } from '../types/ordine';
 import '../styles/app-shell.css';
+import '../styles/documenti.css';
 import '../styles/vendite.css';
 
 type SortKey = 'numero' | 'cliente' | 'data' | 'consegna' | 'pezzi' | 'totale' | 'priorita' | 'stato';

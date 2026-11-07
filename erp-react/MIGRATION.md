@@ -1,6 +1,6 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 + Fasi A, B completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+Stato: **Step 6 + Fasi A, B, C completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
 piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
@@ -319,10 +319,42 @@ Infrastruttura introdotta:
   mostra il messaggio d'errore (prima solo il bordo rosso).
 - Toast/Confirm/FieldId: hook separati dai provider (fast refresh, lint pulito).
 
+## Fase C — Acquisti (ciclo passivo) — DONE
+
+Route `/acquisti`. Dominio in `types/acquisto.ts`, adapter in
+`lib/mockApi/acquisti.ts`, effetti di magazzino in `lib/mockApi/inventario.ts`.
+
+- **Ciclo di vita** (macchina a stati dichiarativa, `lib/stateMachine.ts`,
+  ora usata anche dagli ordini di vendita): bozza → inviato → parziale →
+  ricevuto; annullabile solo senza merce ricevuta.
+- **Ricevimento merce** anche a più riprese: carico di magazzino per riga,
+  collegato al documento (`Movimento.acquistoId`), quantità oltre il residuo
+  rifiutate, stato aggiornato dalle quantità.
+- **Costo medio ponderato** ricalcolato a ogni carico con il costo netto di
+  riga: la valorizzazione di magazzino segue gli acquisti reali.
+- **Riordino suggerito**: articoli sotto scorta raggruppati per fornitore
+  abituale, quantità per tornare a 2 × scorta al netto della merce già in
+  arrivo (bozze comprese: rigenerare non duplica). Una bozza per fornitore.
+- Permessi: creare/inviare = ordini; ricevere = magazzino (update).
+
+### Documenti: componenti e aritmetica condivisi
+- `types/documento.ts`: `RigaDocumento` comune a vendite/acquisti/fatture.
+- **Money §10**: `lib/money.ts` — importi in **centesimi interi** (tipo
+  `Cents` brandizzato), arrotondamento half-up esplicito, golden test.
+- **IVA per aliquota** (FatturaPA DatiRiepilogo): l'imposta si calcola sul
+  totale imponibile di ciascuna aliquota, non riga per riga.
+- `components/documenti/`: `RigheEditor` (generalizzato da vendite: prezzo
+  proposto e controllo giacenza configurabili), `RigheList`, `TotaliBlock`
+  con riepilogo IVA, `StatoActions`; stili in `styles/documenti.css`.
+
+### Test di architettura (`app/architecture.test.ts`)
+Le regole fra layer sono verificate a ogni `npm test`: pagine/componenti non
+importano i mock, il dominio non dipende da React/UI, niente colori
+esadecimali nei componenti.
+
 ## Roadmap frontend (backend in secondo piano)
 - ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
-- **C — Acquisti**: ordini fornitore, ricevimento merce con carico
-  automatico, riordino da sotto scorta.
+- ~~C — Acquisti~~ — fatto.
 - **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,
   lotti/seriali/scadenze, inventario fisico, valorizzazione.
 - **E — Ciclo attivo**: DDT, fatture/NC (bozze; SDI backend), scadenzario.

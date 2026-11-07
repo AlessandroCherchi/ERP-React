@@ -35,5 +35,6 @@ export const acme: TenantOverride = {
     numbering: {
         sku: { prefix: 'ACM-', start: 10000, pad: 6 },
         ordine: { prefix: 'OV-', start: 0, pad: 5 },
+        acquisto: { prefix: 'OF-', start: 0, pad: 5 },
     },
 };

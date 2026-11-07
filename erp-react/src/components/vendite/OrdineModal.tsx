@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Modal } from '../ui/Modal';
 import { ActionButton } from '../ui/Button';
 import { FormGroup, FormRow, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
-import { RigheOrdineEditor } from './RigheOrdineEditor';
+import { RigheEditor } from '../documenti/RigheEditor';
 import { useValidatedForm } from '../../lib/validation';
 import { ordineSchema } from '../../lib/schemas/ordine';
 import { today } from '../../lib/format';
@@ -10,7 +10,7 @@ import {
     EMPTY_ORDINE_FORM, PRIORITA_OPTIONS,
     type Ordine, type OrdineFormValues, type OrdinePriorita,
 } from '../../types/ordine';
-import type { ClienteRef } from '../../lib/mockApi/clienti';
+import type { ClienteRef } from '../../types/cliente';
 import type { Prodotto } from '../../types/prodotto';
 
 interface OrdineModalProps {
@@ -158,7 +158,7 @@ export function OrdineModal({
 
             <FormRow>
                 <div className="form-group--full">
-                    <RigheOrdineEditor
+                    <RigheEditor totaleLabel="Totale ordine"
                         righe={values.righe}
                         prodotti={prodotti}
                         onChange={(righe) => setField('righe', righe)}
