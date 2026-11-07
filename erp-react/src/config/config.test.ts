@@ -61,3 +61,25 @@ describe('merge config tenant', () => {
         expect(optionsWithCurrent(opts, 'a')).toBe(opts);
     });
 });
+
+import { derivePalette, mix, isHexColor } from './palette';
+
+describe('palette derivata dal brand', () => {
+    it('mix: 0 = originale, 1 = target', () => {
+        expect(mix('#a10f0f', '#ffffff', 0)).toBe('#a10f0f');
+        expect(mix('#a10f0f', '#000000', 1)).toBe('#000000');
+        expect(mix('#000000', '#ffffff', 0.5)).toBe('#808080');
+    });
+
+    it('derivePalette genera varianti più chiare e più scure del primario', () => {
+        const p = derivePalette('#1f4e9c', '#2a9df4');
+        expect(p['--erp-accent']).toBe('#1f4e9c');
+        expect(p['--erp-accent-dark']).not.toBe(p['--erp-accent']);
+        expect(p['--erp-gold-strong']).toBe('#2a9df4');
+        for (const v of Object.values(p)) expect(isHexColor(v!)).toBe(true);
+    });
+
+    it('senza secondario non tocca i token oro', () => {
+        expect(derivePalette('#123456')['--erp-gold']).toBeUndefined();
+    });
+});

@@ -1,6 +1,6 @@
 # Roadmap migrazione → Specifica v3.1
 
-Stato: **Step 6 + Fase A completati** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
+Stato: **Step 6 + Fasi A, B completate** (scaffold, Login, Dashboard, Clienti, Inventario, Fornitori, Vendite;
 piattaforma configurabile per tenant). Roadmap frontend: fasi A→F, backend dopo.
 
 ## Step 1 — DONE
@@ -292,9 +292,35 @@ senza toccare il codice dei moduli. Guida operativa: `CUSTOMIZZAZIONE.md`.
 - Residuo: testi delle pagine modulo nei dizionari i18n (le pagine nuove
   nascono già tradotte).
 
+## Fase B — Impostazioni — DONE
+
+`/impostazioni` (owner, admin): ogni scheda modifica una sezione di
+`TenantConfig`, persistita come override locale per tenant. Scheda attiva
+nell'URL (`?tab=`), schede filtrate per permesso, sola lettura se il ruolo
+non può modificare.
+
+| Scheda | Cosa configura | Note |
+|---|---|---|
+| Azienda | nome prodotto, logo (upload, max 200 KB), ragione sociale, P.IVA, sede, email | validazione Valibot |
+| Aspetto | colore primario e secondario, raggio angoli | varianti derivate (`config/palette.ts`), anteprima live isolata |
+| Moduli | attivazione per modulo | effetto immediato su menu e route; Dashboard e Impostazioni bloccati |
+| Tabelle | categorie (con icona), unità, aliquote IVA (con natura), termini e metodi di pagamento | editor generico `OptionListEditor`, unicità e campi obbligatori |
+| Numerazioni | prefisso, ultimo numero, padding di SKU/ordini/fatture | anteprima del prossimo codice |
+| Utenti e ruoli | invito, cambio ruolo, disattivazione | almeno un titolare attivo; niente auto-disattivazione; login rifiuta i disattivati |
+| Lingua e formati | lingua UI, locale Intl, valuta, righe per pagina | anteprima formati |
+| Dati | export JSON del config (base per un nuovo tenant), reset dataset demo | |
+
+Infrastruttura introdotta:
+- `useDraft` (bozza con riallineamento durante il render), `SettingsCard`
+  (Salva/Ripristina, indicatore modifiche non salvate), `resetSection` nel
+  config store.
+- Utenti come collezione mock (`lib/mockApi/utenti.ts`) + `UtentiApi`.
+- **Accessibilità form**: `FormGroup` associa `<label>` e campo (`useId`) e
+  mostra il messaggio d'errore (prima solo il bordo rosso).
+- Toast/Confirm/FieldId: hook separati dai provider (fast refresh, lint pulito).
+
 ## Roadmap frontend (backend in secondo piano)
-- **B — Impostazioni e tabelle base**: azienda, utenti/ruoli, numerazioni,
-  tabelle, branding, moduli attivi, campi personalizzati, modelli di stampa.
+- ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
 - **C — Acquisti**: ordini fornitore, ricevimento merce con carico
   automatico, riordino da sotto scorta.
 - **D — Magazzino avanzato**: multi-magazzino/ubicazioni, trasferimenti,

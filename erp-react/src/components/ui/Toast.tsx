@@ -1,17 +1,12 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { ToastContext, type ToastType } from './toastContext';
 import '../../styles/erp-ui.css';
-
-export type ToastType = 'success' | 'error' | 'info';
 
 interface ToastItem {
     id: number;
     message: string;
     type: ToastType;
     removing: boolean;
-}
-
-interface ToastContextValue {
-    toast: (message: string, type?: ToastType) => void;
 }
 
 const TOAST_LIFETIME = 3500;
@@ -22,8 +17,6 @@ const TOAST_ICONS: Record<ToastType, string> = {
     error: 'fa-circle-xmark',
     info: 'fa-circle-info',
 };
-
-const ToastContext = createContext<ToastContextValue | null>(null);
 
 /** Provider unico dei toast: monta una sola volta in App/root layout. */
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -62,11 +55,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             </div>
         </ToastContext.Provider>
     );
-}
-
-/** Hook: const { toast } = useToast(); toast('Salvato', 'success'); */
-export function useToast(): ToastContextValue {
-    const ctx = useContext(ToastContext);
-    if (!ctx) throw new Error('useToast va usato dentro <ToastProvider>');
-    return ctx;
 }

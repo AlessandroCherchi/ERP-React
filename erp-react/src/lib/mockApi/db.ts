@@ -55,3 +55,8 @@ export function saveAll(): void {
 export function resetDemoData(): void {
     for (const key of safeStorage.keys(`erp.${getConfig().id}.db.`)) safeStorage.remove(key);
 }
+
+/** Latenza di rete simulata: l'interfaccia deve già gestire gli stati di attesa. */
+export function delay(ms = 120): Promise<void> {
+    return new Promise((r) => setTimeout(r, ms));
+}

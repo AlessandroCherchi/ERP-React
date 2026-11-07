@@ -5,8 +5,8 @@ import { DataTable, EntityCell, KpiGrid, ListToolbar, ToolbarSelect, type Column
 import { FornitoreDetailPanel } from '../components/fornitori/FornitoreDetailPanel';
 import { FornitoreModal } from '../components/fornitori/FornitoreModal';
 import type { PanelAction } from '../components/ui/DetailPanelShell';
-import { useToast } from '../components/ui/Toast';
-import { useConfirm } from '../components/ui/Confirm';
+import { useToast } from '../components/ui/toastContext';
+import { useConfirm } from '../components/ui/confirmContext';
 import { useStagger } from '../hooks/useStagger';
 import { useListState } from '../hooks/useListState';
 import { useCrudDialogs } from '../hooks/useCrudDialogs';

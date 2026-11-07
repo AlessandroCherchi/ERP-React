@@ -5,7 +5,7 @@ import { DataTable, EntityCell, KpiGrid, ListToolbar, type Column, type RowActio
 import { ClientDetailPanel } from '../components/clienti/ClientDetailPanel';
 import { ClientModal } from '../components/clienti/ClientModal';
 import type { PanelAction } from '../components/ui/DetailPanelShell';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../components/ui/toastContext';
 import { useStagger } from '../hooks/useStagger';
 import { useListState } from '../hooks/useListState';
 import { useCrudDialogs } from '../hooks/useCrudDialogs';

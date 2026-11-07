@@ -1,5 +1,13 @@
 # Personalizzare il gestionale per un cliente
 
+Due livelli:
+
+1. **Da interfaccia** — *Impostazioni* (owner/admin): brand, logo, colori,
+   moduli, tabelle, numerazioni, utenti, lingua. Le modifiche sono salvate
+   per tenant. *Impostazioni → Dati → Esporta JSON* produce il punto di
+   partenza per il file del tenant.
+2. **Da codice** (build dedicata al cliente) — come sotto.
+
 Tutto ciò che cambia da un cliente all'altro sta in `src/config/`.
 Il codice dei moduli non va toccato.
 

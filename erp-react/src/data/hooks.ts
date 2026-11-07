@@ -13,6 +13,7 @@ import type { FornitoreFormValues } from '../types/fornitore';
 import type { ProdottoForm } from '../types/quickActions';
 import type { OrdineFormValues, OrdineStato } from '../types/ordine';
 import type { RettificaInput } from './contracts';
+import type { Utente, UtenteFormValues } from '../types/utente';
 
 /** Opzioni che una pagina può passare: callback di feedback, non invalidazioni. */
 type MutationHookOptions<TData, TVars> = Pick<
@@ -90,3 +91,11 @@ export const useDeleteOrdine = (o?: MutationHookOptions<void, number>) =>
 /** Una transizione può muovere il magazzino: invalida anche giacenze e movimenti. */
 export const useCambiaStatoOrdine = (o?: MutationHookOptions<Awaited<ReturnType<typeof api.ordini.cambiaStato>>, { id: number; nuovo: OrdineStato }>) =>
     useEntityMutation(({ id, nuovo }) => api.ordini.cambiaStato(id, nuovo), [qk.ordini.all, ...MAGAZZINO], o);
+
+// ------------------------- UTENTI -------------------------
+
+export const useUtenti = () => useQuery({ queryKey: qk.utenti.all, queryFn: api.utenti.list });
+export const useInvitaUtente = (o?: MutationHookOptions<Utente, UtenteFormValues>) =>
+    useEntityMutation(api.utenti.invite, [qk.utenti.all], o);
+export const useAggiornaUtente = (o?: MutationHookOptions<Utente, { id: string; patch: Partial<Pick<Utente, 'name' | 'role' | 'attivo'>> }>) =>
+    useEntityMutation(({ id, patch }) => api.utenti.update(id, patch), [qk.utenti.all], o);

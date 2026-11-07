@@ -1,4 +1,5 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { FieldIdContext, useFieldId } from './fieldId';
 import '../../styles/erp-ui.css';
 
 interface FormGroupProps {
@@ -10,10 +11,12 @@ interface FormGroupProps {
 
 /** Wrapper .form-group: label + campo + stato d'errore, identico a erp-ui.css. */
 export function FormGroup({ label, error, full, children }: FormGroupProps) {
+    const id = useId();
     return (
         <div className={`form-group${full ? ' form-group--full' : ''}${error ? ' has-error' : ''}`}>
-            <label>{label}</label>
-            {children}
+            <label htmlFor={id}>{label}</label>
+            <FieldIdContext.Provider value={id}>{children}</FieldIdContext.Provider>
+            {error && <span className="form-error" role="alert">{error}</span>}
         </div>
     );
 }
@@ -28,10 +31,11 @@ interface InputBoxProps extends InputHTMLAttributes<HTMLInputElement> {
 
 /** .input-box: input con icona Font Awesome, stesso stile neumorfico del login. */
 export function InputBox({ icon, ...inputProps }: InputBoxProps) {
+    const id = useFieldId();
     return (
         <div className="input-box">
             <i className={`fa-solid ${icon}`} />
-            <input {...inputProps} />
+            <input id={id} {...inputProps} />
         </div>
     );
 }
@@ -42,9 +46,10 @@ interface SelectBoxProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 /** .select-box: select neumorfico con chevron. */
 export function SelectBox({ children, ...selectProps }: SelectBoxProps) {
+    const id = useFieldId();
     return (
         <div className="select-box">
-            <select {...selectProps}>{children}</select>
+            <select id={id} {...selectProps}>{children}</select>
             <i className="fa-solid fa-chevron-down" />
         </div>
     );
@@ -54,9 +59,10 @@ type TextareaBoxProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 /** .textarea-box: textarea neumorfica. */
 export function TextareaBox(props: TextareaBoxProps) {
+    const id = useFieldId();
     return (
         <div className="textarea-box">
-            <textarea {...props} />
+            <textarea id={id} {...props} />
         </div>
     );
 }

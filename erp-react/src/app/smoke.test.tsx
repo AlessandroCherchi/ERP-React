@@ -33,6 +33,7 @@ beforeAll(() => {
 afterEach(() => {
     cleanup();
     useAuthStore.getState().logout();
+    useConfigStore.getState().resetLocalOverrides();
     useConfigStore.getState().setTenant('default');
 });
 
@@ -111,6 +112,24 @@ describe('elenchi', () => {
         await renderAt('/inventario?q=SKU-4501');
         expect(await screen.findByText('Widget Pro X200')).toBeTruthy();
         expect(await screen.findByRole('cell', { name: 'Tecnoforniture S.p.A.' })).toBeTruthy();
+    });
+});
+
+describe('impostazioni', () => {
+    it('owner vede tutte le schede; disattivare un modulo lo toglie dal menu', async () => {
+        await loginAs('owner');
+        await renderAt('/impostazioni?tab=moduli');
+        expect(await screen.findByRole('tab', { name: /Utenti e ruoli/ })).toBeTruthy();
+        expect(screen.getByRole('link', { name: /Fornitori/ })).toBeTruthy();
+        await act(async () => screen.getByRole('switch', { name: 'Fornitori' }).click());
+        expect(screen.queryByRole('link', { name: /Fornitori/ })).toBeNull();
+    });
+
+    it('le tabelle configurate alimentano i form', async () => {
+        await loginAs('owner');
+        act(() => useConfigStore.getState().updateConfig({ tables: { ...useConfigStore.getState().config.tables, categorie: [{ value: 'Vernici', label: 'Vernici' }] } }));
+        await renderAt('/inventario');
+        expect(await screen.findAllByRole('option', { name: 'Vernici', hidden: true })).not.toHaveLength(0);
     });
 });
 

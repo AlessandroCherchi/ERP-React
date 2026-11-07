@@ -23,7 +23,7 @@ export interface RowAction<T> {
     disabled?: (row: T) => string | false;
 }
 
-export interface DataTableProps<T extends { id: number }, K extends string> {
+export interface DataTableProps<T extends { id: number | string }, K extends string> {
     rows: T[];
     columns: Column<T, K>[];
     sortKey: K;
@@ -48,7 +48,7 @@ export interface DataTableProps<T extends { id: number }, K extends string> {
  * empty state e paginazione. Le pagine dichiarano solo colonne e azioni;
  * markup, accessibilità e classi CSS (app-shell.css) vivono qui una volta.
  */
-export function DataTable<T extends { id: number }, K extends string>({
+export function DataTable<T extends { id: number | string }, K extends string>({
     rows, columns, sortKey, sortDir, onSort, actions = [], rowClassName, rowLabel, empty, pagination,
 }: DataTableProps<T, K>) {
     const t = useT();

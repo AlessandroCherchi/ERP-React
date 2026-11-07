@@ -4,7 +4,7 @@
 // funzioni così TanStack Query non cambia in Dashboard/Clienti.
 
 import type { Cliente, ClienteFormValues } from '../../types/cliente';
-import { collection, nextIdOf } from './db';
+import { collection, delay, nextIdOf } from './db';
 
 const SEED: Cliente[] = [
     { id: 1, nome: 'Rossi S.r.l.', email: 'info@rossi-srl.it', telefono: '+39 02 4567890', citta: 'Milano', provincia: 'MI', indirizzo: 'Via Montenapoleone 12', piva: 'IT01234567890', cf: '01234567890', pec: 'rossi@pec.it', sdi: 'ABC1234', stato: 'attivo', fatturato: 45200, ordini: 32, credito: 3200, note: 'Cliente premium con condizioni speciali di pagamento a 60gg.' },
@@ -36,8 +36,6 @@ const SEED: Cliente[] = [
 const store = collection('clienti', SEED);
 let nextId = nextIdOf(store);
 
-const LATENCY = 120;
-const delay = () => new Promise((r) => setTimeout(r, LATENCY));
 
 export async function fetchClienti(): Promise<Cliente[]> {
     await delay();

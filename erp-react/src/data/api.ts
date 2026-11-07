@@ -8,6 +8,7 @@ import * as clienti from '../lib/mockApi/clienti';
 import * as fornitori from '../lib/mockApi/fornitori';
 import * as inventario from '../lib/mockApi/inventario';
 import * as ordini from '../lib/mockApi/ordini';
+import * as utenti from '../lib/mockApi/utenti';
 
 const mockApi: DataApi = {
     clienti: {
@@ -38,6 +39,11 @@ const mockApi: DataApi = {
         update: ordini.updateOrdine,
         remove: ordini.deleteOrdine,
         cambiaStato: ordini.cambiaStatoOrdine,
+    },
+    utenti: {
+        list: utenti.fetchUtenti,
+        invite: utenti.invitaUtente,
+        update: utenti.aggiornaUtente,
     },
 };
 

@@ -8,6 +8,7 @@ import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../types/forn
 import type { Movimento, Prodotto } from '../types/prodotto';
 import type { ProdottoForm } from '../types/quickActions';
 import type { Ordine, OrdineFormValues, OrdineStato } from '../types/ordine';
+import type { Utente, UtenteFormValues } from '../types/utente';
 import type { ClienteRef } from '../lib/mockApi/clienti';
 import type { RettificaInput } from '../lib/mockApi/inventario';
 
@@ -46,9 +47,16 @@ export interface OrdiniApi {
     cambiaStato(id: number, nuovo: OrdineStato): Promise<Ordine>;
 }
 
+export interface UtentiApi {
+    list(): Promise<Utente[]>;
+    invite(data: UtenteFormValues): Promise<Utente>;
+    update(id: string, patch: Partial<Pick<Utente, 'name' | 'role' | 'attivo'>>): Promise<Utente>;
+}
+
 export interface DataApi {
     clienti: ClientiApi;
     fornitori: FornitoriApi;
     magazzino: MagazzinoApi;
     ordini: OrdiniApi;
+    utenti: UtentiApi;
 }

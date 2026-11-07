@@ -9,7 +9,7 @@
 // /api/v1/fornitori, stesso envelope ApiResponse.
 
 import type { Fornitore, FornitoreFormValues, FornitoreRef } from '../../types/fornitore';
-import { collection, nextIdOf } from './db';
+import { collection, delay, nextIdOf } from './db';
 
 
 const SEED: Fornitore[] = [
@@ -30,8 +30,6 @@ const SEED: Fornitore[] = [
 const store = collection('fornitori', SEED);
 let nextId = nextIdOf(store);
 
-const LATENCY = 120;
-const delay = () => new Promise((r) => setTimeout(r, LATENCY));
 
 export async function fetchFornitori(): Promise<Fornitore[]> {
     await delay();

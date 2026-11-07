@@ -1,4 +1,4 @@
-import { useConfirm } from '../components/ui/Confirm';
+import { useConfirm } from '../components/ui/confirmContext';
 
 /** Conferma standard di eliminazione: stesso testo e tono in tutto il prodotto. */
 export function useDeleteConfirm() {

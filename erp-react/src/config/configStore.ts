@@ -61,6 +61,8 @@ interface ConfigState {
     localOverrides: TenantOverride;
     setTenant: (tenantId: string) => void;
     updateConfig: (patch: TenantOverride) => void;
+    /** Rimuove gli override locali di una sezione: torna al valore del tenant. */
+    resetSection: (key: keyof TenantConfig) => void;
     resetLocalOverrides: () => void;
 }
 
@@ -81,6 +83,14 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
     updateConfig: (patch) => {
         const { config, localOverrides } = get();
         const local = mergeConfig(localOverrides as TenantConfig, patch) as TenantOverride;
+        safeStorage.set(overridesKey(config.id), JSON.stringify(local));
+        set({ config: buildConfig(config.id, local), localOverrides: local });
+    },
+
+    resetSection: (key) => {
+        const { config, localOverrides } = get();
+        const local = { ...localOverrides };
+        delete local[key];
         safeStorage.set(overridesKey(config.id), JSON.stringify(local));
         set({ config: buildConfig(config.id, local), localOverrides: local });
     },

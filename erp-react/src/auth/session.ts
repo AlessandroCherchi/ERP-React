@@ -5,14 +5,13 @@
 
 import { create } from 'zustand';
 import { safeStorage } from '../lib/storage';
-import type { Role } from './permissions';
+import type { Utente } from '../types/utente';
+import { DEMO_USERS, verificaCredenziali } from '../lib/mockApi/utenti';
 
-export interface SessionUser {
-    id: string;
-    name: string;
-    email: string;
-    role: Role;
-}
+export { DEMO_USERS };
+
+/** Utente in sessione: snapshot al login (il ruolo effettivo lo decide il backend). */
+export type SessionUser = Pick<Utente, 'id' | 'name' | 'email' | 'role'>;
 
 export interface Session {
     user: SessionUser;
@@ -21,16 +20,6 @@ export interface Session {
     expiresAt: string;
 }
 
-/** Utenti demo, uno per ruolo della permission matrix. Password: "demo". */
-export const DEMO_USERS: SessionUser[] = [
-    { id: 'u-owner', name: 'Olivia Titolare', email: 'owner@demo.it', role: 'owner' },
-    { id: 'u-admin', name: 'Andrea Admin', email: 'admin@demo.it', role: 'admin' },
-    { id: 'u-acc', name: 'Carla Contabile', email: 'contabilita@demo.it', role: 'accounting' },
-    { id: 'u-wh', name: 'Marco Magazzino', email: 'magazzino@demo.it', role: 'warehouse' },
-    { id: 'u-view', name: 'Vera Viewer', email: 'viewer@demo.it', role: 'viewer' },
-];
-
-const DEMO_PASSWORD = 'demo';
 const SESSION_KEY = 'erp.session';
 const TTL_REMEMBER_MS = 7 * 24 * 3600 * 1000;
 const TTL_SESSION_MS = 8 * 3600 * 1000;
@@ -69,9 +58,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async (email, password, { remember, tenantId }) => {
         // latenza simulata: l'interfaccia deve già gestire lo stato "in corso"
         await new Promise((r) => setTimeout(r, 250));
-        const user = DEMO_USERS.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-        // Messaggio unico per utente e password: non rivelare quali email esistono.
-        if (!user || password !== DEMO_PASSWORD) throw new AuthError('Credenziali non valide');
+        const found = verificaCredenziali(email, password);
+        // Messaggio unico per utente, password e disattivato: non rivelare quali email esistono.
+        if (!found) throw new AuthError('Credenziali non valide');
+        const user: SessionUser = { id: found.id, name: found.name, email: found.email, role: found.role };
 
         const session: Session = {
             user,

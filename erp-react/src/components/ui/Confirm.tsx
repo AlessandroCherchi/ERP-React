@@ -1,20 +1,6 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { ConfirmContext, type ConfirmOptions } from './confirmContext';
 import '../../styles/erp-ui.css';
-
-interface ConfirmOptions {
-    title?: string;
-    text?: string;
-    confirmLabel?: string;
-    icon?: string;
-    tone?: 'danger' | 'accent';
-    onConfirm?: () => void;
-}
-
-interface ConfirmContextValue {
-    confirm: (opts: ConfirmOptions) => void;
-}
-
-const ConfirmContext = createContext<ConfirmContextValue | null>(null);
 
 /** Provider unico del dialogo di conferma: monta una sola volta in App/root layout. */
 export function ConfirmProvider({ children }: { children: ReactNode }) {
@@ -67,11 +53,4 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             </div>
         </ConfirmContext.Provider>
     );
-}
-
-/** Hook: const { confirm } = useConfirm(); confirm({ title, text, onConfirm }); */
-export function useConfirm(): ConfirmContextValue {
-    const ctx = useContext(ConfirmContext);
-    if (!ctx) throw new Error('useConfirm va usato dentro <ConfirmProvider>');
-    return ctx;
 }

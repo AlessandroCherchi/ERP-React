@@ -16,7 +16,7 @@ import {
     impegnaMagazzino, ordineEliminabile, ordineModificabile, transizioneValida,
     type Ordine, type OrdineFormValues, type OrdineStato,
 } from '../../types/ordine';
-import { collection, nextIdOf } from './db';
+import { collection, delay, nextIdOf } from './db';
 
 
 // Gli ordini 1-6 sono quelli che compaiono già come causale nel registro
@@ -144,8 +144,6 @@ const SEED: Ordine[] = [
 const store = collection('ordini', SEED);
 let nextId = nextIdOf(store);
 
-const LATENCY = 120;
-const delay = () => new Promise((r) => setTimeout(r, LATENCY));
 
 export async function fetchOrdini(): Promise<Ordine[]> {
     await delay();

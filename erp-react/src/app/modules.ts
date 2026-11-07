@@ -39,7 +39,8 @@ export const MODULES: ModuleDef[] = [
     { id: 'fatture', path: '/fatture', icon: 'fa-file-invoice-dollar', labelKey: 'nav.fatture', resource: 'fatture', placement: 'main' },
     { id: 'contabilita', path: '/contabilita', icon: 'fa-calculator', labelKey: 'nav.contabilita', resource: 'fatture', placement: 'main' },
     { id: 'report', path: '/report', icon: 'fa-chart-pie', labelKey: 'nav.report', resource: 'ordini', placement: 'main' },
-    { id: 'impostazioni', path: '/impostazioni', icon: 'fa-gear', labelKey: 'nav.impostazioni', resource: 'impostazioni', placement: 'footer' },
+    { id: 'impostazioni', path: '/impostazioni', icon: 'fa-gear', labelKey: 'nav.impostazioni', resource: 'impostazioni', placement: 'footer',
+      page: page(() => import('../pages/Impostazioni'), 'Impostazioni') },
 ];
 
 export function getModule(id: ModuleId): ModuleDef {

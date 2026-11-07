@@ -9,7 +9,7 @@
 import { applicaMovimento, type Movimento, type MovimentoTipo, type Prodotto } from '../../types/prodotto';
 import type { ProdottoForm } from '../../types/quickActions';
 import { parseNum } from '../format';
-import { collection, nextIdOf } from './db';
+import { collection, delay, nextIdOf } from './db';
 
 
 // I primi 5 articoli sono gli stessi "Top Prodotti" della Dashboard:
@@ -63,8 +63,6 @@ const movimenti = collection('movimenti', SEED_MOVIMENTI);
 let nextId = nextIdOf(store);
 let nextMovimentoId = nextIdOf(movimenti);
 
-const LATENCY = 120;
-const delay = () => new Promise((r) => setTimeout(r, LATENCY));
 
 /** Converte i valori string del form nei tipi numerici del dominio. */
 function fromForm(data: ProdottoForm): Omit<Prodotto, 'id'> {
