@@ -425,12 +425,15 @@ Inventario organizzato in viste (`?vista=`): **Articoli**, **Movimenti**,
 Da fare in una fase successiva (dipendono dal backend per la tracciabilità):
 **lotti/seriali/scadenze** (FEFO) e **DDT** con fatturazione differita da DDT.
 
-## Roadmap frontend (backend in secondo piano)
-- ~~B — Impostazioni~~ — fatto (campi personalizzati e modelli di stampa: con la Fase E).
-- ~~C — Acquisti~~ — fatto.
-- ~~D — Magazzino avanzato~~ — fatto (lotti/seriali/scadenze e DDT: prossima fase).
-- ~~E — Ciclo attivo~~ — fatto (DDT: vedi D).
-- ~~F — Report, Dashboard reale, audit, notifiche, ricerca~~ — fatto.
+## Prossimi passi frontend
+- **i18n delle pagine modulo**: shell, login, Impostazioni e pagine di sistema
+  sono già nei dizionari; i testi di vendite/acquisti/fatture/report vanno
+  spostati in `src/i18n/` (le chiavi tipizzate rendono la migrazione sicura).
+- **Lotti, seriali e scadenze** (FEFO) e **DDT** con fatturazione differita da DDT.
+- **E2E Playwright** sui flussi critici (ordine → conferma → fattura → incasso;
+  acquisto → ricevimento; inventario fisico) e test di componente mirati.
+- Code splitting del data layer (oggi i mock sono nel bundle iniziale: con il
+  backend il client HTTP li sostituisce).
 
 ## Step 7 — RxDB + Sync Coordinator
 - Schema RxDB per cache/outbox (customer/order/invoice/product draft)

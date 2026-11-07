@@ -23,7 +23,6 @@ export const DEFAULT_CONFIG: TenantConfig = {
     theme: {},
     modules: {},
     features: {
-        giacenzaNegativa: false,
         demoLogin: true,
         multiMagazzino: true,
     },

@@ -41,9 +41,9 @@ Registrarlo in `src/config/tenants/index.ts`.
 | `locale` | lingua UI (`it`/`en`), formati numeri/date, valuta |
 | `theme` | qualsiasi token colore di `src/styles/tokens.css`, più `--erp-radius`, `--erp-radius-lg`, `--erp-font`. Le varianti `-rgb` si calcolano da sole |
 | `modules` | `false` = modulo nascosto dal menu e rotta bloccata |
-| `features` | feature flag (es. `demoLogin`) |
+| `features` | feature flag: `demoLogin` (account demo al login), `multiMagazzino` (giacenze per sede, trasferimenti) |
 | `tables` | categorie, unità di misura, aliquote IVA (con natura), termini e metodi di pagamento. Un array dichiarato **sostituisce** quello di serie |
-| `numbering` | prefisso, progressivo iniziale e padding di SKU, ordini, fatture |
+| `numbering` | prefisso, progressivo iniziale e padding di SKU, ordini di vendita, ordini d'acquisto, fatture |
 | `pageSize` | righe per pagina delle tabelle |
 
 ## 3. Build per il cliente

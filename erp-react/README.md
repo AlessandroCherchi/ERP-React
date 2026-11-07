@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# erp-react — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Guida per sviluppatori. Panoramica del prodotto nel [README principale](../README.md).
 
-Currently, two official plugins are available:
+## Requisiti
+Node.js 22 LTS (`.nvmrc`), npm.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Comandi
+| Comando | Cosa fa |
+|---|---|
+| `npm run dev` | server di sviluppo (http://localhost:5173) |
+| `npm test` | Vitest: dominio, adapter, architettura, smoke di tutte le route |
+| `npm run test:watch` | test in watch mode |
+| `npm run typecheck` | TypeScript strict (`noUncheckedIndexedAccess`) |
+| `npm run lint` | oxlint (regole React incluse) |
+| `npm run build` | build di produzione in `dist/` |
 
-## React Compiler
+## Documentazione
+| File | Contenuto |
+|---|---|
+| [`docs/ARCHITETTURA.md`](docs/ARCHITETTURA.md) | layer, flusso dei dati, decisioni tecniche |
+| [`CUSTOMIZZAZIONE.md`](CUSTOMIZZAZIONE.md) | personalizzare il prodotto per un cliente |
+| [`MIGRATION.md`](MIGRATION.md) | storico delle fasi e roadmap verso il backend |
+| [`../documentazione/`](../documentazione/) | specifica architetturale v3.1 (contratto di implementazione) |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Convenzioni
+- Le pagine usano solo gli hook di `src/data/` (verificato da `app/architecture.test.ts`).
+- Regole di business in `src/types/` (funzioni pure, senza React) e `src/lib/`.
+- Colori solo via token `var(--erp-*)` (verificato da `styles/tokens.test.ts`).
+- Testi nuovi in `src/i18n/it.ts` + `en.ts`; elenchi di dominio dal config del tenant.
+- Commenti per spiegare il *perché* (vincoli, regole fiscali, scelte), non il *cosa*.
