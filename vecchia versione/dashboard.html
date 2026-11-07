@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP — Dashboard</title>
+    <meta name="description" content="Dashboard principale ERP — panoramica aziendale in tempo reale">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <!-- design system condiviso per modali, form, conferme e toast -->
+    <link rel="stylesheet" href="erp-ui.css">
+</head>
+
+<body>
+
+    <!-- ========================= SIDEBAR ========================= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="assett/logo.png" alt="Logo ERP" class="sidebar-logo" id="sidebarLogo">
+            <span class="sidebar-brand">ERP Suite</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item active" id="navDashboard">
+                <i class="fa-solid fa-grid-2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" id="navVendite">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Vendite</span>
+            </a>
+            <a href="#" class="nav-item" id="navInventario">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Inventario</span>
+            </a>
+            <a href="clienti.html" class="nav-item" id="navClienti">
+                <i class="fa-solid fa-users"></i>
+                <span>Clienti</span>
+            </a>
+            <a href="#" class="nav-item" id="navFornitori">
+                <i class="fa-solid fa-truck-field"></i>
+                <span>Fornitori</span>
+            </a>
+            <a href="#" class="nav-item" id="navFatture">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span>Fatture</span>
+            </a>
+            <a href="#" class="nav-item" id="navContabilita">
+                <i class="fa-solid fa-calculator"></i>
+                <span>Contabilità</span>
+            </a>
+            <a href="#" class="nav-item" id="navReport">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Report</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" id="navImpostazioni">
+                <i class="fa-solid fa-gear"></i>
+                <span>Impostazioni</span>
+            </a>
+            <a href="index.html" class="nav-item" id="navLogout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Esci</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ========================= MAIN CONTENT ========================= -->
+    <main class="main-content" id="mainContent">
+
+        <!-- TOP BAR -->
+        <header class="topbar" id="topbar">
+            <div class="topbar-left">
+                <button class="neu-icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="topbar-greeting">
+                    <h1 id="greetingTitle">Buongiorno, Admin</h1>
+                    <p id="greetingDate"></p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box" id="searchBox">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Cerca nell'ERP..." id="globalSearch" autocomplete="off">
+                </div>
+                <button class="neu-icon-btn notification-btn" id="notifBtn" aria-label="Notifiche">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge">3</span>
+                </button>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================= KPI CARDS ========================= -->
+        <section class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card" id="kpiFatturato">
+                <div class="kpi-icon kpi-icon--revenue">
+                    <i class="fa-solid fa-euro-sign"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Fatturato Mensile</span>
+                    <span class="kpi-value" id="kpiRevenueVal">€ 124.850</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +12.4%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiOrdini">
+                <div class="kpi-icon kpi-icon--orders">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Ordini Aperti</span>
+                    <span class="kpi-value" id="kpiOrdersVal">38</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +5.2%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiClienti">
+                <div class="kpi-icon kpi-icon--clients">
+                    <i class="fa-solid fa-user-group"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Nuovi Clienti</span>
+                    <span class="kpi-value" id="kpiClientsVal">16</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +8.1%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiMagazzino">
+                <div class="kpi-icon kpi-icon--stock">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Articoli in Stock</span>
+                    <span class="kpi-value" id="kpiStockVal">1.247</span>
+                    <span class="kpi-trend kpi-trend--down"><i class="fa-solid fa-arrow-trend-down"></i> -2.3%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================= CHARTS ROW ========================= -->
+        <section class="dashboard-row" id="chartsRow">
+            <div class="neu-panel chart-panel" id="chartRevenue">
+                <div class="panel-header">
+                    <h2>Andamento Fatturato</h2>
+                    <div class="panel-actions">
+                        <button class="chip-btn active" data-range="7d">7G</button>
+                        <button class="chip-btn" data-range="30d">30G</button>
+                        <button class="chip-btn" data-range="12m">12M</button>
+                    </div>
+                </div>
+                <div class="chart-container" id="revenueChartContainer">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="neu-panel chart-panel chart-panel--small" id="chartOrders">
+                <div class="panel-header">
+                    <h2>Ordini per Stato</h2>
+                </div>
+                <div class="chart-container chart-container--donut" id="ordersChartContainer">
+                    <canvas id="ordersDonut"></canvas>
+                </div>
+                <div class="donut-legend" id="donutLegend">
+                    <div class="legend-item"><span class="dot dot--completed"></span>Completati</div>
+                    <div class="legend-item"><span class="dot dot--pending"></span>In Attesa</div>
+                    <div class="legend-item"><span class="dot dot--cancelled"></span>Annullati</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================= BOTTOM ROW ========================= -->
+        <section class="dashboard-row" id="bottomRow">
+
+            <!-- RECENT ACTIVITIES -->
+            <div class="neu-panel activities-panel" id="activitiesPanel">
+                <div class="panel-header">
+                    <h2>Attività Recenti</h2>
+                    <a href="#" class="panel-link">Vedi tutto <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <ul class="activity-list" id="activityList">
+                    <!-- populated by JS -->
+                </ul>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="neu-panel quick-panel" id="quickPanel">
+                <div class="panel-header">
+                    <h2>Azioni Rapide</h2>
+                </div>
+                <div class="quick-grid" id="quickGrid">
+                    <button class="quick-btn" id="qaNuovoOrdine">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-plus"></i></div>
+                        <span>Nuovo Ordine</span>
+                    </button>
+                    <button class="quick-btn" id="qaNuovaFattura">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                        <span>Nuova Fattura</span>
+                    </button>
+                    <button class="quick-btn" id="qaAggiungiCliente">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-user-plus"></i></div>
+                        <span>Aggiungi Cliente</span>
+                    </button>
+                    <button class="quick-btn" id="qaAggiungiProdotto">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-box"></i></div>
+                        <span>Aggiungi Prodotto</span>
+                    </button>
+                    <button class="quick-btn" id="qaReport">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-download"></i></div>
+                        <span>Scarica Report</span>
+                    </button>
+                    <button class="quick-btn" id="qaBackup">
+                        <div class="quick-btn-icon"><i class="fa-solid fa-database"></i></div>
+                        <span>Backup Dati</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================= TOP PRODUCTS TABLE ========================= -->
+        <section class="dashboard-row" id="tableRow">
+            <div class="neu-panel table-panel" id="topProductsPanel">
+                <div class="panel-header">
+                    <h2>Top Prodotti del Mese</h2>
+                    <a href="#" class="panel-link">Catalogo <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="table-wrapper">
+                    <table class="neu-table" id="topProductsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Prodotto</th>
+                                <th>Categoria</th>
+                                <th>Venduti</th>
+                                <th>Ricavo</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topProductsBody">
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             MODALI AZIONI RAPIDE
+             Overlay unico condiviso + un .modal per ogni azione.
+             Stile e struttura identici al modale "Nuovo Cliente"
+             di clienti.html (erp-ui.css / erp-ui.js).
+             I campi da leggere e validare usano data-field.
+        ========================================================== -->
+        <div class="modal-overlay" id="modalOverlay"></div>
+
+        <!-- ------------------------- NUOVO ORDINE ------------------------- -->
+        <div class="modal" id="modalOrdine" role="dialog" aria-modal="true" aria-labelledby="modalOrdineTitle">
+            <div class="modal-header">
+                <h2 id="modalOrdineTitle">Nuovo Ordine</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" data-modal-close aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="formOrdine" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="oCliente">Cliente *</label>
+                        <div class="select-box">
+                            <select id="oCliente" data-field="cliente" data-client-select required></select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="oRiferimento">Riferimento *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input type="text" id="oRiferimento" data-field="riferimento" placeholder="ORD-3093"
+                                required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="oData">Data ordine *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="date" id="oData" data-field="data" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="oConsegna">Consegna prevista</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-truck-fast"></i>
+                            <input type="date" id="oConsegna" data-field="consegna">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="oPriorita">Priorità</label>
+                        <div class="select-box">
+                            <select id="oPriorita" data-field="priorita">
+                                <option value="normale">Normale</option>
+                                <option value="bassa">Bassa</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="oStato">Stato iniziale</label>
+                        <div class="select-box">
+                            <select id="oStato" data-field="stato">
+                                <option value="bozza">Bozza</option>
+                                <option value="confermato">Confermato</option>
+                                <option value="in-attesa">In attesa</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="oArticoli">Numero articoli *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                            <input type="number" id="oArticoli" data-field="articoli" min="1" step="1" placeholder="12"
+                                required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="oImporto">Importo (€) *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-euro-sign"></i>
+                            <input type="number" id="oImporto" data-field="importo" min="0" step="0.01"
+                                placeholder="2340.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="oNote">Note</label>
+                        <div class="textarea-box">
+                            <textarea id="oNote" data-field="note" rows="3"
+                                placeholder="Condizioni, riferimenti interni, istruzioni di spedizione..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" data-modal-close>
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="saveOrdine">
+                    <i class="fa-solid fa-check"></i> <span>Crea Ordine</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ------------------------- NUOVA FATTURA ------------------------- -->
+        <div class="modal" id="modalFattura" role="dialog" aria-modal="true" aria-labelledby="modalFatturaTitle">
+            <div class="modal-header">
+                <h2 id="modalFatturaTitle">Nuova Fattura</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" data-modal-close aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="formFattura" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="iCliente">Cliente *</label>
+                        <div class="select-box">
+                            <select id="iCliente" data-field="cliente" data-client-select required></select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="iNumero">Numero documento *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <input type="text" id="iNumero" data-field="numero" placeholder="2026/0142" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="iTipo">Tipo documento</label>
+                        <div class="select-box">
+                            <select id="iTipo" data-field="tipo">
+                                <option value="fattura">Fattura immediata</option>
+                                <option value="differita">Fattura differita</option>
+                                <option value="acconto">Fattura di acconto</option>
+                                <option value="nota-credito">Nota di credito</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="iData">Data emissione *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="date" id="iData" data-field="data" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="iScadenza">Termini di pagamento</label>
+                        <div class="select-box">
+                            <select id="iScadenza" data-field="scadenza">
+                                <option value="30">30 giorni data fattura</option>
+                                <option value="60">60 giorni data fattura</option>
+                                <option value="90">90 giorni data fattura</option>
+                                <option value="0">Pagamento immediato</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="iPagamento">Metodo di pagamento</label>
+                        <div class="select-box">
+                            <select id="iPagamento" data-field="pagamento">
+                                <option value="bonifico">Bonifico bancario</option>
+                                <option value="riba">RIBA</option>
+                                <option value="carta">Carta di credito</option>
+                                <option value="contanti">Contanti</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="iImponibile">Imponibile (€) *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-euro-sign"></i>
+                            <input type="number" id="iImponibile" data-field="imponibile" min="0" step="0.01"
+                                placeholder="1500.00" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="iIva">Aliquota IVA</label>
+                        <div class="select-box">
+                            <select id="iIva" data-field="iva">
+                                <option value="22">22% — ordinaria</option>
+                                <option value="10">10% — ridotta</option>
+                                <option value="4">4% — minima</option>
+                                <option value="0">0% — esente / non imponibile</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- totale calcolato in tempo reale da dashboard.js -->
+                    <div class="form-total">
+                        <span class="form-total-label">Totale documento</span>
+                        <span class="form-total-value" id="fatturaTotale">€ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="iNote">Note</label>
+                        <div class="textarea-box">
+                            <textarea id="iNote" data-field="note" rows="3"
+                                placeholder="Riferimento ordine, causale, note in fattura..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" data-modal-close>
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="saveFattura">
+                    <i class="fa-solid fa-check"></i> <span>Emetti Fattura</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ------------------------- NUOVO CLIENTE -------------------------
+             Stessi campi del modale di clienti.html: l'anagrafica creata qui
+             è identica a quella creata dalla pagina Clienti.
+        ------------------------------------------------------------------- -->
+        <div class="modal" id="modalCliente" role="dialog" aria-modal="true" aria-labelledby="modalClienteTitle">
+            <div class="modal-header">
+                <h2 id="modalClienteTitle">Nuovo Cliente</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" data-modal-close aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="formCliente" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cNome">Ragione Sociale *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-building"></i>
+                            <input type="text" id="cNome" data-field="nome" placeholder="Es. Rossi S.r.l." required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cEmail">Email *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="cEmail" data-field="email" placeholder="info@azienda.it" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cTelefono">Telefono</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="cTelefono" data-field="telefono" placeholder="+39 02 1234567">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cPiva">Partita IVA</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input type="text" id="cPiva" data-field="piva" placeholder="IT01234567890" maxlength="13">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cCf">Codice Fiscale</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-id-card"></i>
+                            <input type="text" id="cCf" data-field="cf" placeholder="01234567890" maxlength="16">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cPec">PEC</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                            <input type="email" id="cPec" data-field="pec" placeholder="azienda@pec.it">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cSdi">Codice SDI</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text" id="cSdi" data-field="sdi" placeholder="ABC1234" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cStato">Stato</label>
+                        <div class="select-box">
+                            <select id="cStato" data-field="stato">
+                                <option value="attivo">Attivo</option>
+                                <option value="inattivo">Inattivo</option>
+                                <option value="prospect">Prospect</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="cIndirizzo">Indirizzo</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <input type="text" id="cIndirizzo" data-field="indirizzo" placeholder="Via Roma 1, 20100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cCitta">Città</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-city"></i>
+                            <input type="text" id="cCitta" data-field="citta" placeholder="Milano">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cProvincia">Provincia</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-map"></i>
+                            <input type="text" id="cProvincia" data-field="provincia" placeholder="MI" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="cNote">Note</label>
+                        <div class="textarea-box">
+                            <textarea id="cNote" data-field="note" rows="3"
+                                placeholder="Note aggiuntive sul cliente..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" data-modal-close>
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="saveCliente">
+                    <i class="fa-solid fa-check"></i> <span>Salva Cliente</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ------------------------- NUOVO PRODOTTO ------------------------- -->
+        <div class="modal" id="modalProdotto" role="dialog" aria-modal="true" aria-labelledby="modalProdottoTitle">
+            <div class="modal-header">
+                <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" data-modal-close aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="formProdotto" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pNome">Nome prodotto *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-box"></i>
+                            <input type="text" id="pNome" data-field="nome" placeholder="Es. Widget Pro X200" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pSku">Codice SKU *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text" id="pSku" data-field="sku" placeholder="SKU-4522" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pCategoria">Categoria</label>
+                        <div class="select-box">
+                            <select id="pCategoria" data-field="categoria">
+                                <option value="Elettronica">Elettronica</option>
+                                <option value="Componenti">Componenti</option>
+                                <option value="Illuminazione">Illuminazione</option>
+                                <option value="Networking">Networking</option>
+                                <option value="Accessori">Accessori</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pFornitore">Fornitore</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-truck-field"></i>
+                            <input type="text" id="pFornitore" data-field="fornitore" placeholder="Es. Tecnoforniture S.p.A.">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pCosto">Costo acquisto (€)</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-tag"></i>
+                            <input type="number" id="pCosto" data-field="costo" min="0" step="0.01" placeholder="32.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pPrezzo">Prezzo vendita (€) *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-euro-sign"></i>
+                            <input type="number" id="pPrezzo" data-field="prezzo" min="0" step="0.01"
+                                placeholder="54.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pGiacenza">Giacenza iniziale</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-warehouse"></i>
+                            <input type="number" id="pGiacenza" data-field="giacenza" min="0" step="1" placeholder="120">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pScorta">Scorta minima</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <input type="number" id="pScorta" data-field="scorta" min="0" step="1" placeholder="20">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pUnita">Unità di misura</label>
+                        <div class="select-box">
+                            <select id="pUnita" data-field="unita">
+                                <option value="pz">Pezzi (pz)</option>
+                                <option value="cf">Confezioni (cf)</option>
+                                <option value="kg">Chilogrammi (kg)</option>
+                                <option value="m">Metri (m)</option>
+                                <option value="lt">Litri (lt)</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pIva">Aliquota IVA</label>
+                        <div class="select-box">
+                            <select id="pIva" data-field="iva">
+                                <option value="22">22% — ordinaria</option>
+                                <option value="10">10% — ridotta</option>
+                                <option value="4">4% — minima</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- margine calcolato in tempo reale da dashboard.js -->
+                    <div class="form-total">
+                        <span class="form-total-label">Margine unitario stimato</span>
+                        <span class="form-total-value" id="prodottoMargine">€ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="pDescrizione">Descrizione</label>
+                        <div class="textarea-box">
+                            <textarea id="pDescrizione" data-field="descrizione" rows="3"
+                                placeholder="Caratteristiche tecniche, note di magazzino..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" data-modal-close>
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="saveProdotto">
+                    <i class="fa-solid fa-check"></i> <span>Salva Prodotto</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ------------------------- SCARICA REPORT ------------------------- -->
+        <div class="modal modal--sm" id="modalReport" role="dialog" aria-modal="true"
+            aria-labelledby="modalReportTitle">
+            <div class="modal-header">
+                <h2 id="modalReportTitle">Scarica Report</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" data-modal-close aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="formReport" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="rTipo">Tipo di report *</label>
+                        <div class="select-box">
+                            <select id="rTipo" data-field="tipo" required>
+                                <option value="fatturato">Andamento fatturato</option>
+                                <option value="prodotti">Top prodotti del mese</option>
+                                <option value="attivita">Registro attività</option>
+                                <option value="kpi">Riepilogo KPI</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="rPeriodo">Periodo</label>
+                        <div class="select-box">
+                            <select id="rPeriodo" data-field="periodo">
+                                <option value="7d">Ultimi 7 giorni</option>
+                                <option value="30d" selected>Ultimi 30 giorni</option>
+                                <option value="12m">Ultimi 12 mesi</option>
+                                <option value="custom">Intervallo personalizzato</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- visibile solo con periodo = intervallo personalizzato -->
+                <div class="form-row" id="reportCustomRange" hidden>
+                    <div class="form-group">
+                        <label for="rDal">Dal</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="date" id="rDal" data-field="dal">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="rAl">Al</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <input type="date" id="rAl" data-field="al">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full">
+                        <label for="rFormato">Formato file</label>
+                        <div class="select-box">
+                            <select id="rFormato" data-field="formato">
+                                <option value="csv">CSV — compatibile con Excel</option>
+                                <option value="json">JSON — per integrazioni</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <p class="form-hint form-group--full">
+                        Il file viene generato dai dati attualmente visualizzati nella dashboard
+                        e scaricato direttamente sul tuo dispositivo.
+                    </p>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" data-modal-close>
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="saveReport">
+                    <i class="fa-solid fa-download"></i> <span>Genera e Scarica</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================= TOAST ========================= -->
+        <div class="toast-container" id="toastContainer"></div>
+
+    </main>
+
+    <!-- ========================= SCRIPTS ========================= -->
+    <script src="erp-ui.js"></script>
+    <script src="dashboard.js"></script>
+
+</body>
+
+</html>

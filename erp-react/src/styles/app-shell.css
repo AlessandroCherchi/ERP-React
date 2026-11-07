@@ -1,0 +1,1338 @@
+/* ============================================================
+   APP SHELL — chrome condiviso delle pagine post-login
+   ------------------------------------------------------------
+   Sidebar, topbar, KPI, pannelli, tabelle, paginazione,
+   pannello dettaglio, empty state e responsive: tutto ciò che è
+   identico fra Dashboard / Clienti / Inventario.
+
+   Estratto verbatim da styles/clienti.css (che a sua volta è
+   "identico a dashboard.css"): stessi selettori, stessi valori,
+   zero deriva visiva. Modali/form/toast/confirm NON sono qui:
+   vivono in erp-ui.css. Il wrapper di pagina (`.<nome>-page`,
+   ex `body`) resta nel CSS della singola pagina.
+
+   TODO(cleanup): migrare anche dashboard.css e clienti.css a
+   questo file — oggi ne contengono una copia identica.
+============================================================ */
+
+
+/* scroll-bar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c3c3c3;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a10f0f;
+}
+
+
+/* ========================= SIDEBAR (identica a dashboard.css) ========================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #e8e8e8;
+    box-shadow:
+        6px 0 18px rgba(0, 0, 0, .06),
+        -1px 0 1px rgba(255, 255, 255, .5) inset;
+    z-index: 100;
+    transition: width .4s cubic-bezier(.22, 1, .36, 1), transform .4s cubic-bezier(.22, 1, .36, 1);
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: 72px;
+}
+
+.sidebar.collapsed .sidebar-brand,
+.sidebar.collapsed .nav-item span {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, .65);
+}
+
+.sidebar-logo {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-brand {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4a4a4a;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -2px -2px 1px rgba(163, 163, 163, .25);
+    transition: opacity .3s ease;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #7a7a7a;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.nav-item i {
+    font-size: 16px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color .35s ease;
+}
+
+.nav-item span {
+    transition: opacity .3s ease;
+}
+
+.nav-item:hover {
+    background: #e8e8e8;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .9),
+        inset 4px 4px 8px rgba(184, 190, 204, .35);
+    color: #4a4a4a;
+}
+
+.nav-item.active {
+    background: #e8e8e8;
+    color: #a10f0f;
+    font-weight: 600;
+    box-shadow:
+        inset 4px 4px 8px rgba(120, 10, 10, .12),
+        inset -4px -4px 8px rgba(255, 255, 255, .8);
+}
+
+.nav-item.active i {
+    color: #a10f0f;
+}
+
+.sidebar-footer {
+    padding: 12px 12px 20px;
+    border-top: 1px solid rgba(255, 255, 255, .65);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+/* ========================= MAIN CONTENT ========================= */
+
+.main-content {
+    flex: 1;
+    /* Un flex item nasce con min-width:auto e non scende sotto il min-content
+       dei suoi figli: senza questo zero, la griglia KPI o una tabella larga
+       impediscono alla colonna di restringersi e trascinano TUTTA la pagina
+       oltre il viewport — topbar e toolbar comprese, non solo la tabella.
+       Gli elementi che devono davvero scorrere hanno il proprio
+       overflow-x (vedi .table-wrapper). */
+    min-width: 0;
+    margin-left: 260px;
+    padding: 0 32px 40px;
+    transition: margin-left .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.sidebar.collapsed~.main-content {
+    margin-left: 72px;
+}
+
+
+/* ========================= TOPBAR (identica) ========================= */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 24px;
+    position: sticky;
+    top: 0;
+    background: #e8e8e8;
+    z-index: 50;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.topbar-greeting h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4a4a4a;
+    letter-spacing: .3px;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -2px -2px 1px rgba(163, 163, 163, .25);
+}
+
+.topbar-greeting p {
+    font-size: 12px;
+    color: #9a9a9a;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+
+/* ========================= ICON BUTTON (identico) ========================= */
+
+.neu-icon-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    background: #e8e8e8;
+    color: #7a7a7a;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow:
+        -5px -5px 10px #ffffff,
+        5px 5px 10px #c8c8c8;
+    transition: all .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.neu-icon-btn:hover {
+    transform: translateY(-2px);
+    color: #a10f0f;
+    box-shadow:
+        -7px -7px 14px #ffffff,
+        7px 7px 14px #c3c3c3;
+}
+
+.neu-icon-btn:active {
+    transform: translateY(0) scale(.95);
+    box-shadow:
+        inset 3px 3px 6px rgba(184, 190, 204, .45),
+        inset -3px -3px 6px rgba(255, 255, 255, .9);
+}
+
+.neu-icon-btn--sm {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    border-radius: 10px;
+    box-shadow:
+        -3px -3px 6px #ffffff,
+        3px 3px 6px #c8c8c8;
+}
+
+
+/* notification badge */
+.notification-btn {
+    position: relative;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    color: #f5e9c8;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(120, 10, 10, .4);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+
+/* ========================= SEARCH BOX (identico) ========================= */
+
+.search-box {
+    position: relative;
+    width: 240px;
+    /* Larghezza desiderata, non minima: nella topbar la ricerca cede spazio
+       al titolo invece di spingere fuori campo notifiche e avatar. */
+    flex: 0 1 240px;
+    min-width: 0;
+}
+
+.search-box input {
+    min-width: 0;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #909090;
+    font-size: 13px;
+    z-index: 2;
+    transition: color .35s ease;
+}
+
+.search-box input {
+    width: 100%;
+    height: 42px;
+    padding: 0 16px 0 38px;
+    border: none;
+    outline: none;
+    background: #e8e8e8;
+    color: #4a4a4a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .95),
+        inset 4px 4px 8px rgba(184, 190, 204, .4);
+    transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.search-box input:focus {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 3px 3px 6px rgba(120, 10, 10, .2),
+        inset -3px -3px 6px rgba(212, 55, 55, .15);
+}
+
+.search-box input:focus~i,
+.search-box:focus-within i {
+    color: #a10f0f;
+}
+
+.search-box input::placeholder {
+    color: #a3a3a3;
+    font-weight: 400;
+}
+
+.search-box--table {
+    width: 280px;
+}
+
+
+/* ========================= USER AVATAR (identico) ========================= */
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #7a7a7a;
+    box-shadow:
+        -5px -5px 10px #ffffff,
+        5px 5px 10px #c8c8c8;
+    cursor: pointer;
+    transition: all .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.user-avatar:hover {
+    transform: translateY(-2px);
+    color: #a10f0f;
+    box-shadow:
+        -7px -7px 14px #ffffff,
+        7px 7px 14px #c3c3c3;
+}
+
+
+/* ========================= KPI CARDS (identiche) ========================= */
+
+.kpi-grid {
+    display: grid;
+    /* minmax(0, 1fr) e non 1fr: `1fr` vale `minmax(auto, 1fr)` e la traccia
+       non scende mai sotto il min-content della card, quindi quattro
+       etichette lunghe sfondano la griglia invece di stringersi. */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px 22px;
+    border-radius: 16px;
+    background: #e8e8e8;
+    box-shadow:
+        -8px -8px 16px #ffffff,
+        8px 8px 16px #c8c8c8;
+    transition: all .4s cubic-bezier(.22, 1, .36, 1);
+    cursor: default;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        -10px -10px 22px #ffffff,
+        10px 10px 22px #c3c3c3;
+}
+
+.kpi-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow:
+        inset 3px 3px 6px rgba(184, 190, 204, .35),
+        inset -3px -3px 6px rgba(255, 255, 255, .9);
+}
+
+.kpi-icon--revenue {
+    color: #a10f0f;
+    background: #e8e8e8;
+}
+
+.kpi-icon--clients {
+    color: #2e7d32;
+    background: #e8e8e8;
+}
+
+.kpi-icon--active {
+    color: #1565c0;
+    background: #e8e8e8;
+}
+
+.kpi-icon--new {
+    color: #b8860b;
+    background: #e8e8e8;
+}
+
+/* varianti già presenti in dashboard.css, riunite qui per avere
+   un set unico condiviso da tutte le pagine */
+.kpi-icon--orders {
+    color: #b8860b;
+    background: #e8e8e8;
+}
+
+.kpi-icon--stock {
+    color: #1565c0;
+    background: #e8e8e8;
+}
+
+/* varianti aggiunte per l'Inventario (scorte/esauriti) */
+.kpi-icon--warning {
+    color: #b8860b;
+    background: #e8e8e8;
+}
+
+.kpi-icon--danger {
+    color: #c62828;
+    background: #e8e8e8;
+}
+
+.kpi-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* La colonna di testo può stringersi: l'etichetta va a capo invece di
+       allargare la card. */
+    min-width: 0;
+}
+
+.kpi-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #9a9a9a;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    /* Ultima difesa: un importo molto lungo va a capo, non sfonda la card. */
+    overflow-wrap: anywhere;
+    font-size: 26px;
+    font-weight: 800;
+    color: #4a4a4a;
+    letter-spacing: .3px;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -1px -1px 1px rgba(163, 163, 163, .2);
+}
+
+.kpi-trend {
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.kpi-trend--up {
+    color: #2e7d32;
+}
+
+.kpi-trend--down {
+    color: #c62828;
+}
+
+
+/* ========================= CHIP BUTTONS (identici) ========================= */
+
+.chip-btn {
+    padding: 5px 14px;
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    background: #e8e8e8;
+    color: #9a9a9a;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+        -3px -3px 6px #ffffff,
+        3px 3px 6px #c8c8c8;
+    transition: all .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.chip-btn:hover {
+    color: #4a4a4a;
+}
+
+.chip-btn.active {
+    color: #f5e9c8;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    box-shadow:
+        0 4px 12px rgba(120, 10, 10, .3),
+        inset 0 1px 1px rgba(255, 255, 255, .15);
+}
+
+
+/* ========================= TOOLBAR ========================= */
+
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 6px;
+}
+
+
+/* ========================= NEU PANEL (identico) ========================= */
+
+.neu-panel {
+    border-radius: 16px;
+    background: #e8e8e8;
+    padding: 24px;
+    box-shadow:
+        -8px -8px 16px #ffffff,
+        8px 8px 16px #c8c8c8;
+    transition: all .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.neu-panel:hover {
+    box-shadow:
+        -10px -10px 20px #ffffff,
+        10px 10px 20px #c3c3c3;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4a4a4a;
+    letter-spacing: .3px;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -1px -1px 1px rgba(163, 163, 163, .2);
+}
+
+
+/* ========================= TABLE (identica, estesa) ========================= */
+
+.table-panel {
+    margin-bottom: 28px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.neu-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.neu-table thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9a9a9a;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1px solid rgba(195, 195, 195, .35);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.th-sortable {
+    cursor: pointer;
+    transition: color .3s ease;
+}
+
+.th-sortable:hover {
+    color: #a10f0f;
+}
+
+.th-sortable.sort-asc::after {
+    content: " ▲";
+    font-size: 9px;
+    color: #a10f0f;
+}
+
+.th-sortable.sort-desc::after {
+    content: " ▼";
+    font-size: 9px;
+    color: #a10f0f;
+}
+
+.neu-table tbody tr {
+    transition: all .3s ease;
+}
+
+.neu-table tbody tr:hover {
+    background: rgba(161, 15, 15, .03);
+}
+
+.neu-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(195, 195, 195, .15);
+    font-weight: 500;
+    color: #5a5a5a;
+    white-space: nowrap;
+}
+
+.neu-table tbody td:first-child {
+    font-weight: 700;
+    color: #a10f0f;
+}
+
+
+/* ---- STATUS BADGE ---- */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+.status-badge--attivo {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, .08);
+}
+
+.status-badge--attivo::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2e7d32;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-badge--inattivo {
+    color: #9a9a9a;
+    background: rgba(154, 154, 154, .1);
+}
+
+.status-badge--inattivo::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9a9a9a;
+}
+
+.status-badge--prospect {
+    color: #b8860b;
+    background: rgba(184, 134, 11, .08);
+}
+
+.status-badge--prospect::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #b8860b;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .4;
+    }
+}
+
+
+/* ---- TABLE ACTIONS ---- */
+
+.table-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.table-actions .neu-icon-btn--sm {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+
+/* ---- CLIENT NAME CELL ---- */
+
+.client-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.client-avatar-sm {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f5e9c8;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(120, 10, 10, .25);
+    text-transform: uppercase;
+}
+
+.client-name-text {
+    font-weight: 600;
+    color: #4a4a4a;
+    transition: color .3s ease;
+}
+
+.client-name-cell:hover .client-name-text {
+    color: #a10f0f;
+}
+
+
+/* ========================= PAGINATION ========================= */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(195, 195, 195, .25);
+}
+
+.pagination-info {
+    font-size: 12px;
+    color: #9a9a9a;
+    font-weight: 500;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-pages {
+    display: flex;
+    gap: 4px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    background: #e8e8e8;
+    color: #7a7a7a;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+        -2px -2px 5px #ffffff,
+        2px 2px 5px #c8c8c8;
+    transition: all .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.page-btn:hover {
+    color: #a10f0f;
+}
+
+.page-btn.active {
+    color: #f5e9c8;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    box-shadow:
+        0 3px 8px rgba(120, 10, 10, .3),
+        inset 0 1px 1px rgba(255, 255, 255, .15);
+}
+
+
+/* ========================= DETAIL SLIDE-OUT PANEL ========================= */
+
+.detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .2);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+}
+
+.detail-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.detail-panel {
+    position: fixed;
+    top: 0;
+    right: -460px;
+    width: 440px;
+    height: 100vh;
+    background: #e8e8e8;
+    box-shadow:
+        -8px 0 24px rgba(0, 0, 0, .08);
+    z-index: 210;
+    display: flex;
+    flex-direction: column;
+    transition: right .4s cubic-bezier(.22, 1, .36, 1);
+    overflow: hidden;
+}
+
+.detail-panel.open {
+    right: 0;
+}
+
+.detail-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, .65);
+}
+
+.detail-panel-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4a4a4a;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -2px -2px 1px rgba(163, 163, 163, .25);
+}
+
+.detail-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.detail-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #f5e9c8;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    box-shadow:
+        0 6px 18px rgba(120, 10, 10, .3),
+        -4px -4px 10px rgba(255, 255, 255, .3);
+}
+
+.detail-name {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #4a4a4a;
+    margin-bottom: 6px;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -1px -1px 1px rgba(163, 163, 163, .2);
+}
+
+.detail-status {
+    display: block;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.detail-section {
+    margin-bottom: 22px;
+}
+
+.detail-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9a9a9a;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(195, 195, 195, .25);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.detail-field {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #e8e8e8;
+    box-shadow:
+        inset -3px -3px 6px rgba(255, 255, 255, .9),
+        inset 3px 3px 6px rgba(184, 190, 204, .25);
+}
+
+.detail-field-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: #9a9a9a;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    margin-bottom: 4px;
+}
+
+.detail-field-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a4a4a;
+    word-break: break-all;
+}
+
+.detail-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.detail-stat {
+    text-align: center;
+    padding: 16px 10px;
+    border-radius: 12px;
+    background: #e8e8e8;
+    box-shadow:
+        -5px -5px 10px #ffffff,
+        5px 5px 10px #c8c8c8;
+}
+
+.detail-stat-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #4a4a4a;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -1px -1px 1px rgba(163, 163, 163, .2);
+}
+
+.detail-stat-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: #9a9a9a;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    margin-top: 4px;
+}
+
+.detail-notes {
+    font-size: 13px;
+    color: #7a7a7a;
+    line-height: 1.6;
+    font-weight: 400;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #e8e8e8;
+    box-shadow:
+        inset -3px -3px 6px rgba(255, 255, 255, .9),
+        inset 3px 3px 6px rgba(184, 190, 204, .2);
+}
+
+.detail-panel-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, .65);
+}
+
+
+
+/* ========================= EMPTY STATE ========================= */
+
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.empty-state i {
+    font-size: 42px;
+    color: #c3c3c3;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: #9a9a9a;
+    font-weight: 500;
+}
+
+
+/* ========================= RESPONSIVE ========================= */
+
+/* La soglia non è estetica ma misurata: sotto i ~1440px la colonna
+   di contenuto (viewport − 260px di sidebar − 64px di padding) non regge
+   quattro card senza comprimere il valore KPI, quindi si passa a 2×2. */
+@media (max-width: 1440px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 960px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 0 18px 32px;
+    }
+
+    .sidebar.collapsed~.main-content {
+        margin-left: 0;
+    }
+
+    .detail-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .topbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .search-box {
+        flex: 1;
+        width: auto;
+    }
+
+    .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+    }
+
+    .search-box--table {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .detail-stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+/* ============================================================
+   ELEMENTI CONDIVISI DA PIÙ PAGINE ELENCO
+   ------------------------------------------------------------
+   Nati in inventario.css, spostati qui quando Fornitori ha
+   iniziato a usarli: select di toolbar, evidenza riga in
+   allerta e lista movimenti/righe collegate del pannello
+   dettaglio. Restano invariati, cambia solo dove vivono.
+============================================================ */
+/* ========================= RIGA IN ALLERTA =========================
+   Segnalazione discreta degli articoli da riordinare: una barra
+   d'accento a sinistra, senza sfondi colorati che sporcherebbero
+   la superficie neumorfica. */
+
+.neu-table tbody tr.row--alert td:first-child {
+    box-shadow: inset 3px 0 0 rgba(184, 134, 11, .55);
+}
+
+
+/* ========================= SELECT IN TOOLBAR =========================
+   Riusa .select-box di erp-ui.css, con altezza allineata ai chip
+   e alla search-box della toolbar. */
+
+.select-box--toolbar select {
+    height: 38px;
+    min-width: 180px;
+    font-size: 12.5px;
+}
+
+
+/* ========================= STORICO MOVIMENTI =========================
+   Stessa anatomia della .activity-list della dashboard (icona, testo,
+   valore a destra), adattata al registro di magazzino. */
+
+.movement-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.movement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #e8e8e8;
+    box-shadow:
+        -4px -4px 8px #ffffff,
+        4px 4px 8px #c8c8c8;
+    transition: box-shadow .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.movement-item:hover {
+    box-shadow:
+        -6px -6px 12px #ffffff,
+        6px 6px 12px #c3c3c3;
+}
+
+.movement-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.movement-icon--carico {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, .08);
+}
+
+.movement-icon--scarico {
+    color: #c62828;
+    background: rgba(198, 40, 40, .08);
+}
+
+.movement-icon--rettifica {
+    color: #1565c0;
+    background: rgba(21, 101, 192, .08);
+}
+
+.movement-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.movement-text strong {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4a4a4a;
+    line-height: 1.35;
+}
+
+.movement-text span {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #9a9a9a;
+    line-height: 1.4;
+}
+
+.movement-qty {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.movement-qty--carico {
+    color: #2e7d32;
+}
+
+.movement-qty--scarico {
+    color: #c62828;
+}
+
+.movement-qty--rettifica {
+    color: #1565c0;
+}
+
+/* responsive e motion degli elementi condivisi qui sopra */
+@media (max-width: 600px) {
+    .select-box--toolbar,
+    .select-box--toolbar select {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .movement-item {
+        transition-duration: .01ms;
+    }
+}

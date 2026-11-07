@@ -1,0 +1,29 @@
+/* ============================================================
+   Design tokens — Neumorphic Red/Gold (identici a erp-ui.css)
+   Non introduce nuovi valori: nomina quelli già in uso nel
+   progetto originale, per riuso futuro nei componenti React.
+============================================================ */
+
+:root {
+    --erp-bg: #e8e8e8;
+    --erp-text: #4a4a4a;
+    --erp-text-muted: #9a9a9a;
+    --erp-text-soft: #7a7a7a;
+
+    --erp-accent: #a10f0f;
+    --erp-accent-gradient: linear-gradient(155deg, #b21414, #7c0d0d);
+    --erp-danger-gradient: linear-gradient(155deg, #c62828, #8e0000);
+    --erp-gold: #f5e9c8;
+
+    --erp-shadow-light: #ffffff;
+    --erp-shadow-dark: #c3c3c3;
+    --erp-shadow-dark-2: #c8c8c8;
+
+    --erp-radius: 12px;
+    --erp-radius-lg: 20px;
+    --erp-ease: cubic-bezier(.22, 1, .36, 1);
+
+    --erp-success: #2e7d32;
+    --erp-error: #c62828;
+    --erp-info: #1565c0;
+}

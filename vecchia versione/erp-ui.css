@@ -1,0 +1,648 @@
+/* ============================================================
+   ERP UI — Overlay Design System condiviso (modali, form, toast)
+   ------------------------------------------------------------
+   Estratto 1:1 dal modale "Nuovo Cliente" di clienti.css così che
+   ogni pagina che include questo file abbia esattamente lo stesso
+   look & feel neumorfico, senza riscrivere le regole.
+
+   Uso: includere DOPO il CSS di pagina (dashboard.css, ...) e
+   caricare erp-ui.js per il comportamento.
+
+   Tokens (identici a dashboard.css / clienti.css):
+   bg #e8e8e8 | text #4a4a4a | text-muted #9a9a9a
+   accent #a10f0f | accent-gradient linear-gradient(155deg,#b21414,#7c0d0d)
+   gold #f5e9c8 | luci #ffffff | ombre #c3c3c3 / #c8c8c8
+   raggio 12px | easing .4s cubic-bezier(.22,1,.36,1)
+============================================================ */
+
+
+/* ========================= ACTION BUTTON ========================= */
+/* Non presente in dashboard.css: definito qui una volta sola. */
+
+.neu-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    background: linear-gradient(155deg, #b21414, #7c0d0d);
+    color: #f5e9c8;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow:
+        0 6px 16px rgba(120, 10, 10, .3),
+        inset 0 1px 1px rgba(255, 255, 255, .2);
+    transition: all .35s cubic-bezier(.22, 1, .36, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* premium sheen sweep — identico al login button */
+.neu-action-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255, 255, 255, .25), transparent);
+    transform: skewX(-20deg);
+    transition: left .6s ease;
+}
+
+.neu-action-btn:hover::before {
+    left: 130%;
+}
+
+.neu-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 10px 22px rgba(120, 10, 10, .35),
+        inset 0 1px 1px rgba(255, 255, 255, .25);
+}
+
+.neu-action-btn:active {
+    transform: translateY(0) scale(.97);
+    box-shadow:
+        inset 5px 5px 10px rgba(60, 5, 5, .4),
+        inset -5px -5px 10px rgba(212, 175, 55, .2);
+}
+
+.neu-action-btn--outline {
+    background: #e8e8e8;
+    color: #7a7a7a;
+    box-shadow:
+        -5px -5px 10px #ffffff,
+        5px 5px 10px #c8c8c8;
+}
+
+.neu-action-btn--outline::before {
+    display: none;
+}
+
+.neu-action-btn--outline:hover {
+    color: #a10f0f;
+    box-shadow:
+        -7px -7px 14px #ffffff,
+        7px 7px 14px #c3c3c3;
+}
+
+.neu-action-btn--outline:active {
+    box-shadow:
+        inset 3px 3px 6px rgba(184, 190, 204, .45),
+        inset -3px -3px 6px rgba(255, 255, 255, .9);
+}
+
+.neu-action-btn--danger {
+    background: linear-gradient(155deg, #c62828, #8e0000);
+}
+
+/* variante compatta usata per chiudere modali e pannelli */
+.neu-icon-btn--sm {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    border-radius: 10px;
+    box-shadow:
+        -3px -3px 6px #ffffff,
+        3px 3px 6px #c8c8c8;
+}
+
+
+/* ========================= MODAL ========================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .25);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.9);
+    width: 680px;
+    max-width: 94vw;
+    max-height: 90vh;
+    background: #e8e8e8;
+    border-radius: 20px;
+    box-shadow:
+        -12px -12px 24px #ffffff,
+        12px 12px 24px #c3c3c3,
+        0 20px 40px rgba(0, 0, 0, .1);
+    z-index: 310;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.modal.open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* modale compatto (es. esportazione report) */
+.modal--sm {
+    width: 480px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, .65);
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #4a4a4a;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -2px -2px 1px rgba(163, 163, 163, .25);
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 28px 22px;
+    border-top: 1px solid rgba(255, 255, 255, .65);
+}
+
+
+/* ========================= FORM ELEMENTS ========================= */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+/* ultima riga: nessun margine residuo prima del footer */
+.modal-body .form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group--full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #7a7a7a;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    transition: color .3s ease;
+}
+
+/* input-box identici al login */
+.input-box {
+    position: relative;
+}
+
+.input-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #909090;
+    font-size: 13px;
+    z-index: 2;
+    transition: color .35s ease;
+}
+
+.input-box input {
+    width: 100%;
+    height: 42px;
+    padding: 0 16px 0 38px;
+    border: none;
+    outline: none;
+    background: #e8e8e8;
+    color: #4a4a4a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .2px;
+    border-radius: 12px;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .95),
+        inset 4px 4px 8px rgba(184, 190, 204, .4);
+    transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.input-box input::placeholder {
+    color: #a3a3a3;
+    font-weight: 400;
+}
+
+.input-box input:focus {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 3px 3px 6px rgba(120, 10, 10, .2),
+        inset -3px -3px 6px rgba(212, 55, 55, .15);
+}
+
+.input-box input:focus~i,
+.input-box:focus-within i {
+    color: #a10f0f;
+}
+
+/* date e number: picker discreto e niente spinner, per non rompere l'inset */
+.input-box input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: .45;
+    cursor: pointer;
+}
+
+.input-box input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.input-box input[type="number"]::-webkit-outer-spin-button,
+.input-box input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* select-box (stile neumorphic coerente) */
+.select-box {
+    position: relative;
+}
+
+.select-box select {
+    width: 100%;
+    height: 42px;
+    padding: 0 36px 0 14px;
+    border: none;
+    outline: none;
+    background: #e8e8e8;
+    color: #4a4a4a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .95),
+        inset 4px 4px 8px rgba(184, 190, 204, .4);
+    transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.select-box select:focus {
+    box-shadow:
+        inset 3px 3px 6px rgba(120, 10, 10, .2),
+        inset -3px -3px 6px rgba(212, 55, 55, .15);
+}
+
+.select-box i {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #909090;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+/* textarea-box (stile neumorphic) */
+.textarea-box textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    outline: none;
+    background: #e8e8e8;
+    color: #4a4a4a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    resize: vertical;
+    min-height: 80px;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .95),
+        inset 4px 4px 8px rgba(184, 190, 204, .4);
+    transition: box-shadow .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.textarea-box textarea::placeholder {
+    color: #a3a3a3;
+    font-weight: 400;
+}
+
+.textarea-box textarea:focus {
+    box-shadow:
+        inset 3px 3px 6px rgba(120, 10, 10, .2),
+        inset -3px -3px 6px rgba(212, 55, 55, .15);
+}
+
+/* stato di errore in validazione (gestito da erp-ui.js) */
+.form-group.has-error label,
+.form-group.has-error .input-box i {
+    color: #c62828;
+}
+
+.form-group.has-error .input-box input,
+.form-group.has-error .select-box select,
+.form-group.has-error .textarea-box textarea {
+    box-shadow:
+        inset 3px 3px 6px rgba(198, 40, 40, .26),
+        inset -3px -3px 6px rgba(255, 255, 255, .9);
+}
+
+/* testo di supporto sotto un campo */
+.form-hint {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #9a9a9a;
+    line-height: 1.5;
+}
+
+/* riepilogo calcolato (es. totale fattura) */
+.form-total {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: #e8e8e8;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, .95),
+        inset 4px 4px 8px rgba(184, 190, 204, .4);
+}
+
+.form-total-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #7a7a7a;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+}
+
+.form-total-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #a10f0f;
+    letter-spacing: .3px;
+}
+
+
+/* ========================= CONFIRM DIALOG ========================= */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .3);
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+}
+
+.confirm-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.confirm-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.9);
+    width: 400px;
+    max-width: 90vw;
+    background: #e8e8e8;
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow:
+        -12px -12px 24px #ffffff,
+        12px 12px 24px #c3c3c3,
+        0 20px 40px rgba(0, 0, 0, .1);
+    z-index: 410;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.confirm-dialog.open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #c62828;
+    background: #e8e8e8;
+    box-shadow:
+        -6px -6px 12px #ffffff,
+        6px 6px 12px #c8c8c8;
+}
+
+/* variante non distruttiva (es. backup, conferme informative) */
+.confirm-icon--accent {
+    color: #a10f0f;
+}
+
+.confirm-dialog h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4a4a4a;
+    margin-bottom: 8px;
+    text-shadow:
+        1px 1px 1px rgba(255, 255, 255, .9),
+        -1px -1px 1px rgba(163, 163, 163, .2);
+}
+
+.confirm-dialog p {
+    font-size: 13px;
+    color: #7a7a7a;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+
+/* ========================= TOAST ========================= */
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    border-radius: 14px;
+    background: #e8e8e8;
+    box-shadow:
+        -6px -6px 12px #ffffff,
+        6px 6px 12px #c3c3c3,
+        0 8px 20px rgba(0, 0, 0, .08);
+    pointer-events: auto;
+    animation: toastIn .4s cubic-bezier(.22, 1, .36, 1) forwards;
+    min-width: 280px;
+}
+
+.toast.removing {
+    animation: toastOut .35s ease forwards;
+}
+
+@keyframes toastIn {
+    from {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+}
+
+.toast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast--success .toast-icon {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, .08);
+}
+
+.toast--error .toast-icon {
+    color: #c62828;
+    background: rgba(198, 40, 40, .08);
+}
+
+.toast--info .toast-icon {
+    color: #1565c0;
+    background: rgba(21, 101, 192, .08);
+}
+
+.toast-message {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a4a4a;
+}
+
+
+/* ========================= RESPONSIVE ========================= */
+
+@media (max-width: 960px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .toast-container {
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+    }
+
+    .toast {
+        min-width: 0;
+    }
+}
+
+
+/* ========================= ACCESSIBILITÀ ========================= */
+
+/* rispetta la preferenza di animazione ridotta */
+@media (prefers-reduced-motion: reduce) {
+
+    .modal,
+    .modal-overlay,
+    .confirm-dialog,
+    .confirm-overlay,
+    .toast {
+        transition-duration: .01ms;
+        animation-duration: .01ms;
+    }
+}

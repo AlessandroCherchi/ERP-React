@@ -1,0 +1,78 @@
+/* ============================================================
+   Base globale — reset + font, unico punto di verità.
+   Estratto dagli originali style.css/dashboard.css/clienti.css
+   (regole identiche, deduplicate). Design tokens: vedi tokens.css
+============================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+}
+
+body {
+    color: #4a4a4a;
+}
+
+
+/* ========================= TOUCH TARGET ========================= */
+/*
+   Area sensibile minima 44×44 px (WCAG 2.5.5 AAA / Apple HIG).
+   I pulsanti del progetto sono 42×42, 34×34 e 32×32: alzarne la
+   dimensione VISIVA cambierebbe la densità di ogni pagina, quindi si
+   espande solo l'area di input con uno pseudo-elemento trasparente.
+   Nessuna pagina cambia aspetto.
+
+   Sta in base.css e non in app-shell.css perché questo è l'unico foglio
+   caricato da tutte le route (main.tsx): app-shell.css lo importa il solo
+   Inventario, Dashboard e Clienti hanno il proprio.
+*/
+
+.neu-icon-btn,
+.neu-icon-btn--sm,
+.chip-btn,
+.page-btn {
+    position: relative;
+}
+
+.neu-icon-btn::after,
+.neu-icon-btn--sm::after,
+.chip-btn::after,
+.page-btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    /* nessuno stile visibile: serve solo ad allargare l'area cliccabile */
+}
+
+/* Nei gruppi serrati l'area cresce al massimo di metà gap per lato: due
+   target adiacenti non devono mai sovrapporsi, altrimenti un tap sul bordo
+   attiva il pulsante sbagliato — e in tabella l'ultimo è "Elimina".
+   L'altezza resta 44px: le righe sono più alte, non c'è rischio verticale. */
+.table-actions .neu-icon-btn::after {
+    width: calc(100% + 6px);
+}
+
+.filter-group .chip-btn::after {
+    width: calc(100% + 6px);
+}
+
+.pagination-pages .page-btn::after {
+    width: calc(100% + 4px);
+}
+
+/* Il "chiudi" dei modali è un .neu-action-btn, che ha overflow:hidden per
+   lo sheen e ritaglierebbe l'area espansa. Nella variante outline lo sheen
+   è già disattivato (::before display:none), quindi si può liberare. */
+.neu-action-btn--outline.neu-icon-btn--sm {
+    overflow: visible;
+}

@@ -1,0 +1,197 @@
+import { FormGroup, FormRow, FormTotal, InputBox, SelectBox, TextareaBox } from '../ui/FormField';
+import { formatEuro, parseNum } from '../../lib/format';
+import { CATEGORIE } from '../../types/prodotto';
+import type { ProdottoForm } from '../../types/quickActions';
+import type { FieldErrors } from '../../lib/validation';
+
+interface ProdottoFormFieldsProps {
+    values: ProdottoForm;
+    errors: FieldErrors<ProdottoForm>;
+    setField: <K extends keyof ProdottoForm>(key: K, value: ProdottoForm[K]) => void;
+    /**
+     * Ragioni sociali dall'anagrafica fornitori. Se l'elenco è vuoto
+     * (query non ancora risolta) il campo resta un input libero, così il
+     * form non blocca l'inserimento mentre i dati arrivano.
+     */
+    fornitori?: string[];
+    /**
+     * 'create' → la giacenza è quella iniziale, modificabile.
+     * 'edit'   → la giacenza è in sola lettura: si cambia solo con un
+     *            movimento registrato (carico/scarico/rettifica), così
+     *            ogni variazione resta tracciata a registro.
+     */
+    mode: 'create' | 'edit';
+}
+
+/**
+ * Campi anagrafica prodotto — porting 1:1 del modale "Aggiungi Prodotto"
+ * di dashboard.html, esteso con l'ubicazione di magazzino.
+ * Condiviso da Inventario.tsx e dalla quick action della Dashboard:
+ * stessi campi in entrambi i posti (stesso pattern di ClientFormFields).
+ */
+export function ProdottoFormFields({ values, errors, setField, mode, fornitori = [] }: ProdottoFormFieldsProps) {
+    const margine = parseNum(values.prezzo) - parseNum(values.costo);
+    const isEdit = mode === 'edit';
+
+    // Un articolo esistente può puntare a un fornitore non più attivo (o
+    // eliminato): va comunque mostrato, altrimenti la select lo azzererebbe
+    // silenziosamente al primo salvataggio.
+    const opzioniFornitori = values.fornitore && !fornitori.includes(values.fornitore)
+        ? [values.fornitore, ...fornitori]
+        : fornitori;
+
+    return (
+        <>
+            <FormRow>
+                <FormGroup label="Nome prodotto *" error={errors.nome}>
+                    <InputBox
+                        icon="fa-box"
+                        placeholder="Es. Widget Pro X200"
+                        value={values.nome}
+                        onChange={(e) => setField('nome', e.target.value)}
+                    />
+                </FormGroup>
+                <FormGroup label="Codice SKU *" error={errors.sku}>
+                    <InputBox
+                        icon="fa-barcode"
+                        placeholder="SKU-4522"
+                        value={values.sku}
+                        onChange={(e) => setField('sku', e.target.value)}
+                    />
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label="Categoria">
+                    <SelectBox value={values.categoria} onChange={(e) => setField('categoria', e.target.value)}>
+                        {CATEGORIE.map((c) => (
+                            <option value={c} key={c}>{c}</option>
+                        ))}
+                    </SelectBox>
+                </FormGroup>
+                <FormGroup label="Fornitore">
+                    {opzioniFornitori.length > 0 ? (
+                        <SelectBox
+                            value={values.fornitore}
+                            onChange={(e) => setField('fornitore', e.target.value)}
+                        >
+                            <option value="">Nessun fornitore</option>
+                            {opzioniFornitori.map((f) => (
+                                <option value={f} key={f}>{f}</option>
+                            ))}
+                        </SelectBox>
+                    ) : (
+                        <InputBox
+                            icon="fa-truck-field"
+                            placeholder="Es. Tecnoforniture S.p.A."
+                            value={values.fornitore}
+                            onChange={(e) => setField('fornitore', e.target.value)}
+                        />
+                    )}
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label="Costo acquisto (€)">
+                    <InputBox
+                        icon="fa-tag"
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        placeholder="32.00"
+                        value={values.costo}
+                        onChange={(e) => setField('costo', e.target.value)}
+                    />
+                </FormGroup>
+                <FormGroup label="Prezzo vendita (€) *" error={errors.prezzo}>
+                    <InputBox
+                        icon="fa-euro-sign"
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        placeholder="54.00"
+                        value={values.prezzo}
+                        onChange={(e) => setField('prezzo', e.target.value)}
+                    />
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label={isEdit ? 'Giacenza attuale' : 'Giacenza iniziale'}>
+                    <InputBox
+                        icon="fa-warehouse"
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="120"
+                        value={values.giacenza}
+                        disabled={isEdit}
+                        title={isEdit ? 'Modificabile solo tramite un movimento di magazzino' : undefined}
+                        onChange={(e) => setField('giacenza', e.target.value)}
+                    />
+                    {isEdit && (
+                        <p className="form-hint">
+                            Si modifica solo con un movimento, così la variazione resta a registro.
+                        </p>
+                    )}
+                </FormGroup>
+                <FormGroup label="Scorta minima">
+                    <InputBox
+                        icon="fa-triangle-exclamation"
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="20"
+                        value={values.scorta}
+                        onChange={(e) => setField('scorta', e.target.value)}
+                    />
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label="Unità di misura">
+                    <SelectBox value={values.unita} onChange={(e) => setField('unita', e.target.value)}>
+                        <option value="pz">Pezzi (pz)</option>
+                        <option value="cf">Confezioni (cf)</option>
+                        <option value="kg">Chilogrammi (kg)</option>
+                        <option value="m">Metri (m)</option>
+                        <option value="lt">Litri (lt)</option>
+                    </SelectBox>
+                </FormGroup>
+                <FormGroup label="Aliquota IVA">
+                    <SelectBox value={values.iva} onChange={(e) => setField('iva', e.target.value)}>
+                        <option value="22">22% — ordinaria</option>
+                        <option value="10">10% — ridotta</option>
+                        <option value="4">4% — minima</option>
+                    </SelectBox>
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label="Ubicazione a magazzino" full>
+                    <InputBox
+                        icon="fa-location-dot"
+                        placeholder="A-12-3 (corsia-scaffale-ripiano)"
+                        value={values.ubicazione}
+                        onChange={(e) => setField('ubicazione', e.target.value.toUpperCase())}
+                    />
+                </FormGroup>
+            </FormRow>
+
+            <FormRow>
+                <FormTotal label="Margine unitario stimato" value={formatEuro(margine)} />
+            </FormRow>
+
+            <FormRow>
+                <FormGroup label="Descrizione" full>
+                    <TextareaBox
+                        rows={3}
+                        placeholder="Caratteristiche tecniche, note di magazzino..."
+                        value={values.descrizione}
+                        onChange={(e) => setField('descrizione', e.target.value)}
+                    />
+                </FormGroup>
+            </FormRow>
+        </>
+    );
+}

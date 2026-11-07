@@ -1,0 +1,25 @@
+/* ============================================================
+   ERP CLIENTI — stili specifici della pagina
+   ------------------------------------------------------------
+   Il chrome condiviso (sidebar, topbar, KPI, toolbar, tabella,
+   paginazione, pannello dettaglio, empty state, scrollbar,
+   responsive) vive in styles/app-shell.css — che è stato estratto
+   proprio da questo foglio — mentre modali, form, toast e confirm
+   stanno in styles/erp-ui.css.
+
+   Restava qui una copia identica di entrambi: 33 kB duplicati che
+   rendevano possibile correggere il layout su una pagina e non
+   sulle altre. Ora la pagina carica lo shell come Inventario,
+   Fornitori e Vendite, e qui resta solo il wrapper di pagina.
+============================================================ */
+
+/* `body` scoped al wrapper: più route SPA coesistono nello stesso
+   documento, un body{} qui romperebbe le altre. */
+.clienti-page {
+    display: flex;
+    min-height: 100vh;
+    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background-size: 160px;
+    color: #4a4a4a;
+    overflow-x: hidden;
+}

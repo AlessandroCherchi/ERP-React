@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP — Clienti</title>
+    <meta name="description" content="Gestione anagrafica clienti — ERP Suite">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="clienti.css">
+</head>
+
+<body>
+
+    <!-- ========================= SIDEBAR (identica alla dashboard) ========================= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="assett/logo.png" alt="Logo ERP" class="sidebar-logo" id="sidebarLogo">
+            <span class="sidebar-brand">ERP Suite</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item" id="navDashboard">
+                <i class="fa-solid fa-grid-2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" id="navVendite">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Vendite</span>
+            </a>
+            <a href="#" class="nav-item" id="navInventario">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Inventario</span>
+            </a>
+            <a href="clienti.html" class="nav-item active" id="navClienti">
+                <i class="fa-solid fa-users"></i>
+                <span>Clienti</span>
+            </a>
+            <a href="#" class="nav-item" id="navFornitori">
+                <i class="fa-solid fa-truck-field"></i>
+                <span>Fornitori</span>
+            </a>
+            <a href="#" class="nav-item" id="navFatture">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span>Fatture</span>
+            </a>
+            <a href="#" class="nav-item" id="navContabilita">
+                <i class="fa-solid fa-calculator"></i>
+                <span>Contabilità</span>
+            </a>
+            <a href="#" class="nav-item" id="navReport">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Report</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" id="navImpostazioni">
+                <i class="fa-solid fa-gear"></i>
+                <span>Impostazioni</span>
+            </a>
+            <a href="index.html" class="nav-item" id="navLogout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Esci</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ========================= MAIN CONTENT ========================= -->
+    <main class="main-content" id="mainContent">
+
+        <!-- TOP BAR (identica alla dashboard) -->
+        <header class="topbar" id="topbar">
+            <div class="topbar-left">
+                <button class="neu-icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="topbar-greeting">
+                    <h1>Gestione Clienti</h1>
+                    <p id="pageSubtitle">Anagrafica completa e storico ordini</p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box" id="searchBox">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Cerca nell'ERP..." id="globalSearch" autocomplete="off">
+                </div>
+                <button class="neu-icon-btn notification-btn" id="notifBtn" aria-label="Notifiche">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge">3</span>
+                </button>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================= KPI SUMMARY ========================= -->
+        <section class="kpi-grid" id="clientiKpiGrid">
+            <div class="kpi-card" id="kpiTotClienti">
+                <div class="kpi-icon kpi-icon--clients">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Totale Clienti</span>
+                    <span class="kpi-value" id="kpiTotClientiVal">248</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +8.1%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiClientiAttivi">
+                <div class="kpi-icon kpi-icon--active">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Clienti Attivi</span>
+                    <span class="kpi-value" id="kpiClientiAttiviVal">189</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +4.3%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiNuoviMese">
+                <div class="kpi-icon kpi-icon--new">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Nuovi (Mese)</span>
+                    <span class="kpi-value" id="kpiNuoviMeseVal">16</span>
+                    <span class="kpi-trend kpi-trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +12.5%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCredito">
+                <div class="kpi-icon kpi-icon--revenue">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Credito Totale</span>
+                    <span class="kpi-value" id="kpiCreditoVal">€ 34.720</span>
+                    <span class="kpi-trend kpi-trend--down"><i class="fa-solid fa-arrow-trend-down"></i> -3.1%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================= TOOLBAR ========================= -->
+        <section class="toolbar-row" id="clientiToolbar">
+            <div class="toolbar-left">
+                <div class="search-box search-box--table" id="tableSearchBox">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Cerca cliente..." id="clientSearch" autocomplete="off">
+                </div>
+
+                <div class="filter-group" id="filterGroup">
+                    <button class="chip-btn active" data-filter="all" id="filterAll">Tutti</button>
+                    <button class="chip-btn" data-filter="attivo" id="filterAttivo">Attivi</button>
+                    <button class="chip-btn" data-filter="inattivo" id="filterInattivo">Inattivi</button>
+                    <button class="chip-btn" data-filter="prospect" id="filterProspect">Prospect</button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button class="neu-icon-btn" id="btnExport" aria-label="Esporta CSV" title="Esporta CSV">
+                    <i class="fa-solid fa-file-export"></i>
+                </button>
+                <button class="neu-action-btn" id="btnAddCliente">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nuovo Cliente</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================= CLIENTS TABLE ========================= -->
+        <section class="neu-panel table-panel" id="clientiTablePanel">
+            <div class="table-wrapper">
+                <table class="neu-table" id="clientiTable">
+                    <thead>
+                        <tr>
+                            <th class="th-sortable" data-sort="id" id="thId">#</th>
+                            <th class="th-sortable" data-sort="nome" id="thNome">Cliente</th>
+                            <th class="th-sortable" data-sort="email" id="thEmail">Email</th>
+                            <th id="thTelefono">Telefono</th>
+                            <th class="th-sortable" data-sort="citta" id="thCitta">Città</th>
+                            <th class="th-sortable" data-sort="fatturato" id="thFatturato">Fatturato</th>
+                            <th class="th-sortable" data-sort="stato" id="thStato">Stato</th>
+                            <th id="thAzioni">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientiBody">
+                        <!-- populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination" id="pagination">
+                <span class="pagination-info" id="paginationInfo">Mostrando 1-10 di 24</span>
+                <div class="pagination-controls" id="paginationControls">
+                    <button class="neu-icon-btn neu-icon-btn--sm" id="paginPrev" aria-label="Pagina precedente">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="pagination-pages" id="paginationPages">
+                        <!-- populated by JS -->
+                    </div>
+                    <button class="neu-icon-btn neu-icon-btn--sm" id="paginNext" aria-label="Pagina successiva">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================= DETAIL SLIDE-OUT ========================= -->
+        <div class="detail-overlay" id="detailOverlay"></div>
+        <aside class="detail-panel" id="detailPanel">
+            <div class="detail-panel-header">
+                <h2 id="detailTitle">Dettaglio Cliente</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" id="detailClose" aria-label="Chiudi dettaglio">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="detail-panel-body" id="detailBody">
+                <div class="detail-avatar" id="detailAvatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <h3 class="detail-name" id="detailName">—</h3>
+                <span class="detail-status" id="detailStatus">Attivo</span>
+
+                <div class="detail-section">
+                    <h4>Informazioni di Contatto</h4>
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <span class="detail-field-label">Email</span>
+                            <span class="detail-field-value" id="detailEmail">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Telefono</span>
+                            <span class="detail-field-value" id="detailPhone">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Indirizzo</span>
+                            <span class="detail-field-value" id="detailAddress">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Città</span>
+                            <span class="detail-field-value" id="detailCity">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Dati Aziendali</h4>
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <span class="detail-field-label">P.IVA</span>
+                            <span class="detail-field-value" id="detailPiva">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Cod. Fiscale</span>
+                            <span class="detail-field-value" id="detailCf">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">PEC</span>
+                            <span class="detail-field-value" id="detailPec">—</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">SDI</span>
+                            <span class="detail-field-value" id="detailSdi">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Panoramica Economica</h4>
+                    <div class="detail-stats-row">
+                        <div class="detail-stat">
+                            <span class="detail-stat-value" id="detailFatturato">€ 0</span>
+                            <span class="detail-stat-label">Fatturato</span>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-stat-value" id="detailOrdini">0</span>
+                            <span class="detail-stat-label">Ordini</span>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-stat-value" id="detailCredito">€ 0</span>
+                            <span class="detail-stat-label">Credito</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Note</h4>
+                    <p class="detail-notes" id="detailNotes">Nessuna nota disponibile.</p>
+                </div>
+            </div>
+
+            <div class="detail-panel-footer">
+                <button class="neu-action-btn neu-action-btn--outline" id="detailEdit">
+                    <i class="fa-solid fa-pen"></i> <span>Modifica</span>
+                </button>
+                <button class="neu-action-btn neu-action-btn--danger" id="detailDelete">
+                    <i class="fa-solid fa-trash-can"></i> <span>Elimina</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ========================= ADD / EDIT MODAL ========================= -->
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal" id="clientModal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nuovo Cliente</h2>
+                <button class="neu-icon-btn neu-icon-btn--sm" id="modalClose" aria-label="Chiudi modale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form class="modal-body" id="clientForm" autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group" id="fgNome">
+                        <label for="fNome">Ragione Sociale *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-building"></i>
+                            <input type="text" id="fNome" placeholder="Es. Rossi S.r.l." required>
+                        </div>
+                    </div>
+                    <div class="form-group" id="fgEmail">
+                        <label for="fEmail">Email *</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="fEmail" placeholder="info@azienda.it" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="fgTelefono">
+                        <label for="fTelefono">Telefono</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="fTelefono" placeholder="+39 02 1234567">
+                        </div>
+                    </div>
+                    <div class="form-group" id="fgPiva">
+                        <label for="fPiva">Partita IVA</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input type="text" id="fPiva" placeholder="IT01234567890" maxlength="13">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="fgCf">
+                        <label for="fCf">Codice Fiscale</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-id-card"></i>
+                            <input type="text" id="fCf" placeholder="01234567890" maxlength="16">
+                        </div>
+                    </div>
+                    <div class="form-group" id="fgPec">
+                        <label for="fPec">PEC</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                            <input type="email" id="fPec" placeholder="azienda@pec.it">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="fgSdi">
+                        <label for="fSdi">Codice SDI</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text" id="fSdi" placeholder="ABC1234" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="form-group" id="fgStato">
+                        <label for="fStato">Stato</label>
+                        <div class="select-box" id="selectBoxStato">
+                            <select id="fStato">
+                                <option value="attivo">Attivo</option>
+                                <option value="inattivo">Inattivo</option>
+                                <option value="prospect">Prospect</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full" id="fgIndirizzo">
+                        <label for="fIndirizzo">Indirizzo</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <input type="text" id="fIndirizzo" placeholder="Via Roma 1, 20100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="fgCitta">
+                        <label for="fCitta">Città</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-city"></i>
+                            <input type="text" id="fCitta" placeholder="Milano">
+                        </div>
+                    </div>
+                    <div class="form-group" id="fgProvincia">
+                        <label for="fProvincia">Provincia</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-map"></i>
+                            <input type="text" id="fProvincia" placeholder="MI" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--full" id="fgNote">
+                        <label for="fNote">Note</label>
+                        <div class="textarea-box">
+                            <textarea id="fNote" rows="3" placeholder="Note aggiuntive sul cliente..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="neu-action-btn neu-action-btn--outline" id="modalCancel">
+                    <span>Annulla</span>
+                </button>
+                <button type="button" class="neu-action-btn" id="modalSave">
+                    <i class="fa-solid fa-check"></i> <span>Salva Cliente</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================= DELETE CONFIRM ========================= -->
+        <div class="confirm-overlay" id="confirmOverlay"></div>
+        <div class="confirm-dialog" id="confirmDialog">
+            <div class="confirm-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Conferma Eliminazione</h3>
+            <p id="confirmText">Sei sicuro di voler eliminare questo cliente? L'azione è irreversibile.</p>
+            <div class="confirm-actions">
+                <button class="neu-action-btn neu-action-btn--outline" id="confirmNo">Annulla</button>
+                <button class="neu-action-btn neu-action-btn--danger" id="confirmYes">
+                    <i class="fa-solid fa-trash-can"></i> Elimina
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================= TOAST ========================= -->
+        <div class="toast-container" id="toastContainer"></div>
+
+    </main>
+
+    <!-- ========================= SCRIPTS ========================= -->
+    <script src="clienti.js"></script>
+
+</body>
+
+</html>

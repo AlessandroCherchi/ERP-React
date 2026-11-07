@@ -1,0 +1,22 @@
+# deps / build
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+
+# env / local
+.env
+.env.*
+!.env.example
+*.local
+
+# tooling
+.claude/
+.vscode/
+.idea/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

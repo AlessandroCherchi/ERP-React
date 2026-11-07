@@ -1,0 +1,48 @@
+/* ============================================================
+   ERP FORNITORI — stili specifici della pagina
+   ------------------------------------------------------------
+   Il chrome condiviso è in app-shell.css, modali/form/toast in
+   erp-ui.css. La pagina riusa stili già esistenti, tutti in
+   app-shell.css: .status-badge--attivo/--inattivo, .row--alert,
+   .select-box--toolbar e .movement-list/.movement-item (nati per
+   l'Inventario e spostati nello shell quando sono serviti anche qui).
+
+   Qui resta solo il wrapper di pagina e lo stato "sospeso", che
+   non esisteva in nessuna delle pagine precedenti.
+============================================================ */
+
+/* `body` scoped al wrapper: più route SPA coesistono nello stesso
+   documento, un body{} qui romperebbe le altre. */
+.fornitori-page {
+    display: flex;
+    min-height: 100vh;
+    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background-size: 160px;
+    color: #4a4a4a;
+    overflow-x: hidden;
+}
+
+
+/* ========================= STATO "SOSPESO" =========================
+   Stessa base .status-badge di app-shell.css, stesso pattern
+   pallino + pulse degli altri stati. */
+
+.status-badge--sospeso {
+    color: #b8860b;
+    background: rgba(184, 134, 11, .08);
+}
+
+.status-badge--sospeso::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #b8860b;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .status-badge--sospeso::before {
+        animation: none;
+    }
+}

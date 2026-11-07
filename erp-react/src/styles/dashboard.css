@@ -1,0 +1,292 @@
+/* ============================================================
+   ERP DASHBOARD — stili specifici della pagina
+   ------------------------------------------------------------
+   Il chrome condiviso (sidebar, topbar, KPI, pannelli, tabella,
+   scrollbar, responsive) vive in styles/app-shell.css; modali,
+   form, toast e confirm in styles/erp-ui.css.
+   Qui c'è SOLO ciò che esiste unicamente in questa pagina:
+   grafici, attività recenti, azioni rapide e il trend di tabella.
+
+   Stessi token neumorfici delle altre pagine — nessun colore o
+   raggio nuovo: bg #e8e8e8, testo #4a4a4a, accento #a10f0f,
+   luci #ffffff, ombre #c3c3c3/#c8c8c8, raggio 12px,
+   easing .4s cubic-bezier(.22,1,.36,1).
+============================================================ */
+
+/* `body` scoped al wrapper di pagina: più route SPA coesistono
+   nello stesso documento, un body{} qui romperebbe le altre. */
+.dashboard-page {
+    display: flex;
+    min-height: 100vh;
+    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background-size: 160px;
+    color: #4a4a4a;
+    overflow-x: hidden;
+}
+
+/* ========================= PANNELLI (parti solo dashboard) ========================= */
+.panel-link {
+    font-size: 12px;
+    color: #a10f0f;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .3s ease;
+}
+
+.panel-link:hover { color: #7c0d0d; }
+
+.panel-actions {
+    display: flex;
+    gap: 6px;
+}
+
+
+/* ---- CHIP BUTTONS ---- */
+
+/* ========================= DASHBOARD ROWS ========================= */
+
+.dashboard-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+
+/* ========================= CHART PANELS ========================= */
+
+.chart-panel {
+    min-height: 320px;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 240px;
+}
+
+.chart-container--donut {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.donut-legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: #7a7a7a;
+    font-weight: 500;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot--completed { background: #a10f0f; }
+.dot--pending   { background: #b8860b; }
+.dot--cancelled { background: #c3c3c3; }
+
+
+/* ========================= ACTIVITY LIST ========================= */
+
+.activities-panel {
+    min-height: 300px;
+}
+
+.activity-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #e8e8e8;
+    box-shadow:
+        inset -3px -3px 6px rgba(255, 255, 255, .9),
+        inset 3px 3px 6px rgba(184, 190, 204, .25);
+    transition: all .35s cubic-bezier(.22,1,.36,1);
+}
+
+.activity-item:hover {
+    transform: translateX(4px);
+    box-shadow:
+        inset -3px -3px 6px rgba(255, 255, 255, .95),
+        inset 3px 3px 6px rgba(120, 10, 10, .08);
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #a10f0f;
+    background: #e8e8e8;
+    flex-shrink: 0;
+    box-shadow:
+        -3px -3px 6px #ffffff,
+        3px 3px 6px #c8c8c8;
+}
+
+.activity-text {
+    flex: 1;
+}
+
+.activity-text strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a4a4a;
+    display: block;
+}
+
+.activity-text span {
+    font-size: 11px;
+    color: #9a9a9a;
+    font-weight: 400;
+}
+
+.activity-time {
+    font-size: 10.5px;
+    color: #b0b0b0;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+
+/* ========================= QUICK ACTIONS ========================= */
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.quick-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 12px;
+    border: none;
+    outline: none;
+    border-radius: 14px;
+    background: #e8e8e8;
+    color: #7a7a7a;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+        -5px -5px 10px #ffffff,
+        5px 5px 10px #c8c8c8;
+    transition: all .35s cubic-bezier(.22,1,.36,1);
+}
+
+.quick-btn:hover {
+    transform: translateY(-3px);
+    color: #a10f0f;
+    box-shadow:
+        -7px -7px 14px #ffffff,
+        7px 7px 14px #c3c3c3;
+}
+
+.quick-btn:active {
+    transform: translateY(0) scale(.95);
+    box-shadow:
+        inset 4px 4px 8px rgba(184, 190, 204, .4),
+        inset -4px -4px 8px rgba(255, 255, 255, .9);
+}
+
+.quick-btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: #e8e8e8;
+    box-shadow:
+        inset 3px 3px 6px rgba(184, 190, 204, .3),
+        inset -3px -3px 6px rgba(255, 255, 255, .9);
+    transition: box-shadow .35s ease;
+}
+
+.quick-btn:hover .quick-btn-icon {
+    box-shadow:
+        inset 3px 3px 6px rgba(120, 10, 10, .15),
+        inset -3px -3px 6px rgba(255, 255, 255, .85);
+}
+
+
+/* ========================= TABELLA =========================
+   .table-panel arriva da app-shell.css con un margine inferiore:
+   dentro la griglia .dashboard-row occupa invece l'intera riga e il
+   distanziamento lo dà già la riga stessa. */
+
+.dashboard-row .table-panel {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+}
+
+.table-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.table-trend--up {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, .08);
+}
+
+.table-trend--down {
+    color: #c62828;
+    background: rgba(198, 40, 40, .08);
+}
+
+
+/* ========================= RESPONSIVE =========================
+   Il resto del responsive è in app-shell.css: qui solo gli elementi
+   introdotti da questa pagina. */
+
+@media (max-width: 960px) {
+    .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .quick-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

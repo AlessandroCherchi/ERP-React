@@ -1,0 +1,172 @@
+/* ============================================================
+   ERP INVENTARIO — stili specifici della pagina Magazzino
+   ------------------------------------------------------------
+   Il chrome condiviso (sidebar, topbar, KPI, tabella, pannello
+   dettaglio, responsive) vive in styles/app-shell.css; modali,
+   form, toast e confirm in styles/erp-ui.css.
+   Qui c'è SOLO ciò che esiste unicamente in questa pagina.
+
+   Stessi token neumorfici delle altre pagine — nessun colore o
+   raggio nuovo: bg #e8e8e8, testo #4a4a4a, accento #a10f0f,
+   luci #ffffff, ombre #c3c3c3/#c8c8c8, raggio 12px,
+   easing .4s cubic-bezier(.22,1,.36,1).
+============================================================ */
+
+/* `body` scoped al wrapper di pagina: più route SPA coesistono
+   nello stesso documento, un body{} qui romperebbe le altre. */
+.inventario-page {
+    display: flex;
+    min-height: 100vh;
+    background: #e8e8e8 url('../assets/img/prismatic-bg.svg') repeat center center;
+    background-size: 160px;
+    color: #4a4a4a;
+    overflow-x: hidden;
+}
+
+
+/* ========================= STATUS BADGE (stati di magazzino) =========================
+   Stessa base .status-badge di app-shell.css: qui solo le varianti
+   dell'inventario, con lo stesso pattern pallino + pulse degli stati cliente. */
+
+.status-badge--disponibile {
+    color: #2e7d32;
+    background: rgba(46, 125, 50, .08);
+}
+
+.status-badge--disponibile::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2e7d32;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-badge--sotto-scorta {
+    color: #b8860b;
+    background: rgba(184, 134, 11, .08);
+}
+
+.status-badge--sotto-scorta::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #b8860b;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-badge--esaurito {
+    color: #c62828;
+    background: rgba(198, 40, 40, .08);
+}
+
+.status-badge--esaurito::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #c62828;
+}
+
+
+/* ========================= CELLA SKU ========================= */
+
+.cell-sku {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: .4px;
+    color: #7a7a7a;
+    white-space: nowrap;
+}
+
+
+/* ========================= BARRA DI SCORTA =========================
+   Traccia incisa (inset) + riempimento in rilievo: stessa grammatica
+   neumorfica degli input. Il colore non è mai l'unico indicatore —
+   la quantità è scritta sopra e lo stato ripetuto nel badge. */
+
+.stock-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 110px;
+}
+
+.stock-qty {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a4a4a;
+    white-space: nowrap;
+}
+
+.stock-qty em {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 11px;
+    color: #9a9a9a;
+}
+
+.stock-bar {
+    height: 6px;
+    border-radius: 10px;
+    background: #e8e8e8;
+    overflow: hidden;
+    box-shadow:
+        inset 2px 2px 4px rgba(184, 190, 204, .5),
+        inset -2px -2px 4px rgba(255, 255, 255, .95);
+}
+
+.stock-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 10px;
+    transition: width .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.stock-bar-fill--disponibile {
+    background: linear-gradient(90deg, #2e7d32, #4a9d4e);
+}
+
+.stock-bar-fill--sotto-scorta {
+    background: linear-gradient(90deg, #b8860b, #d4a017);
+}
+
+.stock-bar-fill--esaurito {
+    background: linear-gradient(90deg, #c62828, #e04545);
+}
+
+
+
+/* ========================= NOTE COMPATTE (pannello dettaglio) ========================= */
+
+.detail-notes--compact {
+    margin-top: 10px;
+    font-size: 12px;
+}
+
+
+/* ========================= RESPONSIVE =========================
+   Il resto del responsive è in app-shell.css: qui solo gli elementi
+   introdotti da questa pagina. */
+
+@media (max-width: 600px) {
+    .stock-cell {
+        min-width: 90px;
+    }
+}
+
+
+/* ========================= ACCESSIBILITÀ ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .stock-bar-fill {
+        transition-duration: .01ms;
+    }
+
+    .status-badge--disponibile::before,
+    .status-badge--sotto-scorta::before {
+        animation: none;
+    }
+}
